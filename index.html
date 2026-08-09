@@ -3,44 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokémon Draft Tool Web</title>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Pokémon Draft Simulator</title>
     <style>
         :root {
-            --bg-dark: #1e222a;
-            --bg-card: #21252b;
-            --bg-panel: #282c34;
-            --border-color: #3e4451;
-            --text-main: #abb2bf;
-            --text-bright: #ffffff;
-            --accent-green: #98c379;
-            --accent-green-hover: #7ca35f;
-            --accent-blue: #61afef;
-            --accent-blue-hover: #4b88bc;
-            --accent-yellow: #e5c07b;
-            --accent-orange: #d19a66;
-            --accent-red: #e06c75;
-            --accent-cyan: #56b6c2;
-            --font-family: 'JetBrains Mono', 'Consolas', monospace;
+            --bg-dark: #121212;
+            --bg-panel: #1e1e1e;
+            --bg-card: #2d2d2d;
+            --accent-blue: #007acc;
+            --accent-green: #28a745;
+            --accent-red: #dc3545;
+            --accent-orange: #fd7e14;
+            --accent-cyan: #17a2b8;
+            --accent-yellow: #ffc107;
+            --text-main: #ffffff;
+            --text-muted: #aaa;
+            --border-color: #444;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: var(--font-family);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
             background-color: var(--bg-dark);
             color: var(--text-main);
-            height: 100vh;
             display: flex;
             flex-direction: column;
+            height: 100vh;
             overflow: hidden;
         }
 
-        /* Top Header */
+        /* Top Bar */
         header {
             background-color: var(--bg-panel);
             padding: 10px 20px;
@@ -51,261 +47,182 @@
         }
 
         header h1 {
-            color: var(--accent-blue);
             font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .header-btns {
-            display: flex;
-            gap: 10px;
+            color: var(--accent-blue);
         }
 
         /* Main Container */
         .main-container {
+            display: flex;
             flex: 1;
-            display: grid;
-            grid-template-columns: 5fr 3fr;
-            gap: 12px;
-            padding: 12px;
-            height: calc(100vh - 50px);
             overflow: hidden;
         }
 
-        .column {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        /* Panel Styling */
-        .panel {
-            background-color: var(--bg-panel);
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .panel-title {
-            color: var(--accent-blue);
-            font-size: 0.95rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-            text-align: center;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 6px;
-            text-transform: uppercase;
-        }
-
-        /* Action Box (Left Top) */
-        #action-panel {
+        /* Left Column: Interactive Draft Area */
+        .left-col {
             flex: 2;
-            justify-content: flex-start;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border-color);
+            padding: 15px;
+            overflow-y: auto;
         }
 
-        .action-title {
-            color: var(--accent-bright);
+        .action-header {
+            margin-bottom: 15px;
             font-size: 1.1rem;
-            text-align: center;
-            margin-bottom: 12px;
+            font-weight: bold;
+            color: var(--accent-cyan);
+            white-space: pre-line;
         }
 
+        .action-area {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Cards and Lists */
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            flex: 1;
+            gap: 15px;
+            width: 100%;
         }
 
         .poke-card {
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 8px;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-between;
-            cursor: pointer;
-            transition: transform 0.15s ease, border-color 0.15s ease;
         }
 
         .poke-card:hover {
-            transform: translateY(-2px);
+            transform: translateY(-3px);
             border-color: var(--accent-blue);
         }
 
         .poke-card img {
-            width: 70px;
-            height: 70px;
-            object-fit: contain;
-            image-rendering: pixelated;
+            width: 96px;
+            height: 96px;
         }
 
         .poke-card-name {
-            color: var(--accent-blue);
             font-weight: bold;
-            font-size: 0.9rem;
-            margin-top: 4px;
+            font-size: 0.95rem;
+            margin: 5px 0;
         }
 
         .poke-card-ability {
-            color: var(--accent-green);
-            font-size: 0.75rem;
-            text-align: center;
-            margin: 2px 0;
+            font-size: 0.8rem;
+            color: var(--accent-yellow);
         }
 
         .poke-card-bst {
-            color: var(--accent-yellow);
             font-size: 0.75rem;
-            margin-bottom: 4px;
+            color: var(--text-muted);
+            margin-bottom: 5px;
         }
 
         .stats-mini-table {
-            background-color: #1a1d23;
-            border-radius: 4px;
-            width: 100%;
-            padding: 4px;
             font-size: 0.7rem;
-            text-align: center;
-            color: var(--text-main);
-            margin-bottom: 6px;
-            line-height: 1.3;
+            color: var(--text-muted);
+            line-height: 1.2;
+            margin-bottom: 8px;
         }
 
-        /* Team Box (Left Bottom) */
-        #team-panel {
-            flex: 3;
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        /* Middle Column: Current Team */
+        .mid-col {
+            flex: 1.5;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border-color);
+            padding: 15px;
+            overflow-y: auto;
         }
 
         .team-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(2, 1fr);
-            gap: 8px;
-            flex: 1;
+            grid-template-columns: 1fr;
+            gap: 10px;
         }
 
         .team-slot {
             background-color: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 6px;
-            padding: 6px;
-            display: flex;
-            flex-direction: column;
+            padding: 8px 12px;
             cursor: pointer;
-            transition: border-color 0.15s ease;
-            overflow: hidden;
+            transition: background 0.2s;
         }
 
         .team-slot:hover {
-            border-color: var(--accent-yellow);
+            background-color: #383838;
         }
 
         .slot-header {
             display: flex;
             align-items: center;
-            gap: 6px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            padding-bottom: 4px;
-            margin-bottom: 4px;
+            gap: 10px;
         }
 
         .slot-header img {
-            width: 32px;
-            height: 32px;
-            object-fit: contain;
-            image-rendering: pixelated;
+            width: 40px;
+            height: 40px;
         }
 
-        .slot-header .slot-title {
-            font-size: 0.8rem;
+        .slot-title {
             font-weight: bold;
-            color: var(--accent-blue);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            font-size: 0.85rem;
         }
 
         .slot-info {
-            font-size: 0.7rem;
-            color: var(--text-main);
-            line-height: 1.3;
-            white-space: pre-wrap;
-            overflow: hidden;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            white-space: pre-line;
         }
 
-        /* Detail Box (Right Top) */
-        #detail-panel {
-            flex: 1;
-        }
-
-        .details-textbox {
-            background-color: var(--bg-card);
-            border-radius: 6px;
-            padding: 8px;
-            flex: 1;
-            font-size: 0.8rem;
-            color: var(--text-bright);
-            white-space: pre-wrap;
-            overflow-y: auto;
-            line-height: 1.4;
-            border: 1px solid #1a1d23;
-        }
-
-        /* Sidebar Box (Right Bottom) */
-        #sidebar-panel {
-            flex: 2;
-            overflow-y: auto;
-        }
-
-        .side-pokemon-header {
+        /* Right Column: Pokemon Sidebar Inspector */
+        .right-col {
+            flex: 1.5;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            margin-bottom: 8px;
+            padding: 15px;
+            overflow-y: auto;
+            background-color: #181818;
         }
 
-        .side-pokemon-header img {
-            width: 60px;
-            height: 60px;
-            object-fit: contain;
-            image-rendering: pixelated;
-        }
-
-        .side-types {
-            font-size: 0.8rem;
-            margin: 2px 0;
-        }
-
-        .side-bst {
-            color: var(--accent-yellow);
-            font-size: 0.9rem;
-            font-weight: bold;
-        }
-
-        .side-ability {
-            font-size: 0.75rem;
-            color: var(--accent-green);
-            margin-bottom: 6px;
+        .sidebar-img-box {
             text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .sidebar-img-box img {
+            width: 120px;
+            height: 120px;
         }
 
         .stat-bar-container {
             display: flex;
             align-items: center;
-            gap: 6px;
+            margin-bottom: 4px;
             font-size: 0.75rem;
-            margin-bottom: 3px;
         }
 
         .stat-label {
@@ -316,203 +233,205 @@
         .stat-val {
             width: 30px;
             text-align: right;
+            padding-right: 8px;
         }
 
         .stat-bar-bg {
             flex: 1;
-            height: 6px;
-            background-color: var(--bg-card);
-            border-radius: 3px;
+            height: 8px;
+            background-color: #333;
+            border-radius: 4px;
             overflow: hidden;
         }
 
         .stat-bar-fill {
             height: 100%;
             width: 0%;
-            background-color: var(--accent-green);
-            transition: width 0.3s ease;
+            background-color: var(--accent-blue);
+            transition: width 0.3s;
         }
 
         .matchups-box {
-            margin-top: 8px;
-            background-color: var(--bg-card);
-            padding: 6px;
-            border-radius: 6px;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
+            margin-top: 10px;
             line-height: 1.4;
         }
 
-        /* Buttons & Form Components */
+        .details-textbox {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 8px;
+            font-size: 0.75rem;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin-top: 10px;
+            min-height: 120px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        /* Buttons & Forms */
         .btn {
-            background-color: var(--accent-green);
-            color: #1e222a;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 0.85rem;
+            background-color: var(--bg-card);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 4px;
             cursor: pointer;
-            transition: background-color 0.15s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
+            font-size: 0.85rem;
+            transition: background 0.2s;
         }
 
         .btn:hover {
-            background-color: var(--accent-green-hover);
+            background-color: #3a3a3a;
         }
 
-        .btn-blue {
-            background-color: var(--accent-blue);
-        }
-        .btn-blue:hover {
-            background-color: var(--accent-blue-hover);
-        }
+        .btn-blue { background-color: var(--accent-blue); border: none; }
+        .btn-blue:hover { background-color: #005999; }
 
-        .btn-orange {
-            background-color: var(--accent-orange);
-        }
+        .btn-green { background-color: var(--accent-green); border: none; }
+        .btn-green:hover { background-color: #218838; }
 
-        .btn-yellow {
-            background-color: var(--accent-yellow);
-            color: #1e222a;
-        }
+        .btn-yellow { background-color: var(--accent-yellow); color: #000; border: none; }
+        .btn-yellow:hover { background-color: #e0a800; }
 
-        .btn-red {
-            background-color: var(--accent-red);
-            color: #fff;
-        }
+        .btn-orange { background-color: var(--accent-orange); border: none; }
+        .btn-orange:hover { background-color: #e06d0b; }
+
+        .btn-red { background-color: var(--accent-red); border: none; }
+        .btn-red:hover { background-color: #c82333; }
 
         .btn-block {
             width: 100%;
-            margin-bottom: 6px;
-        }
-
-        .options-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            width: 100%;
-            max-width: 450px;
-            margin: 0 auto;
-        }
-
-        /* Modal Overlay */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal-body {
-            background-color: var(--bg-panel);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            width: 550px;
-            max-width: 90%;
-            max-height: 85vh;
-            display: flex;
-            flex-direction: column;
-            padding: 16px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-        }
-
-        .modal-title {
-            color: var(--accent-blue);
-            font-size: 1.1rem;
-            font-weight: bold;
-            margin-bottom: 12px;
             text-align: center;
         }
 
-        .tabs {
+        /* Config Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            width: 600px;
+            max-width: 90%;
+            max-height: 90vh;
             display: flex;
-            gap: 4px;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 12px;
             border-bottom: 1px solid var(--border-color);
-            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 15px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-tabs {
+            display: flex;
+            gap: 10px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 15px;
         }
 
         .tab-btn {
             background: none;
             border: none;
-            color: var(--text-main);
+            color: var(--text-muted);
             padding: 8px 12px;
             cursor: pointer;
-            font-size: 0.8rem;
-            font-weight: bold;
-            border-bottom: 2px solid transparent;
         }
 
         .tab-btn.active {
             color: var(--accent-blue);
-            border-bottom-color: var(--accent-blue);
+            border-bottom: 2px solid var(--accent-blue);
         }
 
         .tab-content {
             display: none;
-            flex: 1;
-            overflow-y: auto;
-            padding-right: 4px;
         }
 
         .tab-content.active {
             display: block;
         }
 
-        .gen-grid {
+        .checkbox-group {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
+            gap: 8px;
+            margin-bottom: 15px;
         }
 
         .checkbox-label {
+            font-size: 0.8rem;
             display: flex;
             align-items: center;
-            gap: 6px;
-            font-size: 0.8rem;
-            cursor: pointer;
+            gap: 5px;
         }
 
-        .list-input-group {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 10px;
-        }
-
-        .input-text {
-            flex: 1;
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            color: var(--text-bright);
-            padding: 6px 10px;
-            border-radius: 4px;
-            font-size: 0.85rem;
-        }
-
-        .banned-items-list {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            max-height: 200px;
+        .banned-list {
+            max-height: 150px;
             overflow-y: auto;
+            border: 1px solid var(--border-color);
+            padding: 5px;
+            border-radius: 4px;
+            margin-top: 5px;
+            background: var(--bg-dark);
         }
 
         .banned-item-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: var(--bg-card);
-            padding: 4px 8px;
-            border-radius: 4px;
+            padding: 3px 5px;
             font-size: 0.8rem;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+
+        .input-row input {
+            flex: 1;
+            padding: 4px 8px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-radius: 4px;
+        }
+
+        /* Showdown Output Area */
+        .showdown-output {
+            width: 100%;
+            height: 250px;
+            background-color: var(--bg-dark);
+            color: #00ff00;
+            border: 1px solid var(--border-color);
+            font-family: monospace;
+            font-size: 0.8rem;
+            padding: 10px;
+            border-radius: 4px;
+            resize: none;
+            margin-bottom: 10px;
         }
 
         .loading-spinner {
@@ -520,175 +439,129 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100%;
-            gap: 12px;
-            color: var(--accent-blue);
+            gap: 10px;
+            color: var(--text-muted);
         }
 
         .spinner {
-            width: 36px;
-            height: 36px;
-            border: 3px solid rgba(255,255,255,0.1);
+            width: 40px;
+            height: 40px;
+            border: 4px solid #333;
+            border-top: 4px solid var(--accent-blue);
             border-radius: 50%;
-            border-top-color: var(--accent-blue);
-            animation: spin 0.8s linear infinite;
+            animation: spin 1s linear infinite;
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        textarea.showdown-output {
-            width: 100%;
-            height: 180px;
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            color: var(--accent-green);
-            padding: 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            resize: none;
-            margin-bottom: 8px;
-        }
-
-        /* Responsive Layout adjustments */
-        @media (max-width: 900px) {
-            .main-container {
-                grid-template-columns: 1fr;
-                overflow-y: auto;
-            }
-            body {
-                overflow: auto;
-                height: auto;
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
 
-    <!-- Header -->
     <header>
-        <h1>⚡ Pokémon Draft Tool Web</h1>
-        <div class="header-btns">
-            <button class="btn btn-yellow" onclick="openConfigModal()">⚙️ Regole Draft</button>
-            <button class="btn btn-blue" onclick="startDraft()">🔄 Nuovo Draft</button>
+        <h1>🎮 Pokémon Draft Simulator</h1>
+        <div>
+            <button class="btn" onclick="openConfigModal()">⚙️ Impostazioni Regole</button>
+            <button class="btn btn-green" onclick="startDraft()">🔄 Nuovo Draft</button>
         </div>
     </header>
 
-    <!-- App Content Layout -->
     <div class="main-container">
-        
-        <!-- Left Column -->
-        <div class="column">
-            
-            <!-- Action Frame -->
-            <div class="panel" id="action-panel">
-                <div class="action-title" id="action-title">Inizializzazione Draft...</div>
-                <div id="action-content" style="flex:1; display:flex; flex-direction:column; justify-content:center;">
-                    <!-- Content injected dynamically -->
+        <!-- Colonna Sinistra: Area Interattiva Draft -->
+        <div class="left-col">
+            <div id="action-title" class="action-header">Inizializzazione...</div>
+            <div id="action-content" class="action-area">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <div>Inizializzazione Draft...</div>
                 </div>
             </div>
-
-            <!-- Team Frame -->
-            <div class="panel" id="team-panel">
-                <div class="panel-title" style="color:var(--accent-yellow)">IL TUO TEAM (Clicca per Dettagli)</div>
-                <div class="team-grid" id="team-grid">
-                    <!-- 6 slots injected here -->
-                </div>
-            </div>
-
         </div>
 
-        <!-- Right Column -->
-        <div class="column">
-            
-            <!-- Detail Frame -->
-            <div class="panel" id="detail-panel">
-                <div class="panel-title">[ SCHEDA DETTAGLI ]</div>
-                <div class="details-textbox" id="details-textbox">
-Clicca su una card Pokémon o uno slot del Team Viewer per vederne i dettagli estesi qui.
-                </div>
-            </div>
-
-            <!-- Sidebar Info Frame -->
-            <div class="panel" id="sidebar-panel">
-                <div class="panel-title" id="side-title">Info Pokémon</div>
-                
-                <div class="side-pokemon-header">
-                    <img id="side-img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'%3E%3C/svg%3E" alt="">
-                    <div class="side-types" id="side-types">Tipi: -</div>
-                    <div class="side-bst" id="side-bst">BST: -</div>
-                    <div class="side-ability" id="side-ability">Abilità: -</div>
-                </div>
-
-                <div id="stats-bars">
-                    <!-- Stats Bars dynamically populated -->
-                </div>
-
-                <div class="matchups-box" id="matchups-box">
-                    <div style="color:var(--accent-red)">Debolezze x4: -</div>
-                    <div style="color:var(--accent-orange)">Debolezze x2: -</div>
-                    <div style="color:var(--text-main)">Immunità (x0): -</div>
-                    <div style="color:var(--accent-green)">Resistenze x0.5: -</div>
-                    <div style="color:var(--accent-cyan)">Super Res. x0.25: -</div>
-                </div>
-
-            </div>
-
+        <!-- Colonna Centrale: Squadra Corrente -->
+        <div class="mid-col">
+            <div style="font-weight: bold; margin-bottom: 10px;">La tua Squadra (6/6)</div>
+            <div id="team-grid" class="team-grid"></div>
         </div>
 
+        <!-- Colonna Destra: Dettagli Pokémon -->
+        <div class="right-col">
+            <div id="side-title" style="font-weight: bold; font-size: 1.1rem; text-align: center;">Seleziona Pokémon</div>
+            <div id="side-types" style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-bottom: 5px;">Tipi: -</div>
+            
+            <div class="sidebar-img-box">
+                <img id="side-img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'%3E%3C/svg%3E">
+            </div>
+
+            <div id="side-ability" style="font-size: 0.85rem; margin-bottom: 10px;">Abilità: -</div>
+
+            <div id="stats-bars"></div>
+
+            <div id="side-bst" style="font-weight: bold; font-size: 0.8rem; margin-top: 5px;">BST: -</div>
+
+            <div id="matchups-box" class="matchups-box"></div>
+
+            <div id="details-textbox" class="details-textbox">In attesa di selezione...</div>
+        </div>
     </div>
 
-    <!-- Rules Configuration Modal -->
-    <div class="modal-overlay" id="config-modal" style="display:none;">
-        <div class="modal-body">
-            <div class="modal-title">⚙️ IMPOSTAZIONI REGOLE DRAFT</div>
-            
-            <div style="display:flex; gap:10px; margin-bottom:12px;">
-                <button class="btn btn-orange" style="flex:1;" onclick="importRulesJSON()">📥 Importa Regole (.json)</button>
-                <button class="btn btn-yellow" style="flex:1;" onclick="exportRulesJSON()">📤 Esporta Regole (.json)</button>
+    <!-- Modal Regole e Ban -->
+    <div id="config-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span style="font-weight: bold;">Configurazione Regole Draft</span>
+                <button class="btn" onclick="document.getElementById('config-modal').style.display='none'">❌</button>
             </div>
+            <div class="modal-body">
+                <div class="modal-tabs">
+                    <button class="tab-btn active" onclick="switchTab('tab-gens', this)">Generazioni</button>
+                    <button class="tab-btn" onclick="switchTab('tab-moves', this)">Mosse Bannate</button>
+                    <button class="tab-btn" onclick="switchTab('tab-pokes', this)">Pokémon Bannati</button>
+                    <button class="tab-btn" onclick="switchTab('tab-io', this)">Import/Export</button>
+                </div>
 
-            <div class="tabs">
-                <button class="tab-btn active" onclick="switchTab('tab-gen', this)">Generazioni</button>
-                <button class="tab-btn" onclick="switchTab('tab-moves', this)">Mosse Bannate</button>
-                <button class="tab-btn" onclick="switchTab('tab-poke', this)">Pokémon Bannati</button>
-            </div>
+                <div id="tab-gens" class="tab-content active">
+                    <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Seleziona le Generazioni da ECLUDERE (Bannare):</p>
+                    <div id="gen-checkboxes" class="checkbox-group"></div>
+                </div>
 
-            <div class="tab-content active" id="tab-gen">
-                <p style="font-size:0.8rem; margin-bottom:10px;">Spunta le Generazioni che vuoi BANNARE dal Draft:</p>
-                <div class="gen-grid" id="gen-checkboxes">
-                    <!-- Checkboxes created in JS -->
+                <div id="tab-moves" class="tab-content">
+                    <p style="font-size:0.8rem; color:var(--text-muted);">Aggiungi o rimuovi mosse vietate nel draft:</p>
+                    <div id="moves-banned-list" class="banned-list"></div>
+                    <div class="input-row">
+                        <input type="text" id="add-move-input" placeholder="es. fissure">
+                        <button class="btn btn-blue" onclick="addBannedMove()">Aggiungi</button>
+                    </div>
+                </div>
+
+                <div id="tab-pokes" class="tab-content">
+                    <p style="font-size:0.8rem; color:var(--text-muted);">Aggiungi o rimuovi Pokémon vietati nel draft:</p>
+                    <div id="poke-banned-list" class="banned-list"></div>
+                    <div class="input-row">
+                        <input type="text" id="add-poke-input" placeholder="es. mewtwo">
+                        <button class="btn btn-blue" onclick="addBannedPoke()">Aggiungi</button>
+                    </div>
+                </div>
+
+                <div id="tab-io" class="tab-content">
+                    <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Esporta o Importa la configurazione delle regole in formato JSON:</p>
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn btn-blue" onclick="exportRulesJSON()">💾 Esporta Regole JSON</button>
+                        <button class="btn" onclick="importRulesJSON()">📂 Importa Regole JSON</button>
+                        <input type="file" id="import-rules-file" style="display:none" onchange="handleRulesFileSelect(event)">
+                    </div>
                 </div>
             </div>
-
-            <div class="tab-content" id="tab-moves">
-                <div class="list-input-group">
-                    <input type="text" class="input-text" id="add-move-input" placeholder="Aggiungi mossa (es. fissure)...">
-                    <button class="btn" onclick="addBannedMove()">Aggiungi</button>
-                </div>
-                <div class="banned-items-list" id="moves-banned-list"></div>
-            </div>
-
-            <div class="tab-content" id="tab-poke">
-                <div class="list-input-group">
-                    <input type="text" class="input-text" id="add-poke-input" placeholder="Aggiungi pokémon (es. mewtwo)...">
-                    <button class="btn" onclick="addBannedPoke()">Aggiungi</button>
-                </div>
-                <div class="banned-items-list" id="poke-banned-list"></div>
-            </div>
-
-            <div style="margin-top:16px;">
-                <button class="btn btn-block" onclick="saveRulesAndClose()">AVVIA DRAFT CON QUESTE REGOLE</button>
+            <div style="padding:10px; border-top:1px solid var(--border-color); text-align:right;">
+                <button class="btn btn-green" onclick="saveRulesAndClose()">Salva e Applica</button>
             </div>
         </div>
     </div>
 
-    <!-- Hidden file input for rules import -->
-    <input type="file" id="import-rules-file" accept=".json,.txt" style="display:none" onchange="handleRulesFileSelect(event)">
-
+    <!-- LOGICA JAVASCRIPT CORRETTA -->
     <script>
-        // Data Models & Constants
         const BASE_URL = "https://pokeapi.co/api/v2";
 
         const GEN_RANGES = {
@@ -739,25 +612,16 @@ Clicca su una card Pokémon o uno slot del Team Viewer per vederne i dettagli es
         const STAT_KEYS = ["hp", "attack", "defense", "special-attack", "special-defense", "speed"];
         const STAT_SHORT = { "hp":"hp", "attack":"atk", "defense":"def", "special-attack":"spa", "special-defense":"spd", "speed":"spe" };
 
-        // Global State
         let rules = {
             banned_gens: [],
             banned_moves: [...DEFAULT_BANNED_MOVES],
             banned_pokemon: [...DEFAULT_BANNED_POKEMON]
         };
 
-        let moveCache = {};
-        let abilityCache = {};
-        let itemCache = {};
+        let moveCache = {}, abilityCache = {}, itemCache = {};
+        let draftRound = 0, team = [], currentOptions = [], currentPokemon = null;
+        let movePickRound = 0, validPokeIds = [];
 
-        let draftRound = 0;
-        let team = [];
-        let currentOptions = [];
-        let currentPokemon = null;
-        let movePickRound = 0;
-        let validPokeIds = [];
-
-        // Setup Page
         window.addEventListener('DOMContentLoaded', () => {
             initGenCheckboxes();
             renderTeamGrid();
@@ -765,7 +629,6 @@ Clicca su una card Pokémon o uno slot del Team Viewer per vederne i dettagli es
             startDraft();
         });
 
-        // Rules & Modal Logic
         function openConfigModal() {
             document.getElementById('config-modal').style.display = 'flex';
             renderBannedMoves();
@@ -892,7 +755,6 @@ Clicca su una card Pokémon o uno slot del Team Viewer per vederne i dettagli es
             reader.readAsText(file);
         }
 
-        // PokéAPI Async Fetchers
         async function fetchAbilityDesc(abilityName) {
             if (!abilityName || abilityName === "Nessuna") return "Nessun effetto.";
             if (abilityCache[abilityName]) return abilityCache[abilityName];
@@ -977,7 +839,6 @@ Clicca su una card Pokémon o uno slot del Team Viewer per vederne i dettagli es
             }
         }
 
-        // Core Draft Engine
         function startDraft() {
             validPokeIds = [];
             for (let g = 1; g <= 9; g++) {
@@ -1069,7 +930,6 @@ Clicca su una card Pokémon o uno slot del Team Viewer per vederne i dettagli es
             nextPokemonRound();
         }
 
-        // Phase 2: Moves Selection
         async function startMovesPhase() {
             if (draftRound >= team.length) {
                 draftRound = 0;
@@ -1102,8 +962,7 @@ Clicca su una card Pokémon o uno slot del Team Viewer per vederne i dettagli es
             const count = Math.min(3, available.length);
             const moveOptions = sampleArray(available, count);
 
-            document.getElementById('action-title').innerText = `Mosse per ${capitalize(currentPokemon.name)} (${draftRound + 1}/6)
-Scegli mossa ${movePickRound}/4`;
+            document.getElementById('action-title').innerText = `Mosse per ${capitalize(currentPokemon.name)} (${draftRound + 1}/6)\nScegli mossa ${movePickRound}/4`;
             
             const container = document.getElementById('action-content');
             let html = `<div class="options-list">`;
@@ -1122,10 +981,7 @@ Scegli mossa ${movePickRound}/4`;
 
         async function previewMoveHover(moveName) {
             const info = await fetchMoveData(moveName);
-            const text = `=== ANTEPRIMA MOSSA ===
-• ${capitalize(moveName.replace(/-/g, ' '))} [${info.type} | ${info.damage_class}]
-  - Potenza: ${info.power} | Precisione: ${info.accuracy}%
-  -> Effetto: ${info.desc}`;
+            const text = `=== ANTEPRIMA MOSSA ===\n• ${capitalize(moveName.replace(/-/g, ' '))} [${info.type} | ${info.damage_class}]\n  - Potenza: ${info.power} | Precisione: ${info.accuracy}%\n  -> Effetto: ${info.desc}`;
             setDetailsText(text);
         }
 
@@ -1136,7 +992,6 @@ Scegli mossa ${movePickRound}/4`;
             nextMoveRound();
         }
 
-        // Phase 3: Nature Selection
         function startNaturePhase() {
             if (draftRound >= team.length) {
                 draftRound = 0;
@@ -1176,7 +1031,6 @@ Scegli mossa ${movePickRound}/4`;
             startNaturePhase();
         }
 
-        // Phase 4: EV Spread Selection
         function startEVPhase() {
             if (draftRound >= team.length) {
                 draftRound = 0;
@@ -1234,7 +1088,6 @@ Scegli mossa ${movePickRound}/4`;
             startEVPhase();
         }
 
-        // Phase 5: Item Selection
         function startItemPhase() {
             if (draftRound >= team.length) {
                 finishDraft();
@@ -1265,9 +1118,7 @@ Scegli mossa ${movePickRound}/4`;
 
         async function previewItemHover(itemName) {
             const desc = await fetchItemDesc(itemName);
-            const text = `=== ANTEPRIMA OGGETTO ===
-• ${capitalize(itemName.replace(/-/g, ' '))}
-  -> Effetto: ${desc}`;
+            const text = `=== ANTEPRIMA OGGETTO ===\n• ${capitalize(itemName.replace(/-/g, ' '))} \n  -> Effetto: ${desc}`;
             setDetailsText(text);
         }
 
@@ -1280,15 +1131,16 @@ Scegli mossa ${movePickRound}/4`;
             startItemPhase();
         }
 
-        // Finish Draft & Export
         function finishDraft() {
             document.getElementById('action-title').innerText = `🎉 Draft Completato!`;
             const showdownText = exportToShowdown();
 
             const container = document.getElementById('action-content');
             container.innerHTML = `
-                <textarea class="showdown-output" readonly>${showdownText}</textarea>
-                <button class="btn btn-block btn-blue" onclick="downloadTeamTXT()">💾 Salva Team (.txt)</button>
+                <div style="width:100%; text-align:center;">
+                    <textarea class="showdown-output" readonly>${showdownText}</textarea>
+                    <button class="btn btn-block btn-blue" onclick="downloadTeamTXT()">💾 Salva Team (.txt)</button>
+                </div>
             `;
         }
 
@@ -1307,11 +1159,8 @@ Scegli mossa ${movePickRound}/4`;
                     if (evList.length > 0) lines.push(`EVs: ${evList.join(' / ')}`);
                 }
                 p.selected_moves.forEach(m => lines.push(`- ${capitalize(m.replace(/-/g, ' '))}`));
-                return lines.join('
-');
-            }).join('
-
-');
+                return lines.join('\n');
+            }).join('\n\n');
         }
 
         function downloadTeamTXT() {
@@ -1324,7 +1173,6 @@ Scegli mossa ${movePickRound}/4`;
             anchor.remove();
         }
 
-        // View Rendering Helpers
         function renderTeamGrid() {
             const grid = document.getElementById('team-grid');
             grid.innerHTML = '';
@@ -1358,9 +1206,7 @@ Scegli mossa ${movePickRound}/4`;
                     const evStr = p.selected_evs ? `EV: ${Object.values(p.selected_evs).reduce((a,b)=>a+b,0)}` : 'EV: -';
                     const movesStr = p.selected_moves.length > 0 ? p.selected_moves.map(m=>capitalize(m.replace(/-/g, ' '))).join(', ') : 'Mosse: -';
 
-                    infoEl.innerText = `${itemStr}
-${natStr} | ${evStr}
-Mosse: ${movesStr}`;
+                    infoEl.innerText = `${itemStr}\n${natStr} | ${evStr}\nMosse: ${movesStr}`;
                 } else {
                     titleEl.innerText = `Slot ${i+1}: Vuoto`;
                     titleEl.style.color = "var(--text-main)";
@@ -1433,7 +1279,6 @@ Mosse: ${movesStr}`;
 
             document.getElementById('side-bst').innerText = hasCustom ? `STAT TOT (L.50): ${total}` : `BST: ${total}`;
 
-            // Matchups
             const matchups = calcMatchups(p.types);
             document.getElementById('matchups-box').innerHTML = `
                 <div style="color:var(--accent-red)">Debolezze x4: ${matchups['x4'].join(', ') || 'Nessuna'}</div>
@@ -1456,8 +1301,7 @@ Mosse: ${movesStr}`;
             ];
 
             if (p.selected_moves && p.selected_moves.length > 0) {
-                lines.push("
-• MOSSE SELEZIONATE:");
+                lines.push("\n• MOSSE SELEZIONATE:");
                 for (const m of p.selected_moves) {
                     const mInfo = await fetchMoveData(m);
                     lines.push(`  - ${capitalize(m.replace(/-/g, ' '))} [${mInfo.type} | ${mInfo.damage_class}] - Pot: ${mInfo.power} | Prec: ${mInfo.accuracy}%`);
@@ -1467,20 +1311,17 @@ Mosse: ${movesStr}`;
 
             if (p.selected_item) {
                 const itemDesc = await fetchItemDesc(p.selected_item);
-                lines.push(`
-• OGGETTO: ${capitalize(p.selected_item.replace(/-/g, ' '))}`);
+                lines.push(`\n• OGGETTO: ${capitalize(p.selected_item.replace(/-/g, ' '))}`);
                 lines.push(`  -> Effetto: ${itemDesc}`);
             }
 
-            setDetailsText(lines.join('
-'));
+            setDetailsText(lines.join('\n'));
         }
 
         function setDetailsText(txt) {
             document.getElementById('details-textbox').innerText = txt;
         }
 
-        // Calculations & Utilities
         function calcStatLvl50(statName, baseVal, evVal, natureName) {
             const short = STAT_SHORT[statName];
             if (statName === "hp") {
