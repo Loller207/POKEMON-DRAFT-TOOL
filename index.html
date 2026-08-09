@@ -36,7 +36,6 @@
             overflow: hidden;
         }
 
-        /* Top Bar */
         header {
             background-color: var(--bg-panel);
             padding: 10px 20px;
@@ -51,14 +50,12 @@
             color: var(--accent-blue);
         }
 
-        /* Main Container */
         .main-container {
             display: flex;
             flex: 1;
             overflow: hidden;
         }
 
-        /* Left Column: Interactive Draft Area */
         .left-col {
             flex: 2;
             display: flex;
@@ -83,7 +80,6 @@
             align-items: center;
         }
 
-        /* Cards and Lists */
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -146,7 +142,6 @@
             max-width: 400px;
         }
 
-        /* Middle Column: Current Team */
         .mid-col {
             flex: 1.5;
             display: flex;
@@ -198,7 +193,6 @@
             white-space: pre-line;
         }
 
-        /* Right Column: Pokemon Sidebar Inspector */
         .right-col {
             flex: 1.5;
             display: flex;
@@ -271,7 +265,6 @@
             overflow-y: auto;
         }
 
-        /* Buttons & Forms */
         .btn {
             background-color: var(--bg-card);
             color: var(--text-main);
@@ -283,31 +276,19 @@
             transition: background 0.2s;
         }
 
-        .btn:hover {
-            background-color: #3a3a3a;
-        }
-
+        .btn:hover { background-color: #3a3a3a; }
         .btn-blue { background-color: var(--accent-blue); border: none; }
         .btn-blue:hover { background-color: #005999; }
-
         .btn-green { background-color: var(--accent-green); border: none; }
         .btn-green:hover { background-color: #218838; }
-
         .btn-yellow { background-color: var(--accent-yellow); color: #000; border: none; }
         .btn-yellow:hover { background-color: #e0a800; }
-
         .btn-orange { background-color: var(--accent-orange); border: none; }
         .btn-orange:hover { background-color: #e06d0b; }
-
         .btn-red { background-color: var(--accent-red); border: none; }
         .btn-red:hover { background-color: #c82333; }
+        .btn-block { width: 100%; text-align: center; }
 
-        .btn-block {
-            width: 100%;
-            text-align: center;
-        }
-
-        /* Config Modal */
         .modal {
             display: none;
             position: fixed;
@@ -338,11 +319,7 @@
             align-items: center;
         }
 
-        .modal-body {
-            padding: 15px;
-            overflow-y: auto;
-            flex: 1;
-        }
+        .modal-body { padding: 15px; overflow-y: auto; flex: 1; }
 
         .modal-tabs {
             display: flex;
@@ -364,13 +341,8 @@
             border-bottom: 2px solid var(--accent-blue);
         }
 
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
 
         .checkbox-group {
             display: grid;
@@ -404,11 +376,7 @@
             font-size: 0.8rem;
         }
 
-        .input-row {
-            display: flex;
-            gap: 5px;
-            margin-top: 5px;
-        }
+        .input-row { display: flex; gap: 5px; margin-top: 5px; }
 
         .input-row input {
             flex: 1;
@@ -419,7 +387,6 @@
             border-radius: 4px;
         }
 
-        /* Showdown Output Area */
         .showdown-output {
             width: 100%;
             height: 250px;
@@ -469,7 +436,6 @@
     </header>
 
     <div class="main-container">
-        <!-- Colonna Sinistra: Area Interattiva Draft -->
         <div class="left-col">
             <div id="action-title" class="action-header">Inizializzazione...</div>
             <div id="action-content" class="action-area">
@@ -480,13 +446,11 @@
             </div>
         </div>
 
-        <!-- Colonna Centrale: Squadra Corrente -->
         <div class="mid-col">
             <div style="font-weight: bold; margin-bottom: 10px;">La tua Squadra (6/6)</div>
             <div id="team-grid" class="team-grid"></div>
         </div>
 
-        <!-- Colonna Destra: Dettagli Pokémon -->
         <div class="right-col">
             <div id="side-title" style="font-weight: bold; font-size: 1.1rem; text-align: center;">Seleziona Pokémon</div>
             <div id="side-types" style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-bottom: 5px;">Tipi: -</div>
@@ -507,7 +471,6 @@
         </div>
     </div>
 
-    <!-- Modal Regole e Ban -->
     <div id="config-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -523,7 +486,7 @@
                 </div>
 
                 <div id="tab-gens" class="tab-content active">
-                    <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Seleziona le Generazioni da ECLUDERE (Bannare):</p>
+                    <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Seleziona le Generazioni da ESCLUDERE (Bannare):</p>
                     <div id="gen-checkboxes" class="checkbox-group"></div>
                 </div>
 
@@ -560,7 +523,6 @@
         </div>
     </div>
 
-    <!-- LOGICA JAVASCRIPT CORRETTA -->
     <script>
         const BASE_URL = "https://pokeapi.co/api/v2";
 
@@ -621,6 +583,21 @@
         let moveCache = {}, abilityCache = {}, itemCache = {};
         let draftRound = 0, team = [], currentOptions = [], currentPokemon = null;
         let movePickRound = 0, validPokeIds = [];
+
+        // Funzione helper con Timeout per Fetch sicuri
+        async function fetchWithTimeout(url, options = {}, timeout = 4000) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeout);
+            try {
+                const response = await fetch(url, { ...options, signal: controller.signal });
+                clearTimeout(id);
+                if (!response.ok) throw new Error("HTTP error " + response.status);
+                return await response.json();
+            } catch (err) {
+                clearTimeout(id);
+                throw err;
+            }
+        }
 
         window.addEventListener('DOMContentLoaded', () => {
             initGenCheckboxes();
@@ -759,20 +736,20 @@
             if (!abilityName || abilityName === "Nessuna") return "Nessun effetto.";
             if (abilityCache[abilityName]) return abilityCache[abilityName];
             try {
-                const res = await fetch(`${BASE_URL}/ability/${abilityName.toLowerCase().replace(/\s+/g, '-')}`).then(r => r.json());
+                const res = await fetchWithTimeout(`${BASE_URL}/ability/${abilityName.toLowerCase().replace(/\s+/g, '-')}`);
                 const entry = res.effect_entries.find(e => e.language.name === 'en');
                 const desc = entry ? entry.short_effect : "Descrizione non trovata.";
                 abilityCache[abilityName] = desc;
                 return desc;
             } catch {
-                return "Descrizione non disponibile.";
+                return "Effetto non disponibile.";
             }
         }
 
         async function fetchMoveData(moveName) {
             if (moveCache[moveName]) return moveCache[moveName];
             try {
-                const res = await fetch(`${BASE_URL}/move/${moveName.toLowerCase().replace(/\s+/g, '-')}`).then(r => r.json());
+                const res = await fetchWithTimeout(`${BASE_URL}/move/${moveName.toLowerCase().replace(/\s+/g, '-')}`);
                 const entry = res.effect_entries.find(e => e.language.name === 'en');
                 const desc = entry ? entry.short_effect : "Descrizione non trovata.";
                 const data = {
@@ -785,7 +762,7 @@
                 moveCache[moveName] = data;
                 return data;
             } catch {
-                return { desc: "Non disponibile.", power: '-', accuracy: '-', type: '-', damage_class: '-' };
+                return { desc: "Info non disponibile.", power: '-', accuracy: '-', type: '-', damage_class: '-' };
             }
         }
 
@@ -793,7 +770,7 @@
             if (!itemName) return "Nessun oggetto.";
             if (itemCache[itemName]) return itemCache[itemName];
             try {
-                const res = await fetch(`${BASE_URL}/item/${itemName.toLowerCase().replace(/\s+/g, '-')}`).then(r => r.json());
+                const res = await fetchWithTimeout(`${BASE_URL}/item/${itemName.toLowerCase().replace(/\s+/g, '-')}`);
                 const entry = res.effect_entries.find(e => e.language.name === 'en');
                 const desc = entry ? entry.short_effect : "Descrizione non disponibile.";
                 itemCache[itemName] = desc;
@@ -805,7 +782,7 @@
 
         async function fetchPokemonData(pokeId) {
             try {
-                const res = await fetch(`${BASE_URL}/pokemon/${pokeId}`).then(r => r.json());
+                const res = await fetchWithTimeout(`${BASE_URL}/pokemon/${pokeId}`);
                 const types = res.types.map(t => t.type.name);
                 const abilities = res.abilities.map(a => a.ability.name);
                 const stats = {};
@@ -816,8 +793,7 @@
                 
                 const gender = Math.random() < 0.5 ? "M" : "F";
                 const selectedAbility = abilities.length > 0 ? abilities[Math.floor(Math.random() * abilities.length)] : "Nessuna";
-                const abilityDesc = await fetchAbilityDesc(selectedAbility);
-
+                
                 return {
                     id: res.id,
                     name: res.name,
@@ -825,16 +801,17 @@
                     abilities: abilities,
                     stats: stats,
                     moves: moves,
-                    sprite_url: res.sprites.front_default || '',
+                    sprite_url: res.sprites.front_default || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${res.id}.png`,
                     gender: gender,
                     selected_ability: selectedAbility,
-                    ability_desc: abilityDesc,
+                    ability_desc: "Caricamento descrizione...",
                     selected_item: "",
                     selected_moves: [],
                     selected_evs: null,
                     selected_nature: ""
                 };
-            } catch {
+            } catch (err) {
+                console.error("Errore recupero Pokémon ID:", pokeId, err);
                 return null;
             }
         }
@@ -859,6 +836,7 @@
                 <div class="loading-spinner">
                     <div class="spinner"></div>
                     <div>Caricamento dati in corso...</div>
+                    <button class="btn btn-red" style="margin-top:10px;" onclick="nextPokemonRound()">⏳ Salta / Riprova</button>
                 </div>
             `;
         }
@@ -874,7 +852,7 @@
 
             const fetched = [];
             let attempts = 0;
-            while (fetched.length < 3 && attempts < 40) {
+            while (fetched.length < 3 && attempts < 30) {
                 attempts++;
                 const randId = validPokeIds[Math.floor(Math.random() * validPokeIds.length)];
                 if (!fetched.some(p => p.id === randId)) {
@@ -883,6 +861,11 @@
                         fetched.push(pdata);
                     }
                 }
+            }
+
+            if (fetched.length === 0) {
+                alert("Errore di connessione a PokéAPI. Riprova più tardi.");
+                return;
             }
 
             currentOptions = fetched;
@@ -921,8 +904,9 @@
             if (p) refreshSidebar(p);
         }
 
-        function selectPokemon(idx) {
+        async function selectPokemon(idx) {
             const p = currentOptions[idx];
+            p.ability_desc = await fetchAbilityDesc(p.selected_ability);
             team.push(p);
             updateTeamView();
             refreshSidebar(p);
