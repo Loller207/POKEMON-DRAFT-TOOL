@@ -96,9 +96,6 @@
     .ability-box { background: #0f172a; padding: 8px; border-radius: 8px; margin: 8px 0; font-size: 0.8rem; }
     .ability-title { color: #f59e0b; font-weight: bold; margin-bottom: 2px; }
     
-    .moves-filter-box { margin-bottom: 10px; }
-    .moves-filter-box select { width: 100%; background: #0f172a; color: #f8fafc; border: 1px solid #334155; font-size: 0.8rem; }
-
     .moves-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
     .move-card { background: #0f172a; border-left: 4px solid #ef4444; padding: 8px; border-radius: 4px; font-size: 0.8rem; }
     .move-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 4px; }
@@ -170,16 +167,9 @@
       <div class="card-face card-back">
         <div class="header-card">
           <span class="name">MOSSE APPRESE</span>
-          <small style="color: var(--text-dim);">Filtra o mostra tutte</small>
+          <small style="color: var(--text-dim);">Ordinate per Tipo</small>
         </div>
         
-        <div class="moves-filter-box" style="margin-top: 10px;">
-          <select id="moveFilterSelect" onchange="renderMoves(this.value)">
-            <option value="base">Mostra Mosse Set Base (4)</option>
-            <option value="all">Mostra Tutte le Mosse Imparabili</option>
-          </select>
-        </div>
-
         <div class="moves-list" id="pokeMoves"></div>
 
         <button class="flip-btn" style="margin-top: 15px;" onclick="flipCard()">&larr; Torna alle Info</button>
@@ -213,7 +203,7 @@
 
     const allTypes = ["NORMAL", "FIRE", "WATER", "GRASS", "ELECTRIC", "ICE", "FIGHTING", "POISON", "GROUND", "FLYING", "PSYCHIC", "BUG", "ROCK", "GHOST", "DRAGON", "DARK", "STEEL", "FAIRY"];
 
-    // Dati Pokédex estesi con il pool completo delle mosse imparabili
+    // Dati Pokédex
     const pokemons = [
       {
         id: 36, name: "Clefable", types: ["FAIRY"], bst: 483,
@@ -224,13 +214,6 @@
           { name: "CHARGE BEAM", type: "ELECTRIC", power: "50", acc: "90%", desc: "Chi la usa lancia un fascio di elettricità molto intensa. Può anche aumentare il suo Attacco Speciale." },
           { name: "SHADOW BALL", type: "GHOST", power: "80", acc: "100%", desc: "Lancia sul bersaglio una sfera nera. Può anche ridurne la Difesa Speciale." },
           { name: "SAFEGUARD", type: "NORMAL", power: "---", acc: "---", desc: "Chi la usa crea un campo protettivo che evita problemi di stato per sé e gli alleati per cinque turni." }
-        ],
-        learnableMoves: [
-          { name: "MOONBLAST", type: "FAIRY", power: "95", acc: "100%", desc: "Attacca con la forza della Luna. Può ridurre l'Attacco Speciale del bersaglio." },
-          { name: "FLAMETHROWER", type: "FIRE", power: "90", acc: "100%", desc: "Colpisce con un'intensa fiammata che può anche scottare il bersaglio." },
-          { name: "CALM MIND", type: "PSYCHIC", power: "---", acc: "---", desc: "Aumenta l'Attacco Speciale e la Difesa Speciale dell'utilizzatore." },
-          { name: "METRONOME", type: "NORMAL", power: "---", acc: "---", desc: "Usa a caso una tra le tante mosse esistenti." },
-          { name: "THUNDERBOLT", type: "ELECTRIC", power: "90", acc: "100%", desc: "Scarica elettrica che può paralizzare il bersaglio." }
         ]
       },
       {
@@ -242,12 +225,6 @@
           { name: "OMINOUS WIND", type: "GHOST", power: "60", acc: "100%", desc: "Chi la usa attacca con una forte raffica di vento che può aumentare tutte le sue statistiche." },
           { name: "LASER FOCUS", type: "NORMAL", power: "---", acc: "---", desc: "Chi la usa si concentra e nel turno successivo metterà sicuramente a segno un brutto colpo." },
           { name: "TAKE DOWN", type: "NORMAL", power: "90", acc: "85%", desc: "Carica spericolata con tutto il corpo contro il bersaglio. Danneggia un po’ anche chi la usa." }
-        ],
-        learnableMoves: [
-          { name: "FLAMETHROWER", type: "FIRE", power: "90", acc: "100%", desc: "Intensa fiammata d'attacco che può scottare." },
-          { name: "WILL-O-WISP", type: "FIRE", power: "---", acc: "85%", desc: "Lancia una fiammella sinistro che scotta il bersaglio." },
-          { name: "ENERGY BALL", type: "GRASS", power: "90", acc: "100%", desc: "Attinge alla forza della natura per lanciare una sfera d'energia." },
-          { name: "EXTRASENSORY", type: "PSYCHIC", power: "80", acc: "100%", desc: "Attacca con un potere misterioso e insolito. Può far tentennare." }
         ]
       },
       {
@@ -259,12 +236,6 @@
           { name: "TWISTER", type: "DRAGON", power: "40", acc: "100%", desc: "Un potente tornado si abbatte sui nemici nei paraggi. Può anche farli tentennare." },
           { name: "NIGHT SHADE", type: "GHOST", power: "---", acc: "100%", desc: "Fa apparire un orribile miraggio al bersaglio e infligge un danno pari al livello di chi la usa." },
           { name: "POISON FANG", type: "POISON", power: "50", acc: "100%", desc: "Chi la usa morde il bersaglio con denti avvelenati che possono anche iperavvelenarlo." }
-        ],
-        learnableMoves: [
-          { name: "QUIVER DANCE", type: "BUG", power: "---", acc: "---", desc: "Danza mistica che aumenta Sp.Atk, Sp.Def e Velocità." },
-          { name: "BUG BUZZ", type: "BUG", power: "90", acc: "100%", desc: "Genera una vibrazione sonora dannosa che può ridurre la Sp.Def." },
-          { name: "SLUDGE BOMB", type: "POISON", power: "90", acc: "100%", desc: "Lancia fango tossico che può avvelenare il bersaglio." },
-          { name: "SLEEP POWDER", type: "GRASS", power: "---", acc: "75%", desc: "Disperde una polvere che fa addormentare il bersaglio." }
         ]
       },
       {
@@ -276,11 +247,6 @@
           { name: "FRUSTRATION", type: "NORMAL", power: "---", acc: "100%", desc: "Mossa che diventa tanto più potente quanto minore è il grado di affezione del Pokémon per il proprio Allenatore." },
           { name: "ENCORE", type: "NORMAL", power: "---", acc: "100%", desc: "Chi la usa obbliga il bersaglio a ripetere per tre turni l’ultima mossa eseguita." },
           { name: "PAY DAY", type: "NORMAL", power: "40", acc: "100%", desc: "Colpisce il bersaglio con una gran quantità di monete recuperabili dopo la lotta." }
-        ],
-        learnableMoves: [
-          { name: "SCALD", type: "WATER", power: "80", acc: "100%", desc: "Attacca con un getto d'acqua bollente che può scottare." },
-          { name: "ICE BEAM", type: "ICE", power: "90", acc: "100%", desc: "Raggio di ghiaccio ad alta potenza che può congelare." },
-          { name: "PSYCHIC", type: "PSYCHIC", power: "90", acc: "100%", desc: "Forte attacco telecinetico." }
         ]
       },
       {
@@ -292,11 +258,6 @@
           { name: "RETURN", type: "NORMAL", power: "---", acc: "100%", desc: "Mossa che diventa tanto più potente quanto maggiore è il grado di affezione del Pokémon per il proprio Allenatore." },
           { name: "HELPING HAND", type: "NORMAL", power: "---", acc: "---", desc: "Mossa che aumenta la potenza dell’attacco di un alleato." },
           { name: "HYDRO PUMP", type: "WATER", power: "110", acc: "80%", desc: "Il bersaglio è travolto da un potente getto d’acqua spruzzato ad altissima pressione." }
-        ],
-        learnableMoves: [
-          { name: "DYNAMIC PUNCH", type: "FIGHTING", power: "100", acc: "50%", desc: "Pugno potentissimo che confonde sempre il bersaglio se va a segno." },
-          { name: "WATERFALL", type: "WATER", power: "80", acc: "100%", desc: "Carica il bersaglio scivolando come una cascata. Può far tentennare." },
-          { name: "BELLY DRUM", type: "NORMAL", power: "---", acc: "---", desc: "Riduce i propri PS della metà per massimizzare l'Attacco." }
         ]
       },
       {
@@ -308,11 +269,6 @@
           { name: "SUBSTITUTE", type: "NORMAL", power: "---", acc: "---", desc: "Chi la usa crea una copia di se stesso usando alcuni PS. La copia serve come esca per il nemico." },
           { name: "EXPANDING FORCE", type: "PSYCHIC", power: "80", acc: "100%", desc: "Chi la usa attacca il bersaglio con energia psichica. Se utilizzata quando è attivo un Campo Psichico, la mossa aumenta di potenza e danneggia tutti i nemici." },
           { name: "HYDRO PUMP", type: "WATER", power: "110", acc: "80%", desc: "Il bersaglio è travolto da un potente getto d’acqua spruzzato ad altissima pressione." }
-        ],
-        learnableMoves: [
-          { name: "RAPID SPIN", type: "NORMAL", power: "50", acc: "100%", desc: "Gira velocemente per liberarsi da parassiti e trappole, aumentando la Velocità." },
-          { name: "THUNDERBOLT", type: "ELECTRIC", power: "90", acc: "100%", desc: "Potente attacco elettrico." },
-          { name: "ICE BEAM", type: "ICE", power: "90", acc: "100%", desc: "Raggio congelante." }
         ]
       },
       {
@@ -324,11 +280,6 @@
           { name: "REST", type: "PSYCHIC", power: "---", acc: "---", desc: "Chi la usa recupera tutti i PS e guarisce da tutti i suoi problemi di stato, ma dorme per due turni." },
           { name: "TAKE DOWN", type: "NORMAL", power: "90", acc: "85%", desc: "Carica spericolata con tutto il corpo contro il bersaglio. Danneggia un po’ anche chi la usa." },
           { name: "HELPING HAND", type: "NORMAL", power: "---", acc: "---", desc: "Mossa che aumenta la potenza dell’attacco di un alleato." }
-        ],
-        learnableMoves: [
-          { name: "X-SCISSOR", type: "BUG", power: "80", acc: "100%", desc: "Taglia l'avversario Incrociando le sue chele." },
-          { name: "EARTHQUAKE", type: "GROUND", power: "100", acc: "100%", desc: "Un terremoto devastante che colpisce tutti i Pokémon in campo." },
-          { name: "CLOSE COMBAT", type: "FIGHTING", power: "120", acc: "100%", desc: "Lotta ravvicinata che riduce Difesa e Sp.Def di chi la usa." }
         ]
       },
       {
@@ -340,11 +291,6 @@
           { name: "GIGA DRAIN", type: "GRASS", power: "75", acc: "100%", desc: "Mossa che assorbe PS. Chi la usa recupera una quantità di PS pari alla metà del danno inferto." },
           { name: "SWORDS DANCE", type: "NORMAL", power: "---", acc: "---", desc: "Danza frenetica che incrementa lo spirito combattivo. Chi la usa aumenta di molto il suo Attacco." },
           { name: "DIVE", type: "WATER", power: "80", acc: "100%", desc: "Chi la usa si tuffa in acqua per emergere e attaccare al turno seguente." }
-        ],
-        learnableMoves: [
-          { name: "STONE EDGE", type: "ROCK", power: "100", acc: "80%", desc: "Sferra un attacco con pietre affilate dal basso." },
-          { name: "LIQUIDATION", type: "WATER", power: "85", acc: "100%", desc: "Attacca con la forza dell'acqua. Può ridurre la Difesa." },
-          { name: "AQUA JET", type: "WATER", power: "40", acc: "100%", desc: "Mossa ad alta priorità." }
         ]
       },
       {
@@ -354,13 +300,8 @@
         moves: [
           { name: "BULLET SEED", type: "GRASS", power: "25", acc: "100%", desc: "Chi la usa spara da due a cinque raffiche di semi contro il bersaglio in successione." },
           { name: "SOLAR BEAM", type: "GRASS", power: "120", acc: "100%", desc: "Chi la usa assorbe luce al primo turno per proiettare un raggio intenso al turno successivo." },
-          { name: "DOUBLE EDGE", type: "NORMAL", power: "120", acc: "100%", desc: "Carica spietata e dangerous che danneggia molto anche chi la usa." },
+          { name: "DOUBLE EDGE", type: "NORMAL", power: "120", acc: "100%", desc: "Carica spietata e pericolosa che danneggia molto anche chi la usa." },
           { name: "ROCK CLIMB", type: "NORMAL", power: "90", acc: "85%", desc: "Chi la usa carica con impeto incredibile. Il colpo può confondere il bersaglio." }
-        ],
-        learnableMoves: [
-          { name: "ENERGY BALL", type: "GRASS", power: "90", acc: "100%", desc: "Genera una sfera di energia naturale." },
-          { name: "AROMATHERAPY", type: "GRASS", power: "---", acc: "---", desc: "Profumo curativo che guarisce tutti i problemi di stato della squadra." },
-          { name: "REFLECT", type: "PSYCHIC", power: "---", acc: "---", desc: "Barriera che riduce i danni fisici subiti." }
         ]
       },
       {
@@ -372,11 +313,6 @@
           { name: "LIGHT SCREEN", type: "PSYCHIC", power: "---", acc: "---", desc: "Innalza una barriera di luce fantastica che riduce i danni degli attacchi speciali per sé e gli alleati per cinque turni." },
           { name: "SUNNY DAY", type: "FIRE", power: "---", acc: "---", desc: "Chi la usa intensifica i raggi solari per cinque turni, potenziando le mosse di tipo Fuoco." },
           { name: "FLASH", type: "NORMAL", power: "---", acc: "100%", desc: "Investe il bersaglio con una luce abbagliante che ne riduce la precisione." }
-        ],
-        learnableMoves: [
-          { name: "STRENGTH SAP", type: "GRASS", power: "---", acc: "100%", desc: "Riduce l'Attacco del bersaglio e ne assorbe i PS." },
-          { name: "SLEEP POWDER", type: "GRASS", power: "---", acc: "75%", desc: "Fa addormentare l'avversario." },
-          { name: "ACROBATICS", type: "FLYING", power: "55", acc: "100%", desc: "Volteggio acrobatico." }
         ]
       },
       {
@@ -388,11 +324,6 @@
           { name: "GRASS KNOT", type: "GRASS", power: "---", acc: "100%", desc: "Chi la usa intrappola il bersaglio con l’erba e lo fa cadere. Danneggia maggiormente i Pokémon più pesanti." },
           { name: "BULLDOZE", type: "GROUND", power: "60", acc: "100%", desc: "Chi la usa calpesta il terreno e scatena un terremoto che danneggia i Pokémon nei paraggi, riducendone la Velocità." },
           { name: "CALM MIND", type: "PSYCHIC", power: "---", acc: "---", desc: "Chi la usa, meditando, placa il proprio spirito per aumentare l’Attacco Speciale e la Difesa Speciale." }
-        ],
-        learnableMoves: [
-          { name: "TWIN BEAM", type: "PSYCHIC", power: "40", acc: "100%", desc: "Spara due fasci luminosi in rapida successione." },
-          { name: "HYPER VOICE", type: "NORMAL", power: "90", acc: "100%", desc: "Emette un urlo ad altissima frequenza." },
-          { name: "NASTY PLOT", type: "DARK", power: "---", acc: "---", desc: "Pensa a piani cattivi per aumentare di molto l'Attacco Speciale." }
         ]
       },
       {
@@ -404,11 +335,6 @@
           { name: "BRICK BREAK", type: "FIGHTING", power: "75", acc: "100%", desc: "Colpisce il bersaglio con una mano e rompe barriere come Riflesso e Schermoluce." },
           { name: "OMINOUS WIND", type: "GHOST", power: "60", acc: "100%", desc: "Chi la usa attacca con una forte raffica di vento che può aumentare tutte le sue statistiche." },
           { name: "SWAGGER", type: "NORMAL", power: "---", acc: "85%", desc: "Chi la usa provoca il bersaglio e lo confonde, facendo aumentare però di molto il suo Attacco." }
-        ],
-        learnableMoves: [
-          { name: "BULLET PUNCH", type: "STEEL", power: "40", acc: "100%", desc: "Pugno di metallo ad altissima velocità. Colpisce per primo." },
-          { name: "BUG BITE", type: "BUG", power: "60", acc: "100%", desc: "Morde il bersaglio e mangia la sua bacca se presente." },
-          { name: "SWORDS DANCE", type: "NORMAL", power: "---", acc: "---", desc: "Aumenta notevolmente l'Attacco." }
         ]
       },
       {
@@ -420,11 +346,6 @@
           { name: "BULLDOZE", type: "GROUND", power: "60", acc: "100%", desc: "Chi la usa calpesta il terreno e scatena un terremoto che danneggia i Pokémon nei paraggi, riducendone la Velocità." },
           { name: "PROTECT", type: "NORMAL", power: "---", acc: "---", desc: "Permette di eludere tutti gli attacchi. Se usata in successione può fallire." },
           { name: "SWAGGER", type: "NORMAL", power: "---", acc: "85%", desc: "Chi la usa provoca il bersaglio e lo confonde, facendo aumentare però di molto il suo Attacco." }
-        ],
-        learnableMoves: [
-          { name: "SOFT-BOILED", type: "NORMAL", power: "---", acc: "---", desc: "Ripristina fino alla metà dei PS massimi dell'utilizzatore." },
-          { name: "TOXIC", type: "POISON", power: "---", acc: "90%", desc: "Iperavvelena il bersaglio con dosi crescenti di danno." },
-          { name: "SEISMIC TOSS", type: "FIGHTING", power: "---", acc: "100%", desc: "Danno fisso pari al livello del Pokémon." }
         ]
       },
       {
@@ -436,10 +357,6 @@
           { name: "LEAF STORM", type: "GRASS", power: "130", acc: "90%", desc: "Si forma una tempesta di foglie affilate. Il contraccolpo riduce di molto l’Attacco Speciale di chi la usa." },
           { name: "SCREECH", type: "NORMAL", power: "---", acc: "85%", desc: "Stridio assordante che riduce di molto la Difesa del bersaglio." },
           { name: "PSYCH UP", type: "NORMAL", power: "---", acc: "---", desc: "Chi la usa s’ipnotizza per copiare ogni modifica alle statistiche del bersaglio." }
-        ],
-        learnableMoves: [
-          { name: "SUCKER PUNCH", type: "DARK", power: "70", acc: "100%", desc: "Attacca per primo se l'avversario sta preparando un attacco." },
-          { name: "LEAF BLADE", type: "GRASS", power: "90", acc: "100%", desc: "Taglio con foglia affilata ad alto tasso di brutti colpi." }
         ]
       },
       {
@@ -451,10 +368,6 @@
           { name: "HEAT WAVE", type: "FIRE", power: "95", acc: "90%", desc: "Chi la usa investe i nemici che ha intorno con una folata di vento caldo. Può anche scottarli." },
           { name: "HOWL", type: "NORMAL", power: "---", acc: "---", desc: "Chi la usa emette un forte verso per darsi coraggio e aumentare l’Attacco." },
           { name: "ROUND", type: "NORMAL", power: "60", acc: "100%", desc: "Attacca il bersaglio con una melodia. Se usata durante lo stesso turno da più Pokémon, i danni inflitti aumentano." }
-        ],
-        learnableMoves: [
-          { name: "EARTHQUAKE", type: "GROUND", power: "100", acc: "100%", desc: "Terremoto catastrofico." },
-          { name: "ERUPTION", type: "FIRE", power: "150", acc: "100%", desc: "Eruzione vulcanica, più forte a PS alti." }
         ]
       },
       {
@@ -466,11 +379,6 @@
           { name: "FLY", type: "FLYING", power: "90", acc: "95%", desc: "Chi la usa si alza in volo per attaccare al turno seguente." },
           { name: "DOUBLE EDGE", type: "NORMAL", power: "120", acc: "100%", desc: "Carica spietata e pericolosa che danneggia molto anche chi la usa." },
           { name: "MEGA PUNCH", type: "NORMAL", power: "80", acc: "85%", desc: "Colpisce il bersaglio con un pugno poderoso." }
-        ],
-        learnableMoves: [
-          { name: "DRAGON CLAW", type: "DRAGON", power: "80", acc: "100%", desc: "Squarcia con artigli affilati." },
-          { name: "EARTHQUAKE", type: "GROUND", power: "100", acc: "100%", desc: "Forte scossa sismica." },
-          { name: "U-TURN", type: "BUG", power: "70", acc: "100%", desc: "Attacca e si sostituisce." }
         ]
       },
       {
@@ -482,10 +390,6 @@
           { name: "AIR SLASH", type: "FLYING", power: "75", acc: "95%", desc: "Chi la usa attacca con un vento tagliente che squarcia il cielo. Può anche far tentennare il Pokémon colpito." },
           { name: "REST", type: "PSYCHIC", power: "---", acc: "---", desc: "Chi la usa recupera tutti i PS e guarisce da tutti i suoi problemi di stato, ma dorme per due turni." },
           { name: "HIDDEN POWER", type: "NORMAL", power: "60", acc: "100%", desc: "Mossa singolare che cambia tipo a seconda del Pokémon che la usa." }
-        ],
-        learnableMoves: [
-          { name: "BRAVE BIRD", type: "FLYING", power: "120", acc: "100%", desc: "Carica aerea spietata con contraccolpo." },
-          { name: "CLOSE COMBAT", type: "FIGHTING", power: "120", acc: "100%", desc: "Sferra una scarica di colpi da vicino." }
         ]
       },
       {
@@ -497,10 +401,6 @@
           { name: "BULLET SEED", type: "GRASS", power: "25", acc: "100%", desc: "Chi la usa spara da due a cinque raffiche di semi contro il bersaglio in successione." },
           { name: "SWAGGER", type: "NORMAL", power: "---", acc: "85%", desc: "Chi la usa provoca il bersaglio e lo confonde, facendo aumentare però di molto il suo Attacco." },
           { name: "CAPTIVATE", type: "NORMAL", power: "---", acc: "100%", desc: "Se i nemici nei paraggi sono del sesso opposto, ne riduce di molto l'Attacco Speciale." }
-        ],
-        learnableMoves: [
-          { name: "SLUDGE BOMB", type: "POISON", power: "90", acc: "100%", desc: "Lancia fango velenoso." },
-          { name: "GIGA DRAIN", type: "GRASS", power: "75", acc: "100%", desc: "Assorbe i PS del nemico." }
         ]
       },
       {
@@ -512,10 +412,6 @@
           { name: "LUCKY CHANT", type: "NORMAL", power: "---", acc: "---", desc: "Impedisce al nemico di sferrare brutti colpi alla squadra." },
           { name: "HYPER BEAM", type: "NORMAL", power: "150", acc: "90%", desc: "Colpisce il bersaglio con un potente raggio. Chi la usa salta il turno successivo." },
           { name: "HELPING HAND", type: "NORMAL", power: "---", acc: "---", desc: "Mossa che aumenta la potenza dell’attacco di un alleato." }
-        ],
-        learnableMoves: [
-          { name: "PETAL DANCE", type: "GRASS", power: "120", acc: "100%", desc: "Attacca per 2-3 turni poi si confonde." },
-          { name: "WEATHER BALL", type: "NORMAL", power: "50", acc: "100%", desc: "Mossa speciale che cambia tipo con il meteo." }
         ]
       },
       {
@@ -527,25 +423,17 @@
           { name: "SUNNY DAY", type: "FIRE", power: "---", acc: "---", desc: "Chi la usa intensifica i raggi solari per cinque turni, potenziando le mosse di tipo Fuoco." },
           { name: "METRONOME", type: "NORMAL", power: "---", acc: "---", desc: "Usa a caso una tra le tante mosse esistenti." },
           { name: "GIGA IMPACT", type: "NORMAL", power: "150", acc: "90%", desc: "Carica il bersaglio con tutta la forza, ma deve riposare il turno successivo." }
-        ],
-        learnableMoves: [
-          { name: "FAKE OUT", type: "NORMAL", power: "40", acc: "100%", desc: "Attacca per primo e fa sempre tentennare nel primo turno." },
-          { name: "TAIL SLAP", type: "NORMAL", power: "25", acc: "85%", desc: "Colpisce da 2 a 5 volte con le code." }
         ]
       },
       {
         id: 426, name: "Drifblim", types: ["GHOST", "FLYING"], bst: 498,
         stats: { HP: 150, ATK: 80, DEF: 44, "SP.ATK": 90, "SP.DEF": 54, VEL: 80 },
-        ability: "Flare Boost (Nascosta)", abilityDesc: "Aumenta l’Attacco Speciale se il Pokémon è brought/scottato.",
+        ability: "Flare Boost (Nascosta)", abilityDesc: "Aumenta l’Attacco Speciale se il Pokémon è scottato.",
         moves: [
           { name: "SHADOW BALL", type: "GHOST", power: "80", acc: "100%", desc: "Lancia sul bersaglio una sfera nera. Può anche ridurne la Difesa Speciale." },
           { name: "HAZE", type: "ICE", power: "---", acc: "---", desc: "Annulla ogni modifica alle statistiche di tutti i Pokémon in campo." },
           { name: "BIND", type: "NORMAL", power: "15", acc: "85%", desc: "Lega e stritola il bersaglio per quattro o cinque turni." },
           { name: "ALLY SWITCH", type: "PSYCHIC", power: "---", acc: "---", desc: "Si teletrasporta al posto di un alleato in campo." }
-        ],
-        learnableMoves: [
-          { name: "STRENGTH SAP", type: "GRASS", power: "---", acc: "100%", desc: "Ruba l'attacco nemico curandosi." },
-          { name: "HEX", type: "GHOST", power: "65", acc: "100%", desc: "Doppi danni se il nemico ha uno stato." }
         ]
       },
       {
@@ -557,10 +445,6 @@
           { name: "PROTECT", type: "NORMAL", power: "---", acc: "---", desc: "Permette di eludere tutti gli attacchi." },
           { name: "RETURN", type: "NORMAL", power: "---", acc: "100%", desc: "Diventa più potente quanto maggiore è la felicità." },
           { name: "PSYWAVE", type: "PSYCHIC", power: "---", acc: "100%", desc: "Colpisce con una strana onda psichica a intensità variabile." }
-        ],
-        learnableMoves: [
-          { name: "SHADOW BALL", type: "GHOST", power: "80", acc: "100%", desc: "Sfera d'ombra spettrale." },
-          { name: "DAZZLING GLEAM", type: "FAIRY", power: "80", acc: "100%", desc: "Luce fatata abbagliante." }
         ]
       },
       {
@@ -572,10 +456,6 @@
           { name: "DEFENSE CURL", type: "NORMAL", power: "---", acc: "---", desc: "Si raggomitola per aumentare la propria Difesa." },
           { name: "HIDDEN POWER", type: "NORMAL", power: "60", acc: "100%", desc: "Mossa singolare che cambia tipo a seconda di chi la usa." },
           { name: "NATURAL GIFT", type: "NORMAL", power: "---", acc: "100%", desc: "Trae forza dalla bacca posseduta, definendone tipo e potenza." }
-        ],
-        learnableMoves: [
-          { name: "BODY SLAM", type: "NORMAL", power: "85", acc: "100%", desc: "Schiacciata che può paralizzare." },
-          { name: "KNOCK OFF", type: "DARK", power: "65", acc: "100%", desc: "Rimuove lo strumento dal nemico." }
         ]
       },
       {
@@ -587,10 +467,6 @@
           { name: "FLING", type: "DARK", power: "---", acc: "100%", desc: "Lancia il proprio strumento contro il bersaglio." },
           { name: "GIGA IMPACT", type: "NORMAL", power: "150", acc: "90%", desc: "Carica il bersaglio usando tutta la forza, ma salta il turno dopo." },
           { name: "SCARY FACE", type: "NORMAL", power: "---", acc: "100%", desc: "Spaventa il bersaglio e ne riduce di molto la Velocità." }
-        ],
-        learnableMoves: [
-          { name: "FIRE BLAST", type: "FIRE", power: "110", acc: "85%", desc: "Fiammata devastante." },
-          { name: "THUNDERBOLT", type: "ELECTRIC", power: "90", acc: "100%", desc: "Fascio d'energia elettrica." }
         ]
       },
       {
@@ -602,10 +478,6 @@
           { name: "FAKE TEARS", type: "DARK", power: "---", acc: "100%", desc: "Pianto teatrale per ridurre di molto la Difesa Speciale del bersaglio." },
           { name: "SNATCH", type: "DARK", power: "---", acc: "---", desc: "Ruba e usa la mossa curativa o di stato del nemico." },
           { name: "FRUSTRATION", type: "NORMAL", power: "---", acc: "100%", desc: "Mossa più potente quanto minore è l'affezione." }
-        ],
-        learnableMoves: [
-          { name: "ICE BEAM", type: "ICE", power: "90", acc: "100%", desc: "Raggio di ghiaccio concentrato." },
-          { name: "DESTINY BOND", type: "GHOST", power: "---", acc: "---", desc: "Se KO nel turno, va KO anche il nemico." }
         ]
       },
       {
@@ -617,10 +489,6 @@
           { name: "LEAF STORM", type: "GRASS", power: "130", acc: "90%", desc: "Tempesta di foglie affilate. Riduce l'Attacco Speciale (aumenta con Contrary!)." },
           { name: "PROTECT", type: "NORMAL", power: "---", acc: "---", desc: "Elude tutti gli attacchi nel turno." },
           { name: "SECRET POWER", type: "NORMAL", power: "70", acc: "100%", desc: "Attacco con effetto variabile secondo l'ambiente." }
-        ],
-        learnableMoves: [
-          { name: "GIGA DRAIN", type: "GRASS", power: "75", acc: "100%", desc: "Assorbe la vita avversaria." },
-          { name: "DRAGON PULSE", type: "DRAGON", power: "85", acc: "100%", desc: "Sfera d'energia draconica." }
         ]
       },
       {
@@ -632,10 +500,6 @@
           { name: "INCINERATE", type: "FIRE", power: "60", acc: "100%", desc: "Attacca con fiamme distruggendo le bacche del bersaglio." },
           { name: "IRON TAIL", type: "STEEL", power: "100", acc: "75%", desc: "Colpisce con una coda d'acciaio. Può ridurre la Difesa." },
           { name: "SNORE", type: "NORMAL", power: "50", acc: "100%", desc: "Mossa da usare solo mentre si dorme. Può far tentennare." }
-        ],
-        learnableMoves: [
-          { name: "FLARE BLITZ", type: "FIRE", power: "120", acc: "100%", desc: "Carica di fuoco estrema." },
-          { name: "HAMMER ARM", type: "FIGHTING", power: "100", acc: "90%", desc: "Colpo con braccio pesante." }
         ]
       },
       {
@@ -647,10 +511,6 @@
           { name: "HARD PRESS", type: "STEEL", power: "0", acc: "100%", desc: "Schiaccia il bersaglio. Più PS ha il nemico, più la mossa è forte." },
           { name: "MEGA PUNCH", type: "NORMAL", power: "80", acc: "85%", desc: "Colpisce il bersaglio con un pugno poderoso." },
           { name: "BODY SLAM", type: "NORMAL", power: "85", acc: "100%", desc: "Carica il bersaglio con tutto il corpo. Può paralizzare." }
-        ],
-        learnableMoves: [
-          { name: "DRAIN PUNCH", type: "FIGHTING", power: "75", acc: "100%", desc: "Pugno che ruba energia." },
-          { name: "MACH PUNCH", type: "FIGHTING", power: "40", acc: "100%", desc: "Pugno ultraveloce a priorità." }
         ]
       },
       {
@@ -662,10 +522,6 @@
           { name: "SWAGGER", type: "NORMAL", power: "---", acc: "85%", desc: "Provoca il bersaglio, lo confonde ma ne aumenta l'Attacco." },
           { name: "GIGA IMPACT", type: "NORMAL", power: "150", acc: "90%", desc: "Carica usando tutta la forza, salta il turno successivo." },
           { name: "SUBSTITUTE", type: "NORMAL", power: "---", acc: "---", desc: "Crea un sostituto esca usando dei PS." }
-        ],
-        learnableMoves: [
-          { name: "MEGATORNADO", type: "BUG", power: "120", acc: "85%", desc: "Carica con le corna corazzate." },
-          { name: "TOXIC SPIKES", type: "POISON", power: "---", acc: "---", desc: "Trappola di spine velenose." }
         ]
       },
       {
@@ -677,10 +533,6 @@
           { name: "PSYCHIC", type: "PSYCHIC", power: "90", acc: "100%", desc: "Attacco telecinetico che può ridurne la Difesa Speciale." },
           { name: "GROWTH", type: "NORMAL", power: "---", acc: "---", desc: "Aumenta l'Attacco e l'Attacco Speciale dell'utilizzatore." },
           { name: "COVET", type: "NORMAL", power: "60", acc: "100%", desc: "Attacca sorridendo e ruba lo strumento al nemico." }
-        ],
-        learnableMoves: [
-          { name: "TAILWIND", type: "FLYING", power: "---", acc: "---", desc: "Raddoppia la Velocità della squadra." },
-          { name: "MOONBLAST", type: "FAIRY", power: "95", acc: "100%", desc: "Sfera d'energia lunare." }
         ]
       },
       {
@@ -692,10 +544,6 @@
           { name: "WATER PULSE", type: "WATER", power: "60", acc: "100%", desc: "Getto d'acqua che può confondere il bersaglio." },
           { name: "AQUA JET", type: "WATER", power: "40", acc: "100%", desc: "Attacco fulmineo ad alta priorità." },
           { name: "WITHDRAW", type: "WATER", power: "---", acc: "---", desc: "Si ritira nel guscio aumentandone la Difesa." }
-        ],
-        learnableMoves: [
-          { name: "SHELL SMASH", type: "NORMAL", power: "---", acc: "---", desc: "Spezza il guscio per un boost massiccio all'attacco." },
-          { name: "ROCK SLIDE", type: "ROCK", power: "75", acc: "90%", desc: "Frana di rocce." }
         ]
       },
       {
@@ -707,10 +555,6 @@
           { name: "TOXIC", type: "POISON", power: "---", acc: "90%", desc: "Iperavvelena il bersaglio con una potente tossina." },
           { name: "ATTRACT", type: "NORMAL", power: "---", acc: "100%", desc: "Innamora il sesso opposto facendolo tentennare nell'attaccare." },
           { name: "FRUSTRATION", type: "NORMAL", power: "---", acc: "100%", desc: "Danni crescenti con la minora affezione." }
-        ],
-        learnableMoves: [
-          { name: "STICKY WEB", type: "BUG", power: "---", acc: "---", desc: "Rete vischiosa sul campo che rallenta gli avversari." },
-          { name: "THUNDER", type: "ELECTRIC", power: "110", acc: "70%", desc: "Fulmine devastante." }
         ]
       },
       {
@@ -722,10 +566,6 @@
           { name: "ICE PUNCH", type: "ICE", power: "75", acc: "100%", desc: "Pugno di ghiaccio che può congelare il bersaglio." },
           { name: "REST", type: "PSYCHIC", power: "---", acc: "---", desc: "Recupera tutti i PS e dorme per due turni." },
           { name: "SLASH", type: "NORMAL", power: "70", acc: "100%", desc: "Attacca con artigli. Probabile brutto colpo." }
-        ],
-        learnableMoves: [
-          { name: "ICICLE CRASH", type: "ICE", power: "85", acc: "90%", desc: "Fa cadere stalattiti di ghiaccio affilate." },
-          { name: "SUPERPOWER", type: "FIGHTING", power: "120", acc: "100%", desc: "Colpo devastante." }
         ]
       },
       {
@@ -737,10 +577,6 @@
           { name: "LOW SWEEP", type: "FIGHTING", power: "65", acc: "100%", desc: "Colpisce le gambe riducendo la Velocità del bersaglio." },
           { name: "STEALTH ROCK", type: "ROCK", power: "---", acc: "---", desc: "Piazza trappole rocciose sul campo nemico." },
           { name: "IRON HEAD", type: "STEEL", power: "80", acc: "100%", desc: "Colpisce di testa con forza. Può far tentennare." }
-        ],
-        learnableMoves: [
-          { name: "SHADOW PUNCH", type: "GHOST", power: "60", acc: "---", desc: "Pugno d'ombra infallibile." },
-          { name: "HIGH HORSEPOWER", type: "GROUND", power: "95", acc: "95%", desc: "Carica pesante di terra." }
         ]
       },
       {
@@ -752,10 +588,6 @@
           { name: "ROCK POLISH", type: "ROCK", power: "---", acc: "---", desc: "Leviga il corpo per aumentare di molto la Velocità." },
           { name: "SAND ATTACK", type: "GROUND", power: "---", acc: "100%", desc: "Lancia sabbia in faccia riducendo la precisione." },
           { name: "IRON DEFENSE", type: "STEEL", power: "---", acc: "---", desc: "Indurisce il corpo aumentando di molto la Difesa." }
-        ],
-        learnableMoves: [
-          { name: "IRON HEAD", type: "STEEL", power: "80", acc: "100%", desc: "Testata d'acciaio." },
-          { name: "CRUNCH", type: "DARK", power: "80", acc: "100%", desc: "Morsura vigorosa." }
         ]
       },
       {
@@ -767,11 +599,6 @@
           { name: "WATER SHURIKEN", type: "WATER", power: "15", acc: "100%", desc: "Attacca per primo colpendo da due a cinque volte di fila." },
           { name: "POUND", type: "NORMAL", power: "40", acc: "100%", desc: "Colpisce il bersaglio con le zampe o la coda." },
           { name: "GIGA IMPACT", type: "NORMAL", power: "150", acc: "90%", desc: "Carica a tutta forza, richiede riposo il turno dopo." }
-        ],
-        learnableMoves: [
-          { name: "DARK PULSE", type: "DARK", power: "80", acc: "100%", desc: "Aura d'oscurità." },
-          { name: "HYDRO PUMP", type: "WATER", power: "110", acc: "80%", desc: "Getto ad alta pressione." },
-          { name: "ICE BEAM", type: "ICE", power: "90", acc: "100%", desc: "Raggio congelante." }
         ]
       },
       {
@@ -783,10 +610,6 @@
           { name: "RAIN DANCE", type: "WATER", power: "---", acc: "---", desc: "Provoca una forte pioggia per cinque turni." },
           { name: "QUICK ATTACK", type: "NORMAL", power: "40", acc: "100%", desc: "Attacco ultra-veloce ad alta priorità." },
           { name: "FEINT", type: "NORMAL", power: "30", acc: "100%", desc: "Colpisce anche chi usa Protezione o Individua." }
-        ],
-        learnableMoves: [
-          { name: "FLARE BLITZ", type: "FIRE", power: "120", acc: "100%", desc: "Carica infuocata estrema." },
-          { name: "ROOST", type: "FLYING", power: "---", acc: "---", desc: "Aterragio per recuperare PS." }
         ]
       },
       {
@@ -798,10 +621,6 @@
           { name: "ENDEAVOR", type: "NORMAL", power: "---", acc: "100%", desc: "Riduce i PS del bersaglio pari a quelli rimasti all'utilizzatore." },
           { name: "GIGA IMPACT", type: "NORMAL", power: "150", acc: "90%", desc: "Carica a piena forza, riposa il turno dopo." },
           { name: "TACKLE", type: "NORMAL", power: "40", acc: "100%", desc: "Carica l'avversario investendolo col corpo." }
-        ],
-        learnableMoves: [
-          { name: "BELLY DRUM", type: "NORMAL", power: "---", acc: "---", desc: "Massimizza l'attacco sacrificando PS." },
-          { name: "PLAY ROUGH", type: "FAIRY", power: "90", acc: "90%", desc: "Attacco giocoso con potenza fiammante." }
         ]
       },
       {
@@ -813,10 +632,6 @@
           { name: "SCARY FACE", type: "NORMAL", power: "---", acc: "100%", desc: "Riduce di molto la Velocità del bersaglio." },
           { name: "SWIFT", type: "NORMAL", power: "60", acc: "---", desc: "Raggi a forma di stella infallibili." },
           { name: "COACHING", type: "FIGHTING", power: "---", acc: "---", desc: "Aumenta Attacco e Difesa degli alleati." }
-        ],
-        learnableMoves: [
-          { name: "SPIRIT SHACKLE", type: "GHOST", power: "80", acc: "100%", desc: "Freccia spettrale che impedisce la fuga." },
-          { name: "LEAF BLADE", type: "GRASS", power: "90", acc: "100%", desc: "Fendente di foglia." }
         ]
       },
       {
@@ -828,10 +643,6 @@
           { name: "BITE", type: "DARK", power: "60", acc: "100%", desc: "Morde con denti affilati e può far tentennare." },
           { name: "VOLT SWITCH", type: "ELECTRIC", power: "70", acc: "100%", desc: "Attacca ed effettua subito un cambio con un alleato." },
           { name: "ACROBATICS", type: "FLYING", power: "55", acc: "100%", desc: "Attacco rapido più potente se non si hanno strumenti." }
-        ],
-        learnableMoves: [
-          { name: "THUNDERBOLT", type: "ELECTRIC", power: "90", acc: "100%", desc: "Scarica elettrica d'alto voltaggio." },
-          { name: "BUG BUZZ", type: "BUG", power: "90", acc: "100%", desc: "Onda sonora di insetto." }
         ]
       },
       {
@@ -843,10 +654,6 @@
           { name: "TELEKINESIS", type: "PSYCHIC", power: "---", acc: "---", desc: "Fa fluttuare il nemico rendendolo facile da colpire." },
           { name: "FRUSTRATION", type: "NORMAL", power: "---", acc: "100%", desc: "Danni potenziati dalla bassa affezione." },
           { name: "PROTECT", type: "NORMAL", power: "---", acc: "---", desc: "Protegge interamente dagli attacchi per un turno." }
-        ],
-        learnableMoves: [
-          { name: "POLLEN PUFF", type: "BUG", power: "90", acc: "100%", desc: "Attacca nemici o cura alleati." },
-          { name: "STICKY WEB", type: "BUG", power: "---", acc: "---", desc: "Piazza una ragnatela che rallenta gli avversari." }
         ]
       },
       {
@@ -858,10 +665,6 @@
           { name: "SNORE", type: "NORMAL", power: "50", acc: "100%", desc: "Attacco sonoro da usare solo mentre si dorme." },
           { name: "SUBSTITUTE", type: "NORMAL", power: "---", acc: "---", desc: "Crea una copia esca consumando PS." },
           { name: "DOUBLE TEAM", type: "NORMAL", power: "---", acc: "---", desc: "Crea copie illusorie aumentando l'elusione." }
-        ],
-        learnableMoves: [
-          { name: "HIGH HORSEPOWER", type: "GROUND", power: "95", acc: "95%", desc: "Carica pesante e travolgente." },
-          { name: "BODY PRESS", type: "FIGHTING", power: "80", acc: "100%", desc: "Danni calcolati basandosi sulla Difesa." }
         ]
       },
       {
@@ -873,10 +676,6 @@
           { name: "LOW KICK", type: "FIGHTING", power: "---", acc: "100%", desc: "Calcio basso, infligge più danni ai bersagli pesanti." },
           { name: "CHARM", type: "FAIRY", power: "---", acc: "100%", desc: "Ammalia il bersaglio riducendone molto l'Attacco." },
           { name: "TEETER DANCE", type: "NORMAL", power: "---", acc: "100%", desc: "Danza goffa che confonde tutti i Pokémon attorno." }
-        ],
-        learnableMoves: [
-          { name: "TROP KICK", type: "GRASS", power: "70", acc: "100%", desc: "Calcio tropicale che riduce l'Attacco del nemico." },
-          { name: "HIGH JUMP KICK", type: "FIGHTING", power: "130", acc: "90%", desc: "Calcio al volo che danneggia chi la usa se fallisce." }
         ]
       },
       {
@@ -888,10 +687,6 @@
           { name: "DOUBLE KICK", type: "FIGHTING", power: "30", acc: "100%", desc: "Colpisce due volte consecutive con raffiche di calci." },
           { name: "ZEN HEADBUTT", type: "PSYCHIC", power: "80", acc: "90%", desc: "Testata concentrata che può far tentennare il nemico." },
           { name: "HYPER BEAM", type: "NORMAL", power: "150", acc: "90%", desc: "Raggio devastante, salta il turno successivo per ricaricare." }
-        ],
-        learnableMoves: [
-          { name: "COTTON GUARD", type: "GRASS", power: "---", acc: "---", desc: "Aumenta la Difesa di 3 livelli." },
-          { name: "BODY PRESS", type: "FIGHTING", power: "80", acc: "100%", desc: "Attacco basato sulla Difesa." }
         ]
       },
       {
@@ -903,10 +698,6 @@
           { name: "TERA BLAST", type: "NORMAL", power: "80", acc: "100%", desc: "Attacco Teracristal usando la statistica d'attacco più alta." },
           { name: "RECYCLE", type: "NORMAL", power: "---", acc: "---", desc: "Ricicla uno strumento monouso già consumato." },
           { name: "ATTRACT", type: "NORMAL", power: "---", acc: "100%", desc: "Infatua l'avversario di sesso opposto." }
-        ],
-        learnableMoves: [
-          { name: "GRAV APPLE", type: "GRASS", power: "80", acc: "100%", desc: "Lancia una mela dall'alto riducendo la Difesa nemica." },
-          { name: "OUTRAGE", type: "DRAGON", power: "120", acc: "100%", desc: "Furia draconica per 2-3 turni." }
         ]
       },
       {
@@ -918,10 +709,6 @@
           { name: "COIL", type: "POISON", power: "---", acc: "---", desc: "Si concentra aumentando Attacco, Difesa e Precisione." },
           { name: "HYPER BEAM", type: "NORMAL", power: "150", acc: "90%", desc: "Potente raggio. Richiede un turno di riposo." },
           { name: "ATTRACT", type: "NORMAL", power: "---", acc: "100%", desc: "Ammalia il nemico del sesso opposto." }
-        ],
-        learnableMoves: [
-          { name: "EARTHQUAKE", type: "GROUND", power: "100", acc: "100%", desc: "Violenta scossa sismica." },
-          { name: "GLARE", type: "NORMAL", power: "---", acc: "100%", desc: "Sguardo che paralizza il nemico." }
         ]
       },
       {
@@ -933,10 +720,6 @@
           { name: "SURF", type: "WATER", power: "90", acc: "100%", desc: "Un'onda enorme travolge il campo di battaglia." },
           { name: "ICY WIND", type: "ICE", power: "55", acc: "95%", desc: "Aria gelida che riduce la Velocità dei nemici." },
           { name: "AMNESIA", type: "PSYCHIC", power: "---", acc: "---", desc: "Aumenta di molto la Difesa Speciale." }
-        ],
-        learnableMoves: [
-          { name: "DIVE", type: "WATER", power: "80", acc: "100%", desc: "Si tuffa in acqua e attacca dopo." },
-          { name: "ROOST", type: "FLYING", power: "---", acc: "---", desc: "Cura i PS appoggiandosi a terra." }
         ]
       },
       {
@@ -948,10 +731,6 @@
           { name: "THUNDERBOLT", type: "ELECTRIC", power: "90", acc: "100%", desc: "Scarica elettrica che può paralizzare." },
           { name: "SUBSTITUTE", type: "NORMAL", power: "---", acc: "---", desc: "Crea una copia esca consumando PS." },
           { name: "SCREECH", type: "NORMAL", power: "---", acc: "85%", desc: "Stridio che riduce di molto la Difesa nemica." }
-        ],
-        learnableMoves: [
-          { name: "OVERDRIVE", type: "ELECTRIC", power: "80", acc: "100%", desc: "Mossa sonora elettrificante." },
-          { name: "SLUDGE BOMB", type: "POISON", power: "90", acc: "100%", desc: "Lancia fango venefico." }
         ]
       },
       {
@@ -963,10 +742,6 @@
           { name: "SLEEP TALK", type: "NORMAL", power: "---", acc: "---", desc: "Sfodera una mossa a caso mentre dorme." },
           { name: "SHELL SMASH", type: "NORMAL", power: "---", acc: "---", desc: "Riduce le difese per aumentare di molto Atk, SpAtk e Vel." },
           { name: "REST", type: "PSYCHIC", power: "---", acc: "---", desc: "Recupera tutti i PS dormendo per due turni." }
-        ],
-        learnableMoves: [
-          { name: "SHADOW BALL", type: "GHOST", power: "80", acc: "100%", desc: "Sfera d'energia spettrale." },
-          { name: "GIGA DRAIN", type: "GRASS", power: "75", acc: "100%", desc: "Assorbe i PS del nemico." }
         ]
       },
       {
@@ -978,10 +753,6 @@
           { name: "POWDER SNOW", type: "ICE", power: "40", acc: "100%", desc: "Raffica di neve che può congelare." },
           { name: "ENDURE", type: "NORMAL", power: "---", acc: "---", desc: "Resiste a qualsiasi colpo lasciando almeno 1 PS." },
           { name: "HYPER BEAM", type: "NORMAL", power: "150", acc: "90%", desc: "Raggio ad altissima potenza, salta il turno successivo." }
-        ],
-        learnableMoves: [
-          { name: "ICICLE CRASH", type: "ICE", power: "85", acc: "90%", desc: "Fa cadere grandi stalattiti di ghiaccio." },
-          { name: "BELLY DRUM", type: "NORMAL", power: "---", acc: "---", desc: "Massimizza l'Attacco in cambio di PS." }
         ]
       },
       {
@@ -993,10 +764,6 @@
           { name: "GRASSY TERRAIN", type: "GRASS", power: "---", acc: "---", desc: "Crea un campo erboso che rigenera PS ad ogni turno." },
           { name: "POLLEN PUFF", type: "BUG", power: "90", acc: "100%", desc: "Danneggia i nemici o cura gli alleati colpiti." },
           { name: "BATON PASS", type: "NORMAL", power: "---", acc: "---", desc: "Sostituisce il Pokémon ereditando i bonus di statistiche." }
-        ],
-        learnableMoves: [
-          { name: "ENERGY BALL", type: "GRASS", power: "90", acc: "100%", desc: "Sfera d'energia vegetale." },
-          { name: "PSYCHIC", type: "PSYCHIC", power: "90", acc: "100%", desc: "Forte attacco telecinetico." }
         ]
       },
       {
@@ -1008,10 +775,6 @@
           { name: "CRUNCH", type: "DARK", power: "80", acc: "100%", desc: "Morde con forza e può ridurre la Difesa." },
           { name: "STOMPING TANTRUM", type: "GROUND", power: "75", acc: "100%", desc: "Potenza raddoppiata se la mossa precedente ha fallito." },
           { name: "TERA BLAST", type: "NORMAL", power: "80", acc: "100%", desc: "Energia Teracristal adattata al tipo del Pokémon." }
-        ],
-        learnableMoves: [
-          { name: "PLAY ROUGH", type: "FAIRY", power: "90", acc: "90%", desc: "Attacco vigoroso di tipo Folletto." },
-          { name: "WISH", type: "NORMAL", power: "---", acc: "---", desc: "Desiderio che cura PS al turno successivo." }
         ]
       },
       {
@@ -1023,11 +786,6 @@
           { name: "CLEAR SMOG", type: "POISON", power: "50", acc: "---", desc: "Fumo speciale che azzera le statistiche modificate del nemico." },
           { name: "FALSE SWIPE", type: "NORMAL", power: "40", acc: "100%", desc: "Lascia il bersaglio sempre con almeno 1 PS." },
           { name: "TERA BLAST", type: "NORMAL", power: "80", acc: "100%", desc: "Emana energia Teracristal basata sulla statistica più alta." }
-        ],
-        learnableMoves: [
-          { name: "BITTER BLADE", type: "FIRE", power: "90", acc: "100%", desc: "Fendente che assorbe PS proporzionali ai danni inflitti." },
-          { name: "SHADOW CLAW", type: "GHOST", power: "70", acc: "100%", desc: "Artigliata d'ombra ad elevato tasso di brutti colpi." },
-          { name: "SWORDS DANCE", type: "NORMAL", power: "---", acc: "---", desc: "Incrementa di molto l'Attacco dell'utilizzatore." }
         ]
       },
       {
@@ -1039,10 +797,6 @@
           { name: "THUNDER SHOCK", type: "ELECTRIC", power: "40", acc: "100%", desc: "Scarica elettrica base con probabilità di paralisi." },
           { name: "ELECTRIC TERRAIN", type: "ELECTRIC", power: "---", acc: "---", desc: "Crea un campo elettrico che impedisce di addormentarsi." },
           { name: "SLEEP TALK", type: "NORMAL", power: "---", acc: "---", desc: "Usa una mossa a caso mentre dorme." }
-        ],
-        learnableMoves: [
-          { name: "VOLT SWITCH", type: "ELECTRIC", power: "70", acc: "100%", desc: "Scarica rapida e immediata sostituzione." },
-          { name: "AIR SLASH", type: "FLYING", power: "75", acc: "95%", desc: "Lame d'aria taglienti che possono far tentennare." }
         ]
       },
       {
@@ -1054,10 +808,6 @@
           { name: "ENDURE", type: "NORMAL", power: "---", acc: "---", desc: "Sopravvive a qualsiasi colpo con 1 PS." },
           { name: "SCARY FACE", type: "NORMAL", power: "---", acc: "100%", desc: "Spaventa il bersaglio riducendone la Velocità." },
           { name: "LEER", type: "NORMAL", power: "---", acc: "100%", desc: "Sguardo intimidatorio che riduce la Difesa nemica." }
-        ],
-        learnableMoves: [
-          { name: "DOODLE", type: "NORMAL", power: "---", acc: "100%", desc: "Copia l'abilità nemica e la trasmette alla squadra." },
-          { name: "POISON JAB", type: "POISON", power: "80", acc: "100%", desc: "Stoccata velenosa." }
         ]
       },
       {
@@ -1069,10 +819,6 @@
           { name: "STEEL BEAM", type: "STEEL", power: "140", acc: "95%", desc: "Raggio d'acciaio potentissimo che danneggia anche chi la usa." },
           { name: "METAL SOUND", type: "STEEL", power: "---", acc: "85%", desc: "Stridio metallico che riduce di molto la Difesa Speciale." },
           { name: "COVET", type: "NORMAL", power: "60", acc: "100%", desc: "Attacca sorridendo e ruba lo strumento." }
-        ],
-        learnableMoves: [
-          { name: "GIGATON HAMMER", type: "STEEL", power: "160", acc: "100%", desc: "Colpisce con un martello gigante. Impossibile usarla per due turni di fila." },
-          { name: "PLAY ROUGH", type: "FAIRY", power: "90", acc: "90%", desc: "Lotta giocosa ad alto impatto." }
         ]
       },
       {
@@ -1084,10 +830,6 @@
           { name: "FIRE PUNCH", type: "FIRE", power: "75", acc: "100%", desc: "Pugno ardente con probabilità di scottare." },
           { name: "NIGHT SHADE", type: "GHOST", power: "---", acc: "100%", desc: "Danni fissi pari al livello di chi usa la mossa." },
           { name: "DIG", type: "GROUND", power: "80", acc: "100%", desc: "Scava sottoterra e colpisce al turno successivo." }
-        ],
-        learnableMoves: [
-          { name: "RAGE FIST", type: "GHOST", power: "50", acc: "100%", desc: "Aumenta la potenza ogni volta che si subisce un attacco." },
-          { name: "CLOSE COMBAT", type: "FIGHTING", power: "120", acc: "100%", desc: "Lotta serrata ad alto rischio." }
         ]
       },
       {
@@ -1099,10 +841,6 @@
           { name: "BODY SLAM", type: "NORMAL", power: "85", acc: "100%", desc: "Schiacciata che può causare la paralisi." },
           { name: "BATON PASS", type: "NORMAL", power: "---", acc: "---", desc: "Passa il testimone ad un alleato trasferendo le modifiche." },
           { name: "BODY PRESS", type: "FIGHTING", power: "80", acc: "100%", desc: "Danni basati sulla Difesa dell'utilizzatore." }
-        ],
-        learnableMoves: [
-          { name: "HYPER DRILL", type: "NORMAL", power: "100", acc: "100%", desc: "Trapana il nemico e supera la Protezione." },
-          { name: "BOOMBURST", type: "NORMAL", power: "140", acc: "100%", desc: "Esplosione sonora devastante." }
         ]
       },
       {
@@ -1114,10 +852,6 @@
           { name: "DRAGON PULSE", type: "DRAGON", power: "85", acc: "100%", desc: "Genera un'onda d'urto che colpisce il bersaglio." },
           { name: "SOLAR BEAM", type: "GRASS", power: "120", acc: "100%", desc: "Assorbe luce al primo turno, spara un raggio al secondo." },
           { name: "PROTECT", type: "NORMAL", power: "---", acc: "---", desc: "Permette di eludere tutti gli attacchi del turno." }
-        ],
-        learnableMoves: [
-          { name: "SYRUP BOMB", type: "GRASS", power: "60", acc: "85%", desc: "Lancia sciroppo dolce che riduce la velocità dell'avversario ogni turno." },
-          { name: "ENERGY BALL", type: "GRASS", power: "90", acc: "100%", desc: "Sfera d'energia concentrata." }
         ]
       },
       {
@@ -1129,11 +863,6 @@
           { name: "GIGA DRAIN", type: "GRASS", power: "75", acc: "100%", desc: "Assorbe PS ripristinandone metà del danno inferto." },
           { name: "LEAF STORM", type: "GRASS", power: "130", acc: "90%", desc: "Tempesta di foglie affilate, riduce l'Attacco Speciale." },
           { name: "GROWTH", type: "NORMAL", power: "---", acc: "---", desc: "Aumenta la crescita corporale e le statistiche offensive." }
-        ],
-        learnableMoves: [
-          { name: "IVY CUDGEL", type: "GRASS", power: "100", acc: "100%", desc: "Colpisce con una mazza d'edera ad elevata probabilità di brutto colpo." },
-          { name: "SPIKY SHIELD", type: "GRASS", power: "---", acc: "100%", desc: "Protegge dagli attacchi e danneggia chi tenta il contatto." },
-          { name: "SUPERPOWER", type: "FIGHTING", power: "120", acc: "100%", desc: "Super colpo fisico." }
         ]
       }
     ];
@@ -1218,32 +947,6 @@
       imgEl.src = isShiny ? shinyUrl : normalUrl;
     }
 
-    // Renderizza Mosse in base alla modalità selezionata
-    function renderMoves(mode = 'base') {
-      const p = pokemons[currentIndex];
-      let movesToRender = [];
-
-      if (mode === 'all') {
-        const learnable = p.learnableMoves || [];
-        movesToRender = [...p.moves, ...learnable];
-      } else {
-        movesToRender = [...p.moves];
-      }
-
-      const sortedMoves = movesToRender.sort((a, b) => a.type.localeCompare(b.type));
-      const movesContainer = document.getElementById('pokeMoves');
-      movesContainer.innerHTML = sortedMoves.map(m => `
-        <div class="move-card">
-          <div class="move-header">
-            <span>${m.name}</span>
-            <span class="type-badge type-${m.type}">${m.type}</span>
-          </div>
-          <div class="move-stats">Potenza: ${m.power} | Precisione: ${m.acc}</div>
-          <div>${m.desc}</div>
-        </div>
-      `).join('');
-    }
-
     // Renderizza Pokémon
     function renderPokemon(index) {
       const p = pokemons[index];
@@ -1284,10 +987,19 @@
       document.getElementById('pokeAbility').innerText = p.ability;
       document.getElementById('pokeAbilityDesc').innerText = p.abilityDesc;
 
-      // Resetta il selettore mosse a 'base' ad ogni cambio Pokémon e renderizza
-      const filterSelect = document.getElementById('moveFilterSelect');
-      filterSelect.value = 'base';
-      renderMoves('base');
+      // Mosse
+      const sortedMoves = [...p.moves].sort((a, b) => a.type.localeCompare(b.type));
+      const movesContainer = document.getElementById('pokeMoves');
+      movesContainer.innerHTML = sortedMoves.map(m => `
+        <div class="move-card">
+          <div class="move-header">
+            <span>${m.name}</span>
+            <span class="type-badge type-${m.type}">${m.type}</span>
+          </div>
+          <div class="move-stats">Potenza: ${m.power} | Precisione: ${m.acc}</div>
+          <div>${m.desc}</div>
+        </div>
+      `).join('');
 
       // Controlli
       selectEl.value = index;
