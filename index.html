@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PokéDex Interattivo</title>
+  <title>PokéDex Interattivo Complete</title>
   <style>
     :root {
       --bg-color: #0f172a;
@@ -48,9 +48,9 @@
     button:disabled { opacity: 0.3; cursor: not-allowed; }
 
     /* Area Card con Prospettiva 3D per Flip */
-    .card-container { perspective: 1000px; width: 380px; height: 600px; position: relative; }
+    .card-container { perspective: 1000px; width: 420px; height: 680px; position: relative; }
     .card {
-      width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.6s ease-in-out; cursor: pointer;
+      width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.6s ease-in-out;
     }
     .card.flipped { transform: rotateY(180deg); }
 
@@ -61,33 +61,53 @@
     }
     .card-back { transform: rotateY(180deg); }
 
-    /* Tipografia e Badges */
-    .header-card { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #334155; padding-bottom: 10px; }
+    /* Header & Immagine Pokémon */
+    .header-card { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 5px; }
     .id { font-weight: bold; color: var(--text-dim); }
-    .name { font-size: 1.5rem; }
-    .types { display: flex; gap: 5px; margin-bottom: 15px; }
-    .type-badge { padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; }
+    .name { font-size: 1.4rem; font-weight: bold; }
+    .types { display: flex; gap: 5px; margin: 8px 0; }
+    .type-badge { padding: 3px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; display: inline-block; }
+
+    .poke-img-box { text-align: center; position: relative; background: radial-gradient(circle, #334155 0%, transparent 70%); margin: 5px 0; }
+    .poke-img-box img { width: 110px; height: 110px; transition: transform 0.2s ease; cursor: pointer; }
+    .poke-img-box img:hover { transform: scale(1.15); }
+    .shiny-hint { font-size: 0.65rem; color: #f59e0b; margin-top: -5px; }
+
+    /* Sezione Efficacia Tipi */
+    .eff-section { background: #0f172a; padding: 8px 10px; border-radius: 8px; margin: 8px 0; font-size: 0.75rem; }
+    .eff-title { font-weight: bold; margin-bottom: 4px; color: var(--text-dim); text-transform: uppercase; border-bottom: 1px solid #1e293b; padding-bottom: 2px; }
+    .eff-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; flex-wrap: wrap; }
+    .eff-label { font-weight: bold; width: 110px; font-size: 0.7rem; }
+    .eff-label.super-weak { color: #f87171; }
+    .eff-label.weak { color: #fca5a5; }
+    .eff-label.immune { color: #9ca3af; }
+    .eff-label.resist { color: #86efac; }
+    .eff-label.super-resist { color: #4ade80; }
 
     /* Visualizzazione Barre Statistiche */
-    .stats { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
-    .stat-row { display: flex; align-items: center; font-size: 0.85rem; }
-    .stat-label { width: 70px; font-weight: bold; color: var(--text-dim); }
-    .stat-val { width: 35px; text-align: right; padding-right: 10px; font-weight: bold; }
-    .stat-bar-bg { flex: 1; height: 10px; background: #334155; border-radius: 5px; overflow: hidden; }
-    .stat-bar-fill { height: 100%; border-radius: 5px; transition: width 0.4s ease; }
+    .stats { display: flex; flex-direction: column; gap: 4px; margin-top: 5px; }
+    .stat-row { display: flex; align-items: center; font-size: 0.75rem; }
+    .stat-label { width: 60px; font-weight: bold; color: var(--text-dim); }
+    .stat-val { width: 30px; text-align: right; padding-right: 8px; font-weight: bold; }
+    .stat-bar-bg { flex: 1; height: 8px; background: #334155; border-radius: 4px; overflow: hidden; }
+    .stat-bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
 
     /* Sezione Info & Mosse */
-    .ability-box { background: #0f172a; padding: 10px; border-radius: 8px; margin: 10px 0; font-size: 0.85rem; }
-    .ability-title { color: #f59e0b; font-weight: bold; margin-bottom: 4px; }
+    .ability-box { background: #0f172a; padding: 8px; border-radius: 8px; margin: 8px 0; font-size: 0.8rem; }
+    .ability-title { color: #f59e0b; font-weight: bold; margin-bottom: 2px; }
     
-    .moves-list { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
-    .move-card { background: #0f172a; border-left: 4px solid #ef4444; padding: 10px; border-radius: 4px; font-size: 0.85rem; }
-    .move-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px; }
-    .move-stats { color: var(--text-dim); font-size: 0.75rem; margin-bottom: 5px; }
+    .moves-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+    .move-card { background: #0f172a; border-left: 4px solid #ef4444; padding: 8px; border-radius: 4px; font-size: 0.8rem; }
+    .move-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 4px; }
+    .move-stats { color: var(--text-dim); font-size: 0.7rem; margin-bottom: 4px; }
 
-    .flip-hint { margin-top: auto; text-align: center; font-size: 0.75rem; color: var(--text-dim); font-style: italic; }
+    .flip-btn {
+      background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px;
+      font-weight: bold; cursor: pointer; margin-top: auto; align-self: center; font-size: 0.8rem;
+    }
+    .flip-btn:hover { background: #dc2626; }
 
-    /* Scrollbar personalizzata per il retro della carta */
+    /* Scrollbar personalizzata per la carta */
     .card-face::-webkit-scrollbar { width: 6px; }
     .card-face::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
   </style>
@@ -95,7 +115,7 @@
 <body>
 
   <header>
-    <h1>POKÉDEX ESTRATTO</h1>
+    <h1>POKÉDEX INTERATTIVO</h1>
   </header>
 
   <div class="controls">
@@ -105,7 +125,7 @@
   </div>
 
   <div class="card-container">
-    <div class="card" id="pokemonCard" onclick="flipCard(event)">
+    <div class="card" id="pokemonCard">
       
       <!-- FRONT CARTA -->
       <div class="card-face card-front">
@@ -113,20 +133,34 @@
           <span class="name" id="pokeName">---</span>
           <span class="id" id="pokeId">#000</span>
         </div>
-        <div class="types" id="pokeTypes"></div>
         
-        <div style="text-align: center; margin: 10px 0;">
-          <small>Totale Base (BST): <strong id="pokeBST" style="color: #f59e0b;">---</strong></small>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div class="types" id="pokeTypes"></div>
+          <small>BST: <strong id="pokeBST" style="color: #f59e0b;">---</strong></small>
         </div>
 
+        <!-- Immagine Pokémon -->
+        <div class="poke-img-box">
+          <img id="pokeSprite" src="" alt="Pokemon" onclick="toggleShiny()" title="Clicca/Passa sopra per versione Shiny!">
+          <div class="shiny-hint">★ Clicca l'immagine per la versione Shiny ★</div>
+        </div>
+
+        <!-- Debolezze e Resistenze -->
+        <div class="eff-section">
+          <div class="eff-title">Efficacia Tipi Subita</div>
+          <div id="typeEffectiveness"></div>
+        </div>
+
+        <!-- Statistiche -->
         <div class="stats" id="pokeStats"></div>
 
+        <!-- Abilità -->
         <div class="ability-box">
           <div class="ability-title">Abilità Estratta: <span id="pokeAbility">---</span></div>
           <div id="pokeAbilityDesc" style="color: var(--text-dim);">---</div>
         </div>
 
-        <div class="flip-hint">Clicca sulla scheda per vedere le Mosse &rarr;</div>
+        <button class="flip-btn" onclick="flipCard()">Mostra Mosse &rarr;</button>
       </div>
 
       <!-- BACK CARTA -->
@@ -138,14 +172,38 @@
         
         <div class="moves-list" id="pokeMoves"></div>
 
-        <div class="flip-hint" style="margin-top: 15px;">&larr; Clicca per tornare alle Statistiche</div>
+        <button class="flip-btn" style="margin-top: 15px;" onclick="flipCard()">&larr; Torna alle Info</button>
       </div>
 
     </div>
   </div>
 
   <script>
-    // Dati estratto salvati direttamente in JS
+    // Tabella delle relazioni tra tipi Pokémon [Atk][Def]
+    const typeChart = {
+      NORMAL:   { ROCK: 0.5, GHOST: 0, STEEL: 0.5 },
+      FIRE:     { FIRE: 0.5, WATER: 0.5, GRASS: 2, ICE: 2, BUG: 2, ROCK: 0.5, DRAGON: 0.5, STEEL: 2 },
+      WATER:    { FIRE: 2, WATER: 0.5, GRASS: 0.5, GROUND: 2, ROCK: 2, DRAGON: 0.5 },
+      GRASS:    { FIRE: 0.5, WATER: 2, GRASS: 0.5, POISON: 0.5, GROUND: 2, FLYING: 0.5, BUG: 0.5, ROCK: 2, DRAGON: 0.5, STEEL: 0.5 },
+      ELECTRIC: { WATER: 2, ELECTRIC: 0.5, GRASS: 0.5, GROUND: 0, FLYING: 2, DRAGON: 0.5 },
+      ICE:      { FIRE: 0.5, WATER: 0.5, GRASS: 2, ICE: 0.5, GROUND: 2, FLYING: 2, DRAGON: 2, STEEL: 0.5 },
+      FIGHTING: { NORMAL: 2, ICE: 2, POISON: 0.5, FLYING: 0.5, PSYCHIC: 0.5, BUG: 0.5, ROCK: 2, GHOST: 0, DARK: 2, STEEL: 2, FAIRY: 0.5 },
+      POISON:   { GRASS: 2, POISON: 0.5, GROUND: 0.5, ROCK: 0.5, GHOST: 0.5, STEEL: 0, FAIRY: 2 },
+      GROUND:   { FIRE: 2, ELECTRIC: 2, GRASS: 0.5, POISON: 2, FLYING: 0, BUG: 0.5, ROCK: 2, STEEL: 2 },
+      FLYING:   { ELECTRIC: 0.5, GRASS: 2, FIGHTING: 2, BUG: 2, ROCK: 0.5, STEEL: 0.5 },
+      PSYCHIC:  { FIGHTING: 2, POISON: 2, PSYCHIC: 0.5, DARK: 0, STEEL: 0.5 },
+      BUG:      { FIRE: 0.5, GRASS: 2, FIGHTING: 0.5, POISON: 0.5, FLYING: 0.5, PSYCHIC: 2, GHOST: 0.5, DARK: 2, STEEL: 0.5, FAIRY: 0.5 },
+      ROCK:     { FIRE: 2, ICE: 2, FIGHTING: 0.5, GROUND: 0.5, FLYING: 2, BUG: 2, STEEL: 0.5 },
+      GHOST:    { NORMAL: 0, PSYCHIC: 2, GHOST: 2, DARK: 0.5 },
+      DRAGON:   { DRAGON: 2, STEEL: 0.5, FAIRY: 0 },
+      DARK:     { FIGHTING: 0.5, PSYCHIC: 2, GHOST: 2, DARK: 0.5, FAIRY: 0.5 },
+      STEEL:    { FIRE: 0.5, WATER: 0.5, ELECTRIC: 0.5, ICE: 2, ROCK: 2, STEEL: 0.5, FAIRY: 2 },
+      FAIRY:    { FIRE: 0.5, FIGHTING: 2, POISON: 0.5, DRAGON: 2, DARK: 2, STEEL: 0.5 }
+    };
+
+    const allTypes = ["NORMAL", "FIRE", "WATER", "GRASS", "ELECTRIC", "ICE", "FIGHTING", "POISON", "GROUND", "FLYING", "PSYCHIC", "BUG", "ROCK", "GHOST", "DRAGON", "DARK", "STEEL", "FAIRY"];
+
+    // Dati Pokédex
     const pokemons = [
       {
         id: 36, name: "Clefable", types: ["FAIRY"], bst: 483,
@@ -810,6 +868,7 @@
     ];
 
     let currentIndex = 0;
+    let isShiny = false;
 
     // Popola il menu a tendina
     const selectEl = document.getElementById('pokeSelect');
@@ -820,25 +879,95 @@
       selectEl.appendChild(opt);
     });
 
-    // Funzione per ruotare la carta
-    function flipCard(event) {
+    function flipCard() {
       document.getElementById('pokemonCard').classList.toggle('flipped');
     }
 
-    // Carica un pokemon specifico
+    // Calcolo delle Debolezze e Resistenze
+    function calculateTypeEffectiveness(defenderTypes) {
+      let multipliers = {};
+      allTypes.forEach(t => multipliers[t] = 1);
+
+      allTypes.forEach(atkType => {
+        defenderTypes.forEach(defType => {
+          let factor = 1;
+          if (typeChart[atkType] && typeChart[atkType][defType] !== undefined) {
+            factor = typeChart[atkType][defType];
+          }
+          multipliers[atkType] *= factor;
+        });
+      });
+
+      let superWeak = [], weak = [], immune = [], resist = [], superResist = [];
+
+      for (let [type, mult] of Object.entries(multipliers)) {
+        if (mult === 4) superWeak.push(type);
+        else if (mult === 2) weak.push(type);
+        else if (mult === 0) immune.push(type);
+        else if (mult === 0.5) resist.push(type);
+        else if (mult === 0.25) superResist.push(type);
+      }
+
+      let html = "";
+
+      const createBadges = (types) => types.map(t => `<span class="type-badge type-${t}">${t}</span>`).join(' ');
+
+      if (superWeak.length > 0) {
+        html += `<div class="eff-row"><span class="eff-label super-weak">Super Debole (4x):</span><div>${createBadges(superWeak)}</div></div>`;
+      }
+      if (weak.length > 0) {
+        html += `<div class="eff-row"><span class="eff-label weak">Debole (2x):</span><div>${createBadges(weak)}</div></div>`;
+      }
+      if (immune.length > 0) {
+        html += `<div class="eff-row"><span class="eff-label immune">Immune (0x):</span><div>${createBadges(immune)}</div></div>`;
+      }
+      if (resist.length > 0) {
+        html += `<div class="eff-row"><span class="eff-label resist">Resistente (0.5x):</span><div>${createBadges(resist)}</div></div>`;
+      }
+      if (superResist.length > 0) {
+        html += `<div class="eff-row"><span class="eff-label super-resist">Iperresistente (0.25x):</span><div>${createBadges(superResist)}</div></div>`;
+      }
+
+      return html || "<small style='color:var(--text-dim)'>Nessuna debolezza/resistenza particolare</small>";
+    }
+
+    function toggleShiny() {
+      isShiny = !isShiny;
+      updateSprite();
+    }
+
+    function updateSprite() {
+      const p = pokemons[currentIndex];
+      const imgEl = document.getElementById('pokeSprite');
+      
+      // PokéAPI Sprite URLs
+      const normalUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png`;
+      const shinyUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${p.id}.png`;
+      
+      imgEl.src = isShiny ? shinyUrl : normalUrl;
+    }
+
+    // Renderizza Pokémon
     function renderPokemon(index) {
       const p = pokemons[index];
+      isShiny = false; // reset ad ogni cambio pokemon
       
-      // Front Data
+      // Basic Data
       document.getElementById('pokeName').innerText = p.name;
       document.getElementById('pokeId').innerText = `#${p.id}`;
       document.getElementById('pokeBST').innerText = p.bst;
       
+      // Sprite
+      updateSprite();
+
       // Types Badges
       const typesContainer = document.getElementById('pokeTypes');
       typesContainer.innerHTML = p.types.map(t => `<span class="type-badge type-${t}">${t}</span>`).join('');
 
-      // Stats Bars (il max di riferimento per l'ampiezza % è 255 PS)
+      // Calcolo Efficacia Tipi
+      document.getElementById('typeEffectiveness').innerHTML = calculateTypeEffectiveness(p.types);
+
+      // Statistiche
       const statsContainer = document.getElementById('pokeStats');
       statsContainer.innerHTML = Object.entries(p.stats).map(([k, v]) => {
         let pct = Math.min(100, Math.round((v / 180) * 100)); 
@@ -854,11 +983,11 @@
         `;
       }).join('');
 
-      // Ability
+      // Abilità
       document.getElementById('pokeAbility').innerText = p.ability;
       document.getElementById('pokeAbilityDesc').innerText = p.abilityDesc;
 
-      // Moves - ORDINATE PER TIPO (A-Z)
+      // Mosse
       const sortedMoves = [...p.moves].sort((a, b) => a.type.localeCompare(b.type));
       const movesContainer = document.getElementById('pokeMoves');
       movesContainer.innerHTML = sortedMoves.map(m => `
@@ -872,14 +1001,13 @@
         </div>
       `).join('');
 
-      // Update Controls State
+      // Controlli
       selectEl.value = index;
       document.getElementById('prevBtn').disabled = index === 0;
       document.getElementById('nextBtn').disabled = index === pokemons.length - 1;
     }
 
     function changePokemon(direction) {
-      // Rimuove l'effetto ruotato se presente prima di cambiare carta
       document.getElementById('pokemonCard').classList.remove('flipped');
       currentIndex += direction;
       renderPokemon(currentIndex);
@@ -891,7 +1019,7 @@
       renderPokemon(currentIndex);
     }
 
-    // Inizializzazione Primo Caricamento
+    // Inizializzazione
     renderPokemon(0);
   </script>
 </body>
