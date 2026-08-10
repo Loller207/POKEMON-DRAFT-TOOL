@@ -1,1361 +1,898 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokémon Draft Simulator</title>
-    <style>
-        :root {
-            --bg-dark: #121212;
-            --bg-panel: #1e1e1e;
-            --bg-card: #2d2d2d;
-            --accent-blue: #007acc;
-            --accent-green: #28a745;
-            --accent-red: #dc3545;
-            --accent-orange: #fd7e14;
-            --accent-cyan: #17a2b8;
-            --accent-yellow: #ffc107;
-            --text-main: #ffffff;
-            --text-muted: #aaa;
-            --border-color: #444;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PokéDex Interattivo</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #ef4444;
+      --text: #f8fafc;
+      --text-dim: #94a3b8;
+    }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+    /* Colori Tipi Pokémon */
+    .type-FAIRY { background-color: #ee99ac; color: #000; }
+    .type-FIRE { background-color: #f08030; color: #fff; }
+    .type-BUG { background-color: #a8b820; color: #fff; }
+    .type-POISON { background-color: #a040a0; color: #fff; }
+    .type-WATER { background-color: #6890f0; color: #fff; }
+    .type-FIGHTING { background-color: #c03028; color: #fff; }
+    .type-PSYCHIC { background-color: #f85888; color: #fff; }
+    .type-ROCK { background-color: #b8a038; color: #fff; }
+    .type-GRASS { background-color: #78c850; color: #000; }
+    .type-FLYING { background-color: #a890f0; color: #fff; }
+    .type-NORMAL { background-color: #a8a878; color: #000; }
+    .type-STEEL { background-color: #b8b8d0; color: #000; }
+    .type-DARK { background-color: #705848; color: #fff; }
+    .type-GROUND { background-color: #e0c068; color: #000; }
+    .type-DRAGON { background-color: #7038f8; color: #fff; }
+    .type-GHOST { background-color: #705598; color: #fff; }
+    .type-ICE { background-color: #98d8d8; color: #000; }
+    .type-ELECTRIC { background-color: #f8d030; color: #000; }
 
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-        }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
 
-        header {
-            background-color: var(--bg-panel);
-            padding: 10px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-        }
+    header { text-align: center; margin-bottom: 20px; }
+    h1 { color: #ef4444; font-size: 2rem; letter-spacing: 2px; }
 
-        header h1 {
-            font-size: 1.2rem;
-            color: var(--accent-blue);
-        }
+    /* Controlli e Navigazione */
+    .controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
+    select, input, button {
+      padding: 10px 15px; border-radius: 8px; border: none; background: #334155; color: white; font-weight: bold; cursor: pointer; outline: none;
+    }
+    button:hover, select:hover { background: #475569; }
+    button:disabled { opacity: 0.3; cursor: not-allowed; }
 
-        .main-container {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
+    /* Area Card con Prospettiva 3D per Flip */
+    .card-container { perspective: 1000px; width: 380px; height: 600px; position: relative; }
+    .card {
+      width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.6s ease-in-out; cursor: pointer;
+    }
+    .card.flipped { transform: rotateY(180deg); }
 
-        .left-col {
-            flex: 2;
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid var(--border-color);
-            padding: 15px;
-            overflow-y: auto;
-        }
+    .card-face {
+      position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+      border-radius: 20px; background: var(--card-bg); border: 2px solid #334155;
+      padding: 20px; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.5); overflow-y: auto;
+    }
+    .card-back { transform: rotateY(180deg); }
 
-        .action-header {
-            margin-bottom: 15px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: var(--accent-cyan);
-            white-space: pre-line;
-        }
+    /* Tipografia e Badges */
+    .header-card { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #334155; padding-bottom: 10px; }
+    .id { font-weight: bold; color: var(--text-dim); }
+    .name { font-size: 1.5rem; }
+    .types { display: flex; gap: 5px; margin-bottom: 15px; }
+    .type-badge { padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; }
 
-        .action-area {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+    /* Visualizzazione Barre Statistiche */
+    .stats { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+    .stat-row { display: flex; align-items: center; font-size: 0.85rem; }
+    .stat-label { width: 70px; font-weight: bold; color: var(--text-dim); }
+    .stat-val { width: 35px; text-align: right; padding-right: 10px; font-weight: bold; }
+    .stat-bar-bg { flex: 1; height: 10px; background: #334155; border-radius: 5px; overflow: hidden; }
+    .stat-bar-fill { height: 100%; border-radius: 5px; transition: width 0.4s ease; }
 
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            width: 100%;
-        }
+    /* Sezione Info & Mosse */
+    .ability-box { background: #0f172a; padding: 10px; border-radius: 8px; margin: 10px 0; font-size: 0.85rem; }
+    .ability-title { color: #f59e0b; font-weight: bold; margin-bottom: 4px; }
+    
+    .moves-list { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+    .move-card { background: #0f172a; border-left: 4px solid #ef4444; padding: 10px; border-radius: 4px; font-size: 0.85rem; }
+    .move-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px; }
+    .move-stats { color: var(--text-dim); font-size: 0.75rem; margin-bottom: 5px; }
 
-        .poke-card {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: transform 0.2s, border-color 0.2s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+    .flip-hint { margin-top: auto; text-align: center; font-size: 0.75rem; color: var(--text-dim); font-style: italic; }
 
-        .poke-card:hover {
-            transform: translateY(-3px);
-            border-color: var(--accent-blue);
-        }
-
-        .poke-card img {
-            width: 96px;
-            height: 96px;
-        }
-
-        .poke-card-name {
-            font-weight: bold;
-            font-size: 0.95rem;
-            margin: 5px 0;
-        }
-
-        .poke-card-ability {
-            font-size: 0.8rem;
-            color: var(--accent-yellow);
-        }
-
-        .poke-card-bst {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-bottom: 5px;
-        }
-
-        .stats-mini-table {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            line-height: 1.2;
-            margin-bottom: 8px;
-        }
-
-        .options-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .mid-col {
-            flex: 1.5;
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid var(--border-color);
-            padding: 15px;
-            overflow-y: auto;
-        }
-
-        .team-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 10px;
-        }
-
-        .team-slot {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 8px 12px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .team-slot:hover {
-            background-color: #383838;
-        }
-
-        .slot-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .slot-header img {
-            width: 40px;
-            height: 40px;
-        }
-
-        .slot-title {
-            font-weight: bold;
-            font-size: 0.85rem;
-        }
-
-        .slot-info {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-top: 4px;
-            white-space: pre-line;
-        }
-
-        .right-col {
-            flex: 1.5;
-            display: flex;
-            flex-direction: column;
-            padding: 15px;
-            overflow-y: auto;
-            background-color: #181818;
-        }
-
-        .sidebar-img-box {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        .sidebar-img-box img {
-            width: 120px;
-            height: 120px;
-        }
-
-        .stat-bar-container {
-            display: flex;
-            align-items: center;
-            margin-bottom: 4px;
-            font-size: 0.75rem;
-        }
-
-        .stat-label {
-            width: 35px;
-            font-weight: bold;
-        }
-
-        .stat-val {
-            width: 30px;
-            text-align: right;
-            padding-right: 8px;
-        }
-
-        .stat-bar-bg {
-            flex: 1;
-            height: 8px;
-            background-color: #333;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .stat-bar-fill {
-            height: 100%;
-            width: 0%;
-            background-color: var(--accent-blue);
-            transition: width 0.3s;
-        }
-
-        .matchups-box {
-            font-size: 0.75rem;
-            margin-top: 10px;
-            line-height: 1.4;
-        }
-
-        .details-textbox {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            padding: 8px;
-            font-size: 0.75rem;
-            font-family: monospace;
-            white-space: pre-wrap;
-            margin-top: 10px;
-            min-height: 120px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .btn {
-            background-color: var(--bg-card);
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: background 0.2s;
-        }
-
-        .btn:hover { background-color: #3a3a3a; }
-        .btn-blue { background-color: var(--accent-blue); border: none; }
-        .btn-blue:hover { background-color: #005999; }
-        .btn-green { background-color: var(--accent-green); border: none; }
-        .btn-green:hover { background-color: #218838; }
-        .btn-yellow { background-color: var(--accent-yellow); color: #000; border: none; }
-        .btn-yellow:hover { background-color: #e0a800; }
-        .btn-orange { background-color: var(--accent-orange); border: none; }
-        .btn-orange:hover { background-color: #e06d0b; }
-        .btn-red { background-color: var(--accent-red); border: none; }
-        .btn-red:hover { background-color: #c82333; }
-        .btn-block { width: 100%; text-align: center; }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.8);
-            z-index: 100;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background-color: var(--bg-panel);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            width: 600px;
-            max-width: 90%;
-            max-height: 90vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .modal-header {
-            padding: 12px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-body { padding: 15px; overflow-y: auto; flex: 1; }
-
-        .modal-tabs {
-            display: flex;
-            gap: 10px;
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 15px;
-        }
-
-        .tab-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            padding: 8px 12px;
-            cursor: pointer;
-        }
-
-        .tab-btn.active {
-            color: var(--accent-blue);
-            border-bottom: 2px solid var(--accent-blue);
-        }
-
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-
-        .checkbox-group {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-bottom: 15px;
-        }
-
-        .checkbox-label {
-            font-size: 0.8rem;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .banned-list {
-            max-height: 150px;
-            overflow-y: auto;
-            border: 1px solid var(--border-color);
-            padding: 5px;
-            border-radius: 4px;
-            margin-top: 5px;
-            background: var(--bg-dark);
-        }
-
-        .banned-item-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 3px 5px;
-            font-size: 0.8rem;
-        }
-
-        .input-row { display: flex; gap: 5px; margin-top: 5px; }
-
-        .input-row input {
-            flex: 1;
-            padding: 4px 8px;
-            background: var(--bg-dark);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            border-radius: 4px;
-        }
-
-        .showdown-output {
-            width: 100%;
-            height: 250px;
-            background-color: var(--bg-dark);
-            color: #00ff00;
-            border: 1px solid var(--border-color);
-            font-family: monospace;
-            font-size: 0.8rem;
-            padding: 10px;
-            border-radius: 4px;
-            resize: none;
-            margin-bottom: 10px;
-        }
-
-        .loading-spinner {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            color: var(--text-muted);
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #333;
-            border-top: 4px solid var(--accent-blue);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
+    /* Scrollbar personalizzata per il retro della carta */
+    .card-face::-webkit-scrollbar { width: 6px; }
+    .card-face::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+  </style>
 </head>
 <body>
 
-    <header>
-        <h1>🎮 Pokémon Draft Simulator</h1>
-        <div>
-            <button class="btn" onclick="openConfigModal()">⚙️ Impostazioni Regole</button>
-            <button class="btn btn-green" onclick="startDraft()">🔄 Nuovo Draft</button>
+  <header>
+    <h1>POKÉDEX ESTRATTO</h1>
+  </header>
+
+  <div class="controls">
+    <button id="prevBtn" onclick="changePokemon(-1)">&larr; Precedente</button>
+    <select id="pokeSelect" onchange="selectPokemon(this.value)"></select>
+    <button id="nextBtn" onclick="changePokemon(1)">Successivo &rarr;</button>
+  </div>
+
+  <div class="card-container">
+    <div class="card" id="pokemonCard" onclick="flipCard(event)">
+      
+      <!-- FRONT CARTA -->
+      <div class="card-face card-front">
+        <div class="header-card">
+          <span class="name" id="pokeName">---</span>
+          <span class="id" id="pokeId">#000</span>
         </div>
-    </header>
-
-    <div class="main-container">
-        <div class="left-col">
-            <div id="action-title" class="action-header">Inizializzazione...</div>
-            <div id="action-content" class="action-area">
-                <div class="loading-spinner">
-                    <div class="spinner"></div>
-                    <div>Inizializzazione Draft...</div>
-                </div>
-            </div>
+        <div class="types" id="pokeTypes"></div>
+        
+        <div style="text-align: center; margin: 10px 0;">
+          <small>Totale Base (BST): <strong id="pokeBST" style="color: #f59e0b;">---</strong></small>
         </div>
 
-        <div class="mid-col">
-            <div style="font-weight: bold; margin-bottom: 10px;">La tua Squadra (6/6)</div>
-            <div id="team-grid" class="team-grid"></div>
+        <div class="stats" id="pokeStats"></div>
+
+        <div class="ability-box">
+          <div class="ability-title">Abilità Estratta: <span id="pokeAbility">---</span></div>
+          <div id="pokeAbilityDesc" style="color: var(--text-dim);">---</div>
         </div>
 
-        <div class="right-col">
-            <div id="side-title" style="font-weight: bold; font-size: 1.1rem; text-align: center;">Seleziona Pokémon</div>
-            <div id="side-types" style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-bottom: 5px;">Tipi: -</div>
-            
-            <div class="sidebar-img-box">
-                <img id="side-img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'%3E%3C/svg%3E">
-            </div>
+        <div class="flip-hint">Clicca sulla scheda per vedere le Mosse &rarr;</div>
+      </div>
 
-            <div id="side-ability" style="font-size: 0.85rem; margin-bottom: 10px;">Abilità: -</div>
-
-            <div id="stats-bars"></div>
-
-            <div id="side-bst" style="font-weight: bold; font-size: 0.8rem; margin-top: 5px;">BST: -</div>
-
-            <div id="matchups-box" class="matchups-box"></div>
-
-            <div id="details-textbox" class="details-textbox">In attesa di selezione...</div>
+      <!-- BACK CARTA -->
+      <div class="card-face card-back">
+        <div class="header-card">
+          <span class="name">MOSSE APPRESE</span>
+          <small style="color: var(--text-dim);">Ordinate per Tipo</small>
         </div>
+        
+        <div class="moves-list" id="pokeMoves"></div>
+
+        <div class="flip-hint" style="margin-top: 15px;">&larr; Clicca per tornare alle Statistiche</div>
+      </div>
+
     </div>
+  </div>
 
-    <div id="config-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span style="font-weight: bold;">Configurazione Regole Draft</span>
-                <button class="btn" onclick="document.getElementById('config-modal').style.display='none'">❌</button>
+  <script>
+    // Dati estratto salvati direttamente in JS
+    const pokemons = [
+      {
+        id: 36, name: "Clefable", types: ["FAIRY"], bst: 483,
+        stats: { HP: 95, ATK: 70, DEF: 73, "SP.ATK": 95, "SP.DEF": 90, VEL: 60 },
+        ability: "Magic Guard", abilityDesc: "Il Pokémon subisce danni solo da attacchi diretti.",
+        moves: [
+          { name: "BLIZZARD", type: "ICE", power: "110", acc: "70%", desc: "Colpisce i nemici intorno con una tremenda tempesta di ghiaccio che può anche congelarli." },
+          { name: "CHARGE BEAM", type: "ELECTRIC", power: "50", acc: "90%", desc: "Chi la usa lancia un fascio di elettricità molto intensa. Può anche aumentare il suo Attacco Speciale." },
+          { name: "SHADOW BALL", type: "GHOST", power: "80", acc: "100%", desc: "Lancia sul bersaglio una sfera nera. Può anche ridurne la Difesa Speciale." },
+          { name: "SAFEGUARD", type: "NORMAL", power: "---", acc: "---", desc: "Chi la usa crea un campo protettivo che evita problemi di stato per sé e gli alleati per cinque turni." }
+        ]
+      },
+      {
+        id: 38, name: "Ninetales", types: ["FIRE"], bst: 505,
+        stats: { HP: 73, ATK: 76, DEF: 75, "SP.ATK": 81, "SP.DEF": 100, VEL: 100 },
+        ability: "Drought (Nascosta)", abilityDesc: "Il sole brilla intensamente quando il Pokémon entra in campo.",
+        moves: [
+          { name: "DARK PULSE", type: "DARK", power: "80", acc: "100%", desc: "Chi la usa emana un’aura impregnata di oscuri pensieri. Può anche far tentennare il Pokémon colpito." },
+          { name: "OMINOUS WIND", type: "GHOST", power: "60", acc: "100%", desc: "Chi la usa attacca con una forte raffica di vento che può aumentare tutte le sue statistiche." },
+          { name: "LASER FOCUS", type: "NORMAL", power: "---", acc: "---", desc: "Chi la usa si concentra e nel turno successivo metterà sicuramente a segno un brutto colpo." },
+          { name: "TAKE DOWN", type: "NORMAL", power: "90", acc: "85%", desc: "Carica spericolata con tutto il corpo contro il bersaglio. Danneggia un po’ anche chi la usa." }
+        ]
+      },
+      {
+        id: 49, name: "Venomoth", types: ["BUG", "POISON"], bst: 450,
+        stats: { HP: 70, ATK: 65, DEF: 60, "SP.ATK": 90, "SP.DEF": 75, VEL: 90 },
+        ability: "Shield Dust", abilityDesc: "Annulla gli effetti secondari delle mosse subite.",
+        moves: [
+          { name: "STRUGGLE BUG", type: "BUG", power: "50", acc: "100%", desc: "Colpisce i nemici intorno opponendo resistenza e riducendo il loro Attacco Speciale." },
+          { name: "TWISTER", type: "DRAGON", power: "40", acc: "100%", desc: "Un potente tornado si abbatte sui nemici nei paraggi. Può anche farli tentennare." },
+          { name: "NIGHT SHADE", type: "GHOST", power: "---", acc: "100%", desc: "Fa apparire un orribile miraggio al bersaglio e infligge un danno pari al livello di chi la usa." },
+          { name: "POISON FANG", type: "POISON", power: "50", acc: "100%", desc: "Chi la usa morde il bersaglio con denti avvelenati che possono anche iperavvelenarlo." }
+        ]
+      },
+      {
+        id: 55, name: "Golduck", types: ["WATER"], bst: 500,
+        stats: { HP: 80, ATK: 82, DEF: 78, "SP.ATK": 95, "SP.DEF": 80, VEL: 85 },
+        ability: "Cloud Nine", abilityDesc: "Neutralizza gli effetti delle condizioni atmosferiche.",
+        moves: [
+          { name: "DIG", type: "GROUND", power: "80", acc: "100%", desc: "Chi la usa scava al primo turno e attacca al successivo. Fuori dalla lotta fa uscire da alcuni luoghi." },
+          { name: "FRUSTRATION", type: "NORMAL", power: "---", acc: "100%", desc: "Mossa che diventa tanto più potente quanto minore è il grado di affezione del Pokémon per il proprio Allenatore." },
+          { name: "ENCORE", type: "NORMAL", power: "---", acc: "100%", desc: "Chi la usa obbliga il bersaglio a ripetere per tre turni l’ultima mossa eseguita." },
+          { name: "PAY DAY", type: "NORMAL", power: "40", acc: "100%", desc: "Colpisce il bersaglio con una gran quantità di monete recuperabili dopo la lotta." }
+        ]
+      },
+      {
+        id: 62, name: "Poliwrath", types: ["WATER", "FIGHTING"], bst: 510,
+        stats: { HP: 90, ATK: 95, DEF: 95, "SP.ATK": 70, "SP.DEF": 90, VEL: 70 },
+        ability: "Damp", abilityDesc: "Impedisce le mosse autodistruttive.",
+        moves: [
+          { name: "HYPNOSIS", type: "PSYCHIC", power: "---", acc: "60%", desc: "Chi la usa si avvale della suggestione ipnotica per far addormentare il bersaglio." },
+          { name: "RETURN", type: "NORMAL", power: "---", acc: "100%", desc: "Mossa che diventa tanto più potente quanto maggiore è il grado di affezione del Pokémon per il proprio Allenatore." },
+          { name: "HELPING HAND", type: "NORMAL", power: "---", acc: "---", desc: "Mossa che aumenta la potenza dell’attacco di un alleato." },
+          { name: "HYDRO PUMP", type: "WATER", power: "110", acc: "80%", desc: "Il bersaglio è travolto da un potente getto d’acqua spruzzato ad altissima pressione." }
+        ]
+      },
+      {
+        id: 121, name: "Starmie", types: ["WATER", "PSYCHIC"], bst: 520,
+        stats: { HP: 60, ATK: 75, DEF: 85, "SP.ATK": 100, "SP.DEF": 85, VEL: 115 },
+        ability: "Natural Cure", abilityDesc: "Cura i problemi di stato quando il Pokémon viene sostituito.",
+        moves: [
+          { name: "CHARGE BEAM", type: "ELECTRIC", power: "50", acc: "90%", desc: "Chi la usa lancia un fascio di elettricità molto intensa. Può anche aumentare il suo Attacco Speciale." },
+          { name: "SUBSTITUTE", type: "NORMAL", power: "---", acc: "---", desc: "Chi la usa crea una copia di se stesso usando alcuni PS. La copia serve come esca per il nemico." },
+          { name: "EXPANDING FORCE", type: "PSYCHIC", power: "80", acc: "100%", desc: "Chi la usa attacca il bersaglio con energia psichica. Se utilizzata quando è attivo un Campo Psichico, la mossa aumenta di potenza e danneggia tutti i nemici." },
+          { name: "HYDRO PUMP", type: "WATER", power: "110", acc: "80%", desc: "Il bersaglio è travolto da un potente getto d’acqua spruzzato ad altissima pressione." }
+        ]
+      },
+      {
+        id: 127, name: "Pinsir", types: ["BUG"], bst: 500,
+        stats: { HP: 65, ATK: 125, DEF: 100, "SP.ATK": 55, "SP.DEF": 70, VEL: 85 },
+        ability: "Mold Breaker", abilityDesc: "Neutralizza le abilità che bloccano le mosse.",
+        moves: [
+          { name: "ROCK CLIMB", type: "NORMAL", power: "90", acc: "85%", desc: "Chi la usa carica con impeto incredibile. Il colpo può confondere il bersaglio." },
+          { name: "REST", type: "PSYCHIC", power: "---", acc: "---", desc: "Chi la usa recupera tutti i PS e guarisce da tutti i suoi problemi di stato, ma dorme per due turni." },
+          { name: "TAKE DOWN", type: "NORMAL", power: "90", acc: "85%", desc: "Carica spericolata con tutto il corpo contro il bersaglio. Danneggia un po’ anche chi la usa." },
+          { name: "HELPING HAND", type: "NORMAL", power: "---", acc: "---", desc: "Mossa che aumenta la potenza dell’attacco di un alleato." }
+        ]
+      },
+      {
+        id: 141, name: "Kabutops", types: ["ROCK", "WATER"], bst: 495,
+        stats: { HP: 60, ATK: 115, DEF: 105, "SP.ATK": 65, "SP.DEF": 70, VEL: 80 },
+        ability: "Battle Armor", abilityDesc: "Evita che il Pokémon subisca brutti colpi.",
+        moves: [
+          { name: "NIGHT SLASH", type: "DARK", power: "70", acc: "100%", desc: "Chi la usa colpisce il bersaglio appena si presenta l’occasione. Probabile brutto colpo." },
+          { name: "GIGA DRAIN", type: "GRASS", power: "75", acc: "100%", desc: "Mossa che assorbe PS. Chi la usa recupera una quantità di PS pari alla metà del danno inferto." },
+          { name: "SWORDS DANCE", type: "NORMAL", power: "---", acc: "---", desc: "Danza frenetica che incrementa lo spirito combattivo. Chi la usa aumenta di molto il suo Attacco." },
+          { name: "DIVE", type: "WATER", power: "80", acc: "100%", desc: "Chi la usa si tuffa in acqua per emergere e attaccare al turno seguente." }
+        ]
+      },
+      {
+        id: 154, name: "Meganium", types: ["GRASS"], bst: 525,
+        stats: { HP: 80, ATK: 82, DEF: 100, "SP.ATK": 83, "SP.DEF": 100, VEL: 80 },
+        ability: "Overgrow", abilityDesc: "Quando si è in difficoltà, potenzia le mosse di tipo Erba.",
+        moves: [
+          { name: "BULLET SEED", type: "GRASS", power: "25", acc: "100%", desc: "Chi la usa spara da due a cinque raffiche di semi contro il bersaglio in successione." },
+          { name: "SOLAR BEAM", type: "GRASS", power: "120", acc: "100%", desc: "Chi la usa assorbe luce al primo turno per proiettare un raggio intenso al turno successivo." },
+          { name: "DOUBLE EDGE", type: "NORMAL", power: "120", acc: "100%", desc: "Carica spietata e pericolosa che danneggia molto anche chi la usa." },
+          { name: "ROCK CLIMB", type: "NORMAL", power: "90", acc: "85%", desc: "Chi la usa carica con impeto incredibile. Il colpo può confondere il bersaglio." }
+        ]
+      },
+      {
+        id: 189, name: "Jumpluff", types: ["GRASS", "FLYING"], bst: 460,
+        stats: { HP: 75, ATK: 55, DEF: 70, "SP.ATK": 55, "SP.DEF": 95, VEL: 110 },
+        ability: "Leaf Guard", abilityDesc: "Evita problemi di stato quando c’è il sole.",
+        moves: [
+          { name: "BOUNCE", type: "FLYING", power: "85", acc: "85%", desc: "Chi la usa balza in alto e ricade sul bersaglio dopo un turno. Può anche paralizzarlo." },
+          { name: "LIGHT SCREEN", type: "PSYCHIC", power: "---", acc: "---", desc: "Innalza una barriera di luce fantastica che riduce i danni degli attacchi speciali per sé e gli alleati per cinque turni." },
+          { name: "SUNNY DAY", type: "FIRE", power: "---", acc: "---", desc: "Chi la usa intensifica i raggi solari per cinque turni, potenziando le mosse di tipo Fuoco." },
+          { name: "FLASH", type: "NORMAL", power: "---", acc: "100%", desc: "Investe il bersaglio con una luce abbagliante che ne riduce la precisione." }
+        ]
+      },
+      {
+        id: 203, name: "Girafarig", types: ["NORMAL", "PSYCHIC"], bst: 455,
+        stats: { HP: 70, ATK: 80, DEF: 65, "SP.ATK": 90, "SP.DEF": 65, VEL: 85 },
+        ability: "Sap Sipper (Nascosta)", abilityDesc: "Neutralizza le mosse di tipo Erba subite per aumentare l’Attacco.",
+        moves: [
+          { name: "TRAILBLAZE", type: "GRASS", power: "50", acc: "100%", desc: "L'utilizzatore attacca all'improvviso balzando dall'erba alta, aumentando la propria Velocità." },
+          { name: "GRASS KNOT", type: "GRASS", power: "---", acc: "100%", desc: "Chi la usa intrappola il bersaglio con l’erba e lo fa cadere. Danneggia maggiormente i Pokémon più pesanti." },
+          { name: "BULLDOZE", type: "GROUND", power: "60", acc: "100%", desc: "Chi la usa calpesta il terreno e scatena un terremoto che danneggia i Pokémon nei paraggi, riducendone la Velocità." },
+          { name: "CALM MIND", type: "PSYCHIC", power: "---", acc: "---", desc: "Chi la usa, meditando, placa il proprio spirito per aumentare l’Attacco Speciale e la Difesa Speciale." }
+        ]
+      },
+      {
+        id: 212, name: "Scizor", types: ["BUG", "STEEL"], bst: 500,
+        stats: { HP: 70, ATK: 130, DEF: 100, "SP.ATK": 55, "SP.DEF": 80, VEL: 65 },
+        ability: "Swarm", abilityDesc: "Quando si è in difficoltà, potenzia le mosse di tipo Coleottero.",
+        moves: [
+          { name: "SUPERPOWER", type: "FIGHTING", power: "120", acc: "100%", desc: "Chi la usa attacca il bersaglio con grande forza, ma il suo Attacco e la sua Difesa diminuiscono." },
+          { name: "BRICK BREAK", type: "FIGHTING", power: "75", acc: "100%", desc: "Colpisce il bersaglio con una mano e rompe barriere come Riflesso e Schermoluce." },
+          { name: "OMINOUS WIND", type: "GHOST", power: "60", acc: "100%", desc: "Chi la usa attacca con una forte raffica di vento che può aumentare tutte le sue statistiche." },
+          { name: "SWAGGER", type: "NORMAL", power: "---", acc: "85%", desc: "Chi la usa provoca il bersaglio e lo confonde, facendo aumentare però di molto il suo Attacco." }
+        ]
+      },
+      {
+        id: 242, name: "Blissey", types: ["NORMAL"], bst: 540,
+        stats: { HP: 255, ATK: 10, DEF: 10, "SP.ATK": 75, "SP.DEF": 135, VEL: 55 },
+        ability: "Healer (Nascosta)", abilityDesc: "A volte cura i problemi di stato degli alleati.",
+        moves: [
+          { name: "FOCUS BLAST", type: "FIGHTING", power: "120", acc: "70%", desc: "Chi la usa si concentra e rilascia la sua forza. Può ridurre la Difesa Speciale del Pokémon colpito." },
+          { name: "BULLDOZE", type: "GROUND", power: "60", acc: "100%", desc: "Chi la usa calpesta il terreno e scatena un terremoto che danneggia i Pokémon nei paraggi, riducendone la Velocità." },
+          { name: "PROTECT", type: "NORMAL", power: "---", acc: "---", desc: "Permette di eludere tutti gli attacchi. Se usata in successione può fallire." },
+          { name: "SWAGGER", type: "NORMAL", power: "---", acc: "85%", desc: "Chi la usa provoca il bersaglio e lo confonde, facendo aumentare però di molto il suo Attacco." }
+        ]
+      },
+      {
+        id: 275, name: "Shiftry", types: ["GRASS", "DARK"], bst: 480,
+        stats: { HP: 90, ATK: 100, DEF: 60, "SP.ATK": 90, "SP.DEF": 60, VEL: 80 },
+        ability: "Pickpocket (Nascosta)", abilityDesc: "Al contatto subito, ruba lo strumento di chi lo ha attaccato.",
+        moves: [
+          { name: "THIEF", type: "DARK", power: "60", acc: "100%", desc: "Chi la usa attacca il bersaglio e può rubargli lo strumento, se non ne ha già uno." },
+          { name: "LEAF STORM", type: "GRASS", power: "130", acc: "90%", desc: "Si forma una tempesta di foglie affilate. Il contraccolpo riduce di molto l’Attacco Speciale di chi la usa." },
+          { name: "SCREECH", type: "NORMAL", power: "---", acc: "85%", desc: "Stridio assordante che riduce di molto la Difesa del bersaglio." },
+          { name: "PSYCH UP", type: "NORMAL", power: "---", acc: "---", desc: "Chi la usa s’ipnotizza per copiare ogni modifica alle statistiche del bersaglio." }
+        ]
+      },
+      {
+        id: 323, name: "Camerupt", types: ["FIRE", "GROUND"], bst: 460,
+        stats: { HP: 70, ATK: 100, DEF: 70, "SP.ATK": 105, "SP.DEF": 75, VEL: 40 },
+        ability: "Solid Rock", abilityDesc: "Riduce la potenza delle mosse superefficaci.",
+        moves: [
+          { name: "LASH OUT", type: "DARK", power: "75", acc: "100%", desc: "Attacca con rabbia. Se ha subito cali di statistiche nel turno, la potenza raddoppia." },
+          { name: "HEAT WAVE", type: "FIRE", power: "95", acc: "90%", desc: "Chi la usa investe i nemici che ha intorno con una folata di vento caldo. Può anche scottarli." },
+          { name: "HOWL", type: "NORMAL", power: "---", acc: "---", desc: "Chi la usa emette un forte verso per darsi coraggio e aumentare l’Attacco." },
+          { name: "ROUND", type: "NORMAL", power: "60", acc: "100%", desc: "Attacca il bersaglio con una melodia. Se usata durante lo stesso turno da più Pokémon, i danni inflitti aumentano." }
+        ]
+      },
+      {
+        id: 330, name: "Flygon", types: ["GROUND", "DRAGON"], bst: 520,
+        stats: { HP: 80, ATK: 100, DEF: 80, "SP.ATK": 80, "SP.DEF": 80, VEL: 100 },
+        ability: "Levitate", abilityDesc: "Conferisce immunità dagli attacchi di tipo Terra.",
+        moves: [
+          { name: "DRAGON TAIL", type: "DRAGON", power: "60", acc: "90%", desc: "Chi la usa fa volar via il bersaglio in modo che venga sostituito." },
+          { name: "FLY", type: "FLYING", power: "90", acc: "95%", desc: "Chi la usa si alza in volo per attaccare al turno seguente." },
+          { name: "DOUBLE EDGE", type: "NORMAL", power: "120", acc: "100%", desc: "Carica spietata e pericolosa che danneggia molto anche chi la usa." },
+          { name: "MEGA PUNCH", type: "NORMAL", power: "80", acc: "85%", desc: "Colpisce il bersaglio con un pugno poderoso." }
+        ]
+      },
+      {
+        id: 398, name: "Staraptor", types: ["NORMAL", "FLYING"], bst: 485,
+        stats: { HP: 85, ATK: 120, DEF: 70, "SP.ATK": 50, "SP.DEF": 60, VEL: 100 },
+        ability: "Reckless (Nascosta)", abilityDesc: "Potenzia le mosse che provocano contraccolpi.",
+        moves: [
+          { name: "U TURN", type: "BUG", power: "70", acc: "100%", desc: "Chi usa questa mossa fa marcia indietro per farsi sostituire dopo aver sferrato l’attacco." },
+          { name: "AIR SLASH", type: "FLYING", power: "75", acc: "95%", desc: "Chi la usa attacca con un vento tagliente che squarcia il cielo. Può anche far tentennare il Pokémon colpito." },
+          { name: "REST", type: "PSYCHIC", power: "---", acc: "---", desc: "Chi la usa recupera tutti i PS e guarisce da tutti i suoi problemi di stato, ma dorme per due turni." },
+          { name: "HIDDEN POWER", type: "NORMAL", power: "60", acc: "100%", desc: "Mossa singolare che cambia tipo a seconda del Pokémon che la usa." }
+        ]
+      },
+      {
+        id: 407, name: "Roserade", types: ["GRASS", "POISON"], bst: 515,
+        stats: { HP: 60, ATK: 70, DEF: 65, "SP.ATK": 125, "SP.DEF": 105, VEL: 90 },
+        ability: "Natural Cure", abilityDesc: "Cura i problemi di stato quando il Pokémon viene sostituito.",
+        moves: [
+          { name: "SUNNY DAY", type: "FIRE", power: "---", acc: "---", desc: "Chi la usa intensifica i raggi solari per cinque turni, potenziando le mosse di tipo Fuoco." },
+          { name: "BULLET SEED", type: "GRASS", power: "25", acc: "100%", desc: "Chi la usa spara da due a cinque raffiche di semi contro il bersaglio in successione." },
+          { name: "SWAGGER", type: "NORMAL", power: "---", acc: "85%", desc: "Chi la usa provoca il bersaglio e lo confonde, facendo aumentare però di molto il suo Attacco." },
+          { name: "CAPTIVATE", type: "NORMAL", power: "---", acc: "100%", desc: "Se i nemici nei paraggi sono del sesso opposto, ne riduce di molto l'Attacco Speciale." }
+        ]
+      },
+      {
+        id: 421, name: "Cherrim", types: ["GRASS"], bst: 450,
+        stats: { HP: 70, ATK: 60, DEF: 70, "SP.ATK": 87, "SP.DEF": 78, VEL: 85 },
+        ability: "Flower Gift", abilityDesc: "Se c’è il sole, potenzia i Pokémon alleati.",
+        moves: [
+          { name: "SOLAR BLADE", type: "GRASS", power: "125", acc: "100%", desc: "Assorbe luce al primo turno per attaccare con una lama solare al successivo." },
+          { name: "LUCKY CHANT", type: "NORMAL", power: "---", acc: "---", desc: "Impedisce al nemico di sferrare brutti colpi alla squadra." },
+          { name: "HYPER BEAM", type: "NORMAL", power: "150", acc: "90%", desc: "Colpisce il bersaglio con un potente raggio. Chi la usa salta il turno successivo." },
+          { name: "HELPING HAND", type: "NORMAL", power: "---", acc: "---", desc: "Mossa che aumenta la potenza dell’attacco di un alleato." }
+        ]
+      },
+      {
+        id: 424, name: "Ambipom", types: ["NORMAL"], bst: 482,
+        stats: { HP: 75, ATK: 100, DEF: 66, "SP.ATK": 60, "SP.DEF": 66, VEL: 115 },
+        ability: "Pickup", abilityDesc: "Aumenta la probabilità di trovare strumenti.",
+        moves: [
+          { name: "GUNK SHOT", type: "POISON", power: "120", acc: "80%", desc: "Chi la usa attacca il bersaglio con rifiuti sudici che possono anche avvelenarlo." },
+          { name: "SUNNY DAY", type: "FIRE", power: "---", acc: "---", desc: "Chi la usa intensifica i raggi solari per cinque turni, potenziando le mosse di tipo Fuoco." },
+          { name: "METRONOME", type: "NORMAL", power: "---", acc: "---", desc: "Usa a caso una tra le tante mosse esistenti." },
+          { name: "GIGA IMPACT", type: "NORMAL", power: "150", acc: "90%", desc: "Carica il bersaglio con tutta la forza, ma deve riposare il turno successivo." }
+        ]
+      },
+      {
+        id: 426, name: "Drifblim", types: ["GHOST", "FLYING"], bst: 498,
+        stats: { HP: 150, ATK: 80, DEF: 44, "SP.ATK": 90, "SP.DEF": 54, VEL: 80 },
+        ability: "Flare Boost (Nascosta)", abilityDesc: "Aumenta l’Attacco Speciale se il Pokémon è scottato.",
+        moves: [
+          { name: "SHADOW BALL", type: "GHOST", power: "80", acc: "100%", desc: "Lancia sul bersaglio una sfera nera. Può anche ridurne la Difesa Speciale." },
+          { name: "HAZE", type: "ICE", power: "---", acc: "---", desc: "Annulla ogni modifica alle statistiche di tutti i Pokémon in campo." },
+          { name: "BIND", type: "NORMAL", power: "15", acc: "85%", desc: "Lega e stritola il bersaglio per quattro o cinque turni." },
+          { name: "ALLY SWITCH", type: "PSYCHIC", power: "---", acc: "---", desc: "Si teletrasporta al posto di un alleato in campo." }
+        ]
+      },
+      {
+        id: 429, name: "Mismagius", types: ["GHOST"], bst: 495,
+        stats: { HP: 60, ATK: 60, DEF: 60, "SP.ATK": 105, "SP.DEF": 105, VEL: 105 },
+        ability: "Levitate", abilityDesc: "Conferisce immunità dagli attacchi di tipo Terra.",
+        moves: [
+          { name: "HEAL BELL", type: "NORMAL", power: "---", acc: "---", desc: "Cura i problemi di stato suoi e dei Pokémon alleati." },
+          { name: "PROTECT", type: "NORMAL", power: "---", acc: "---", desc: "Permette di eludere tutti gli attacchi." },
+          { name: "RETURN", type: "NORMAL", power: "---", acc: "100%", desc: "Diventa più potente quanto maggiore è la felicità." },
+          { name: "PSYWAVE", type: "PSYCHIC", power: "---", acc: "100%", desc: "Colpisce con una strana onda psichica a intensità variabile." }
+        ]
+      },
+      {
+        id: 463, name: "Lickilicky", types: ["NORMAL"], bst: 515,
+        stats: { HP: 110, ATK: 85, DEF: 95, "SP.ATK": 80, "SP.DEF": 95, VEL: 50 },
+        ability: "Cloud Nine (Nascosta)", abilityDesc: "Neutralizza gli effetti delle condizioni atmosferiche.",
+        moves: [
+          { name: "PSYCH UP", type: "NORMAL", power: "---", acc: "---", desc: "Copia ogni modifica alle statistiche del bersaglio." },
+          { name: "DEFENSE CURL", type: "NORMAL", power: "---", acc: "---", desc: "Si raggomitola per aumentare la propria Difesa." },
+          { name: "HIDDEN POWER", type: "NORMAL", power: "60", acc: "100%", desc: "Mossa singolare che cambia tipo a seconda di chi la usa." },
+          { name: "NATURAL GIFT", type: "NORMAL", power: "---", acc: "100%", desc: "Trae forza dalla bacca posseduta, definendone tipo e potenza." }
+        ]
+      },
+      {
+        id: 467, name: "Magmortar", types: ["FIRE"], bst: 540,
+        stats: { HP: 75, ATK: 95, DEF: 67, "SP.ATK": 125, "SP.DEF": 95, VEL: 83 },
+        ability: "Vital Spirit (Nascosta)", abilityDesc: "Impedisce al Pokémon di addormentarsi.",
+        moves: [
+          { name: "LOW SWEEP", type: "FIGHTING", power: "65", acc: "100%", desc: "Colpisce con un attacco fulmineo riducendo la Velocità del bersaglio." },
+          { name: "FLING", type: "DARK", power: "---", acc: "100%", desc: "Lancia il proprio strumento contro il bersaglio." },
+          { name: "GIGA IMPACT", type: "NORMAL", power: "150", acc: "90%", desc: "Carica il bersaglio usando tutta la forza, ma salta il turno dopo." },
+          { name: "SCARY FACE", type: "NORMAL", power: "---", acc: "100%", desc: "Spaventa il bersaglio e ne riduce di molto la Velocità." }
+        ]
+      },
+      {
+        id: 478, name: "Froslass", types: ["ICE", "GHOST"], bst: 480,
+        stats: { HP: 70, ATK: 80, DEF: 70, "SP.ATK": 80, "SP.DEF": 70, VEL: 110 },
+        ability: "Snow Cloak", abilityDesc: "Aumenta l’elusione quando grandina.",
+        moves: [
+          { name: "ICE SHARD", type: "ICE", power: "40", acc: "100%", desc: "Lancia pezzi di ghiaccio. Questa mossa colpisce per prima." },
+          { name: "FAKE TEARS", type: "DARK", power: "---", acc: "100%", desc: "Pianto teatrale per ridurre di molto la Difesa Speciale del bersaglio." },
+          { name: "SNATCH", type: "DARK", power: "---", acc: "---", desc: "Ruba e usa la mossa curativa o di stato del nemico." },
+          { name: "FRUSTRATION", type: "NORMAL", power: "---", acc: "100%", desc: "Mossa più potente quanto minore è l'affezione." }
+        ]
+      },
+      {
+        id: 497, name: "Serperior", types: ["GRASS"], bst: 528,
+        stats: { HP: 75, ATK: 75, DEF: 95, "SP.ATK": 75, "SP.DEF": 95, VEL: 113 },
+        ability: "Contrary (Nascosta)", abilityDesc: "Le modifiche alle statistiche hanno effetto inverso.",
+        moves: [
+          { name: "KNOCK OFF", type: "DARK", power: "65", acc: "100%", desc: "Rimuove lo strumento del bersaglio. Più forte se lo strumento è presente." },
+          { name: "LEAF STORM", type: "GRASS", power: "130", acc: "90%", desc: "Tempesta di foglie affilate. Riduce l'Attacco Speciale (aumenta con Contrary!)." },
+          { name: "PROTECT", type: "NORMAL", power: "---", acc: "---", desc: "Elude tutti gli attacchi nel turno." },
+          { name: "SECRET POWER", type: "NORMAL", power: "70", acc: "100%", desc: "Attacco con effetto variabile secondo l'ambiente." }
+        ]
+      },
+      {
+        id: 500, name: "Emboar", types: ["FIRE", "FIGHTING"], bst: 528,
+        stats: { HP: 110, ATK: 123, DEF: 65, "SP.ATK": 100, "SP.DEF": 65, VEL: 65 },
+        ability: "Reckless (Nascosta)", abilityDesc: "Potenzia le mosse che provocano contraccolpi.",
+        moves: [
+          { name: "LOW KICK", type: "FIGHTING", power: "---", acc: "100%", desc: "Calcio basso che infligge più danni ai Pokémon più pesanti." },
+          { name: "INCINERATE", type: "FIRE", power: "60", acc: "100%", desc: "Attacca con fiamme distruggendo le bacche del bersaglio." },
+          { name: "IRON TAIL", type: "STEEL", power: "100", acc: "75%", desc: "Colpisce con una coda d'acciaio. Può ridurre la Difesa." },
+          { name: "SNORE", type: "NORMAL", power: "50", acc: "100%", desc: "Mossa da usare solo mentre si dorme. Può far tentennare." }
+        ]
+      },
+      {
+        id: 534, name: "Conkeldurr", types: ["FIGHTING"], bst: 505,
+        stats: { HP: 105, ATK: 140, DEF: 95, "SP.ATK": 55, "SP.DEF": 65, VEL: 45 },
+        ability: "Sheer Force", abilityDesc: "Aumenta i danni annullando altri effetti delle mosse.",
+        moves: [
+          { name: "ROCK SLIDE", type: "ROCK", power: "75", acc: "90%", desc: "Lancia grandi massi che possono far tentennare i nemici." },
+          { name: "HARD PRESS", type: "STEEL", power: "0", acc: "100%", desc: "Schiaccia il bersaglio. Più PS ha il nemico, più la mossa è forte." },
+          { name: "MEGA PUNCH", type: "NORMAL", power: "80", acc: "85%", desc: "Colpisce il bersaglio con un pugno poderoso." },
+          { name: "BODY SLAM", type: "NORMAL", power: "85", acc: "100%", desc: "Carica il bersaglio con tutto il corpo. Può paralizzare." }
+        ]
+      },
+      {
+        id: 545, name: "Scolipede", types: ["BUG", "POISON"], bst: 485,
+        stats: { HP: 60, ATK: 100, DEF: 89, "SP.ATK": 55, "SP.DEF": 69, VEL: 112 },
+        ability: "Poison Point", abilityDesc: "Può avvelenare chi manda a segno una mossa fisica.",
+        moves: [
+          { name: "STEEL ROLLER", type: "STEEL", power: "130", acc: "100%", desc: "Attacca distruggendo il Campo attivo. Fallisce senza Campo." },
+          { name: "SWAGGER", type: "NORMAL", power: "---", acc: "85%", desc: "Provoca il bersaglio, lo confonde ma ne aumenta l'Attacco." },
+          { name: "GIGA IMPACT", type: "NORMAL", power: "150", acc: "90%", desc: "Carica usando tutta la forza, salta il turno successivo." },
+          { name: "SUBSTITUTE", type: "NORMAL", power: "---", acc: "---", desc: "Crea un sostituto esca usando dei PS." }
+        ]
+      },
+      {
+        id: 547, name: "Whimsicott", types: ["GRASS", "FAIRY"], bst: 480,
+        stats: { HP: 60, ATK: 67, DEF: 85, "SP.ATK": 77, "SP.DEF": 75, VEL: 116 },
+        ability: "Chlorophyll (Nascosta)", abilityDesc: "Se c’è il sole, la statistica Velocità aumenta.",
+        moves: [
+          { name: "WORRY SEED", type: "GRASS", power: "---", acc: "100%", desc: "Muta l'abilità del bersaglio in Insonnia." },
+          { name: "PSYCHIC", type: "PSYCHIC", power: "90", acc: "100%", desc: "Attacco telecinetico che può ridurne la Difesa Speciale." },
+          { name: "GROWTH", type: "NORMAL", power: "---", acc: "---", desc: "Aumenta l'Attacco e l'Attacco Speciale dell'utilizzatore." },
+          { name: "COVET", type: "NORMAL", power: "60", acc: "100%", desc: "Attacca sorridendo e ruba lo strumento al nemico." }
+        ]
+      },
+      {
+        id: 565, name: "Carracosta", types: ["WATER", "ROCK"], bst: 495,
+        stats: { HP: 74, ATK: 108, DEF: 133, "SP.ATK": 83, "SP.DEF": 65, VEL: 32 },
+        ability: "Swift Swim (Nascosta)", abilityDesc: "Se piove, la statistica Velocità aumenta.",
+        moves: [
+          { name: "RAIN DANCE", type: "WATER", power: "---", acc: "---", desc: "Provoca una forte pioggia per cinque turni." },
+          { name: "WATER PULSE", type: "WATER", power: "60", acc: "100%", desc: "Getto d'acqua che può confondere il bersaglio." },
+          { name: "AQUA JET", type: "WATER", power: "40", acc: "100%", desc: "Attacco fulmineo ad alta priorità." },
+          { name: "WITHDRAW", type: "WATER", power: "---", acc: "---", desc: "Si ritira nel guscio aumentandone la Difesa." }
+        ]
+      },
+      {
+        id: 596, name: "Galvantula", types: ["BUG", "ELECTRIC"], bst: 472,
+        stats: { HP: 70, ATK: 77, DEF: 60, "SP.ATK": 97, "SP.DEF": 60, VEL: 108 },
+        ability: "Unnerve", abilityDesc: "Il nemico viene intimidito e non può mangiare bacche.",
+        moves: [
+          { name: "POUNCE", type: "BUG", power: "50", acc: "100%", desc: "Balza sul bersaglio riducendone la Velocità." },
+          { name: "TOXIC", type: "POISON", power: "---", acc: "90%", desc: "Iperavvelena il bersaglio con una potente tossina." },
+          { name: "ATTRACT", type: "NORMAL", power: "---", acc: "100%", desc: "Innamora il sesso opposto facendolo tentennare nell'attaccare." },
+          { name: "FRUSTRATION", type: "NORMAL", power: "---", acc: "100%", desc: "Danni crescenti con la minora affezione." }
+        ]
+      },
+      {
+        id: 614, name: "Beartic", types: ["ICE"], bst: 505,
+        stats: { HP: 95, ATK: 130, DEF: 80, "SP.ATK": 70, "SP.DEF": 80, VEL: 50 },
+        ability: "Swift Swim (Nascosta)", abilityDesc: "Se piove, la statistica Velocità aumenta.",
+        moves: [
+          { name: "AVALANCHE", type: "ICE", power: "60", acc: "100%", desc: "Infligge doppi danni se si è subiti danni nello stesso turno." },
+          { name: "ICE PUNCH", type: "ICE", power: "75", acc: "100%", desc: "Pugno di ghiaccio che può congelare il bersaglio." },
+          { name: "REST", type: "PSYCHIC", power: "---", acc: "---", desc: "Recupera tutti i PS e dorme per due turni." },
+          { name: "SLASH", type: "NORMAL", power: "70", acc: "100%", desc: "Attacca con artigli. Probabile brutto colpo." }
+        ]
+      },
+      {
+        id: 623, name: "Golurk", types: ["GROUND", "GHOST"], bst: 483,
+        stats: { HP: 89, ATK: 124, DEF: 80, "SP.ATK": 55, "SP.DEF": 80, VEL: 55 },
+        ability: "Iron Fist", abilityDesc: "Potenzia le mosse che utilizzano pugni.",
+        moves: [
+          { name: "SHOCK WAVE", type: "ELECTRIC", power: "60", acc: "---", desc: "Scossa elettrica che non fallisce mai." },
+          { name: "LOW SWEEP", type: "FIGHTING", power: "65", acc: "100%", desc: "Colpisce le gambe riducendo la Velocità del bersaglio." },
+          { name: "STEALTH ROCK", type: "ROCK", power: "---", acc: "---", desc: "Piazza trappole rocciose sul campo nemico." },
+          { name: "IRON HEAD", type: "STEEL", power: "80", acc: "100%", desc: "Colpisce di testa con forza. Può far tentennare." }
+        ]
+      },
+      {
+        id: 632, name: "Durant", types: ["BUG", "STEEL"], bst: 484,
+        stats: { HP: 58, ATK: 109, DEF: 112, "SP.ATK": 48, "SP.DEF": 48, VEL: 109 },
+        ability: "Hustle", abilityDesc: "Aumenta l’Attacco, ma riduce la precisione.",
+        moves: [
+          { name: "X SCISSOR", type: "BUG", power: "80", acc: "100%", desc: "Colpisce il bersaglio usando le sue falci come forbici." },
+          { name: "ROCK POLISH", type: "ROCK", power: "---", acc: "---", desc: "Leviga il corpo per aumentare di molto la Velocità." },
+          { name: "SAND ATTACK", type: "GROUND", power: "---", acc: "100%", desc: "Lancia sabbia in faccia riducendo la precisione." },
+          { name: "IRON DEFENSE", type: "STEEL", power: "---", acc: "---", desc: "Indurisce il corpo aumentando di molto la Difesa." }
+        ]
+      },
+      {
+        id: 658, name: "Greninja", types: ["WATER", "DARK"], bst: 530,
+        stats: { HP: 72, ATK: 95, DEF: 67, "SP.ATK": 103, "SP.DEF": 71, VEL: 122 },
+        ability: "Protean (Nascosta)", abilityDesc: "Cambia il tipo del Pokémon in quello della mossa usata.",
+        moves: [
+          { name: "ACROBATICS", type: "FLYING", power: "55", acc: "100%", desc: "Infligge danni doppi se l'utilizzatore non possiede strumenti." },
+          { name: "WATER SHURIKEN", type: "WATER", power: "15", acc: "100%", desc: "Attacca per primo colpendo da due a cinque volte di fila." },
+          { name: "POUND", type: "NORMAL", power: "40", acc: "100%", desc: "Colpisce il bersaglio con le zampe o la coda." },
+          { name: "GIGA IMPACT", type: "NORMAL", power: "150", acc: "90%", desc: "Carica a tutta forza, richiede riposo il turno dopo." }
+        ]
+      },
+      {
+        id: 663, name: "Talonflame", types: ["FIRE", "FLYING"], bst: 499,
+        stats: { HP: 78, ATK: 81, DEF: 71, "SP.ATK": 74, "SP.DEF": 69, VEL: 126 },
+        ability: "Flame Body", abilityDesc: "Al contatto subito, chi sferra l’attacco può venire scottato.",
+        moves: [
+          { name: "FIRE BLAST", type: "FIRE", power: "110", acc: "85%", desc: "Intensa fiammata che fa terra bruciata. Può scottare." },
+          { name: "RAIN DANCE", type: "WATER", power: "---", acc: "---", desc: "Provoca una forte pioggia per cinque turni." },
+          { name: "QUICK ATTACK", type: "NORMAL", power: "40", acc: "100%", desc: "Attacco ultra-veloce ad alta priorità." },
+          { name: "FEINT", type: "NORMAL", power: "30", acc: "100%", desc: "Colpisce anche chi usa Protezione o Individua." }
+        ]
+      },
+      {
+        id: 685, name: "Slurpuff", types: ["FAIRY"], bst: 480,
+        stats: { HP: 82, ATK: 80, DEF: 86, "SP.ATK": 85, "SP.DEF": 75, VEL: 72 },
+        ability: "Sweet Veil", abilityDesc: "Impedisce a sé e agli alleati di addormentarsi.",
+        moves: [
+          { name: "DRAINING KISS", type: "FAIRY", power: "50", acc: "100%", desc: "Assorbe PS dal bersaglio recuperando oltre la metà dei danni inflitti." },
+          { name: "ENDEAVOR", type: "NORMAL", power: "---", acc: "100%", desc: "Riduce i PS del bersaglio pari a quelli rimasti all'utilizzatore." },
+          { name: "GIGA IMPACT", type: "NORMAL", power: "150", acc: "90%", desc: "Carica a piena forza, riposa il turno dopo." },
+          { name: "TACKLE", type: "NORMAL", power: "40", acc: "100%", desc: "Carica l'avversario investendolo col corpo." }
+        ]
+      },
+      {
+        id: 724, name: "Decidueye", types: ["GRASS", "GHOST"], bst: 530,
+        stats: { HP: 78, ATK: 107, DEF: 75, "SP.ATK": 100, "SP.DEF": 100, VEL: 70 },
+        ability: "Overgrow", abilityDesc: "Quando si è in difficoltà, potenzia le mosse di tipo Erba.",
+        moves: [
+          { name: "HEX", type: "GHOST", power: "65", acc: "100%", desc: "Danni raddoppiati se il bersaglio soffre di problemi di stato." },
+          { name: "SCARY FACE", type: "NORMAL", power: "---", acc: "100%", desc: "Riduce di molto la Velocità del bersaglio." },
+          { name: "SWIFT", type: "NORMAL", power: "60", acc: "---", desc: "Raggi a forma di stella infallibili." },
+          { name: "COACHING", type: "FIGHTING", power: "---", acc: "---", desc: "Aumenta Attacco e Difesa degli alleati." }
+        ]
+      },
+      {
+        id: 738, name: "Vikavolt", types: ["BUG", "ELECTRIC"], bst: 500,
+        stats: { HP: 77, ATK: 70, DEF: 90, "SP.ATK": 145, "SP.DEF": 75, VEL: 43 },
+        ability: "Levitate", abilityDesc: "Conferisce immunità dagli attacchi di tipo Terra.",
+        moves: [
+          { name: "X SCISSOR", type: "BUG", power: "80", acc: "100%", desc: "Colpisce tagliando a forbice con gli artigli." },
+          { name: "BITE", type: "DARK", power: "60", acc: "100%", desc: "Morde con denti affilati e può far tentennare." },
+          { name: "VOLT SWITCH", type: "ELECTRIC", power: "70", acc: "100%", desc: "Attacca ed effettua subito un cambio con un alleato." },
+          { name: "ACROBATICS", type: "FLYING", power: "55", acc: "100%", desc: "Attacco rapido più potente se non si hanno strumenti." }
+        ]
+      },
+      {
+        id: 743, name: "Ribombee", types: ["BUG", "FAIRY"], bst: 464,
+        stats: { HP: 60, ATK: 55, DEF: 60, "SP.ATK": 95, "SP.DEF": 70, VEL: 124 },
+        ability: "Sweet Veil (Nascosta)", abilityDesc: "Impedisce a sé e agli alleati di addormentarsi.",
+        moves: [
+          { name: "DAZZLING GLEAM", type: "FAIRY", power: "80", acc: "100%", desc: "Emette una luce potente che colpisce i nemici vicini." },
+          { name: "TELEKINESIS", type: "PSYCHIC", power: "---", acc: "---", desc: "Fa fluttuare il nemico rendendolo facile da colpire." },
+          { name: "FRUSTRATION", type: "NORMAL", power: "---", acc: "100%", desc: "Danni potenziati dalla bassa affezione." },
+          { name: "PROTECT", type: "NORMAL", power: "---", acc: "---", desc: "Protegge interamente dagli attacchi per un turno." }
+        ]
+      },
+      {
+        id: 750, name: "Mudsdale", types: ["GROUND"], bst: 500,
+        stats: { HP: 100, ATK: 125, DEF: 100, "SP.ATK": 55, "SP.DEF": 85, VEL: 35 },
+        ability: "Inner Focus (Nascosta)", abilityDesc: "Evita che il Pokémon tentenni.",
+        moves: [
+          { name: "STONE EDGE", type: "ROCK", power: "100", acc: "80%", desc: "Colpisce dal basso con pietre affilate. Alto tasso di brutti colpi." },
+          { name: "SNORE", type: "NORMAL", power: "50", acc: "100%", desc: "Attacco sonoro da usare solo mentre si dorme." },
+          { name: "SUBSTITUTE", type: "NORMAL", power: "---", acc: "---", desc: "Crea una copia esca consumando PS." },
+          { name: "DOUBLE TEAM", type: "NORMAL", power: "---", acc: "---", desc: "Crea copie illusorie aumentando l'elusione." }
+        ]
+      },
+      {
+        id: 763, name: "Tsareena", types: ["GRASS"], bst: 510,
+        stats: { HP: 72, ATK: 120, DEF: 98, "SP.ATK": 50, "SP.DEF": 98, VEL: 72 },
+        ability: "Leaf Guard", abilityDesc: "Evita problemi di stato quando c’è il sole.",
+        moves: [
+          { name: "TRIPLE AXEL", type: "ICE", power: "20", acc: "90%", desc: "Sferra fino a 3 calci consecutivi con potenza crescente." },
+          { name: "LOW KICK", type: "FIGHTING", power: "---", acc: "100%", desc: "Calcio basso, infligge più danni ai bersagli pesanti." },
+          { name: "CHARM", type: "FAIRY", power: "---", acc: "100%", desc: "Ammalia il bersaglio riducendone molto l'Attacco." },
+          { name: "TEETER DANCE", type: "NORMAL", power: "---", acc: "100%", desc: "Danza goffa che confonde tutti i Pokémon attorno." }
+        ]
+      },
+      {
+        id: 832, name: "Dubwool", types: ["NORMAL"], bst: 490,
+        stats: { HP: 72, ATK: 80, DEF: 100, "SP.ATK": 60, "SP.DEF": 90, VEL: 88 },
+        ability: "Steadfast", abilityDesc: "Aumenta la Velocità se il Pokémon tentenna.",
+        moves: [
+          { name: "WILD CHARGE", type: "ELECTRIC", power: "90", acc: "100%", desc: "Carica elettrica sul bersaglio con contraccolpo per sé." },
+          { name: "DOUBLE KICK", type: "FIGHTING", power: "30", acc: "100%", desc: "Colpisce due volte consecutive con raffiche di calci." },
+          { name: "ZEN HEADBUTT", type: "PSYCHIC", power: "80", acc: "90%", desc: "Testata concentrata che può far tentennare il nemico." },
+          { name: "HYPER BEAM", type: "NORMAL", power: "150", acc: "90%", desc: "Raggio devastante, salta il turno successivo per ricaricare." }
+        ]
+      },
+      {
+        id: 841, name: "Flapple", types: ["GRASS", "DRAGON"], bst: 485,
+        stats: { HP: 70, ATK: 110, DEF: 80, "SP.ATK": 95, "SP.DEF": 60, VEL: 70 },
+        ability: "Ripen", abilityDesc: "Fa maturare le bacche raddoppiandone gli effetti.",
+        moves: [
+          { name: "AIR SLASH", type: "FLYING", power: "75", acc: "95%", desc: "Vento tagliente che può far tentennare il bersaglio." },
+          { name: "TERA BLAST", type: "NORMAL", power: "80", acc: "100%", desc: "Attacco Teracristal usando la statistica d'attacco più alta." },
+          { name: "RECYCLE", type: "NORMAL", power: "---", acc: "---", desc: "Ricicla uno strumento monouso già consumato." },
+          { name: "ATTRACT", type: "NORMAL", power: "---", acc: "100%", desc: "Infatua l'avversario di sesso opposto." }
+        ]
+      },
+      {
+        id: 844, name: "Sandaconda", types: ["GROUND"], bst: 510,
+        stats: { HP: 72, ATK: 107, DEF: 125, "SP.ATK": 65, "SP.DEF": 70, VEL: 71 },
+        ability: "Shed Skin", abilityDesc: "Può curare i problemi di stato del Pokémon.",
+        moves: [
+          { name: "WRAP", type: "NORMAL", power: "15", acc: "90%", desc: "Avvolge e stritola per 4 o 5 turni." },
+          { name: "COIL", type: "POISON", power: "---", acc: "---", desc: "Si concentra aumentando Attacco, Difesa e Precisione." },
+          { name: "HYPER BEAM", type: "NORMAL", power: "150", acc: "90%", desc: "Potente raggio. Richiede un turno di riposo." },
+          { name: "ATTRACT", type: "NORMAL", power: "---", acc: "100%", desc: "Ammalia il nemico del sesso opposto." }
+        ]
+      },
+      {
+        id: 845, name: "Cramorant", types: ["FLYING", "WATER"], bst: 475,
+        stats: { HP: 70, ATK: 85, DEF: 55, "SP.ATK": 85, "SP.DEF": 95, VEL: 85 },
+        ability: "Gulp Missile", abilityDesc: "Quando usa Surf o Sub, cattura una preda. Se ferito, la sputa.",
+        moves: [
+          { name: "AIR CUTTER", type: "FLYING", power: "60", acc: "95%", desc: "Provoca un vento tagliente. Probabile brutto colpo." },
+          { name: "SURF", type: "WATER", power: "90", acc: "100%", desc: "Un'onda enorme travolge il campo di battaglia." },
+          { name: "ICY WIND", type: "ICE", power: "55", acc: "95%", desc: "Aria gelida che riduce la Velocità dei nemici." },
+          { name: "AMNESIA", type: "PSYCHIC", power: "---", acc: "---", desc: "Aumenta di molto la Difesa Speciale." }
+        ]
+      },
+      {
+        id: 849, name: "Toxtricity-amped", types: ["ELECTRIC", "POISON"], bst: 502,
+        stats: { HP: 75, ATK: 98, DEF: 70, "SP.ATK": 114, "SP.DEF": 70, VEL: 75 },
+        ability: "Technician (Nascosta)", abilityDesc: "Potenzia le mosse più deboli del Pokémon.",
+        moves: [
+          { name: "PAYBACK", type: "DARK", power: "50", acc: "100%", desc: "Potenza raddoppiata se si attacca dopo il bersaglio." },
+          { name: "THUNDERBOLT", type: "ELECTRIC", power: "90", acc: "100%", desc: "Scarica elettrica che può paralizzare." },
+          { name: "SUBSTITUTE", type: "NORMAL", power: "---", acc: "---", desc: "Crea una copia esca consumando PS." },
+          { name: "SCREECH", type: "NORMAL", power: "---", acc: "85%", desc: "Stridio che riduce di molto la Difesa nemica." }
+        ]
+      },
+      {
+        id: 855, name: "Polteageist", types: ["GHOST"], bst: 508,
+        stats: { HP: 60, ATK: 65, DEF: 65, "SP.ATK": 134, "SP.DEF": 114, VEL: 70 },
+        ability: "Weak Armor", abilityDesc: "Riduce la Difesa e aumenta la Velocità se il Pokémon è colpito.",
+        moves: [
+          { name: "DARK PULSE", type: "DARK", power: "80", acc: "100%", desc: "Emana un'aura oscura che può far tentennare." },
+          { name: "SLEEP TALK", type: "NORMAL", power: "---", acc: "---", desc: "Sfodera una mossa a caso mentre dorme." },
+          { name: "SHELL SMASH", type: "NORMAL", power: "---", acc: "---", desc: "Riduce le difese per aumentare di molto Atk, SpAtk e Vel." },
+          { name: "REST", type: "PSYCHIC", power: "---", acc: "---", desc: "Recupera tutti i PS dormendo per due turni." }
+        ]
+      },
+      {
+        id: 875, name: "Eiscue-ice", types: ["ICE"], bst: 470,
+        stats: { HP: 75, ATK: 80, DEF: 110, "SP.ATK": 65, "SP.DEF": 90, VEL: 50 },
+        ability: "Ice Face", abilityDesc: "Incasse danni fisici grazie al blocco di ghiaccio in testa.",
+        moves: [
+          { name: "AVALANCHE", type: "ICE", power: "60", acc: "100%", desc: "Doppi danni se subisce ferite nello stesso turno." },
+          { name: "POWDER SNOW", type: "ICE", power: "40", acc: "100%", desc: "Raffica di neve che può congelare." },
+          { name: "ENDURE", type: "NORMAL", power: "---", acc: "---", desc: "Resiste a qualsiasi colpo lasciando almeno 1 PS." },
+          { name: "HYPER BEAM", type: "NORMAL", power: "150", acc: "90%", desc: "Raggio ad altissima potenza, salta il turno successivo." }
+        ]
+      },
+      {
+        id: 898, name: "Calyrex", types: ["PSYCHIC", "GRASS"], bst: 500,
+        stats: { HP: 100, ATK: 80, DEF: 80, "SP.ATK": 80, "SP.DEF": 80, VEL: 80 },
+        ability: "Unnerve", abilityDesc: "Il nemico viene intimidito e non può mangiare bacche.",
+        moves: [
+          { name: "SOLAR BLADE", type: "GRASS", power: "125", acc: "100%", desc: "Lama solare ad alta intensità caricata al primo turno." },
+          { name: "GRASSY TERRAIN", type: "GRASS", power: "---", acc: "---", desc: "Crea un campo erboso che rigenera PS ad ogni turno." },
+          { name: "POLLEN PUFF", type: "BUG", power: "90", acc: "100%", desc: "Danneggia i nemici o cura gli alleati colpiti." },
+          { name: "BATON PASS", type: "NORMAL", power: "---", acc: "---", desc: "Sostituisce il Pokémon ereditando i bonus di statistiche." }
+        ]
+      },
+      {
+        id: 927, name: "Dachsbun", types: ["FAIRY"], bst: 477,
+        stats: { HP: 57, ATK: 80, DEF: 115, "SP.ATK": 50, "SP.DEF": 80, VEL: 95 },
+        ability: "Aroma Veil (Nascosta)", abilityDesc: "Protegge da mosse che limitano la scelta di attacchi.",
+        moves: [
+          { name: "FIRE FANG", type: "FIRE", power: "65", acc: "95%", desc: "Morde con denti infuocati. Può scottare o far tentennare." },
+          { name: "CRUNCH", type: "DARK", power: "80", acc: "100%", desc: "Morde con forza e può ridurre la Difesa." },
+          { name: "STOMPING TANTRUM", type: "GROUND", power: "75", acc: "100%", desc: "Potenza raddoppiata se la mossa precedente ha fallito." },
+          { name: "TERA BLAST", type: "NORMAL", power: "80", acc: "100%", desc: "Energia Teracristal adattata al tipo del Pokémon." }
+        ]
+      },
+      {
+        id: 937, name: "Ceruledge", types: ["FIRE", "GHOST"], bst: 525,
+        stats: { HP: 75, ATK: 125, DEF: 80, "SP.ATK": 60, "SP.DEF": 100, VEL: 85 },
+        ability: "Flash Fire", abilityDesc: "Potenzia le proprie mosse Fuoco se se ne subisce una.",
+        moves: [
+          { name: "EMBER", type: "FIRE", power: "40", acc: "100%", desc: "Fiammelle d'attacco che possono scottare." },
+          { name: "CLEAR SMOG", type: "POISON", power: "50", acc: "---", desc: "Fumo speciale che azzera le statistiche modificate del nemico." },
+          { name: "FALSE SWIPE", type: "NORMAL", power: "40", acc: "100%", desc: "Lascia il bersaglio sempre con almeno 1 PS." },
+          { name: "TERA BLAST", type: "NORMAL", power: "80", acc: "100%", desc: "Emana energia Teracristal basata sulla statistica più alta." }
+        ]
+      },
+      {
+        id: 941, name: "Kilowattrel", types: ["ELECTRIC", "FLYING"], bst: 490,
+        stats: { HP: 70, ATK: 70, DEF: 60, "SP.ATK": 105, "SP.DEF": 60, VEL: 125 },
+        ability: "Wind Power", abilityDesc: "Si carica quando è colpito da mosse di vento, potenziando l'Elettricità.",
+        moves: [
+          { name: "THUNDER", type: "ELECTRIC", power: "110", acc: "70%", desc: "Lampo violento che può paralizzare." },
+          { name: "THUNDER SHOCK", type: "ELECTRIC", power: "40", acc: "100%", desc: "Scarica elettrica base con probabilità di paralisi." },
+          { name: "ELECTRIC TERRAIN", type: "ELECTRIC", power: "---", acc: "---", desc: "Crea un campo elettrico che impedisce di addormentarsi." },
+          { name: "SLEEP TALK", type: "NORMAL", power: "---", acc: "---", desc: "Usa una mossa a caso mentre dorme." }
+        ]
+      },
+      {
+        id: 945, name: "Grafaiai", types: ["POISON", "NORMAL"], bst: 485,
+        stats: { HP: 63, ATK: 95, DEF: 65, "SP.ATK": 80, "SP.DEF": 72, VEL: 110 },
+        ability: "Prankster (Nascosta)", abilityDesc: "Dà priorità a mosse che alterano lo stato.",
+        moves: [
+          { name: "MUD SHOT", type: "GROUND", power: "55", acc: "95%", desc: "Lancia fango riducendo la Velocità del bersaglio." },
+          { name: "ENDURE", type: "NORMAL", power: "---", acc: "---", desc: "Sopravvive a qualsiasi colpo con 1 PS." },
+          { name: "SCARY FACE", type: "NORMAL", power: "---", acc: "100%", desc: "Spaventa il bersaglio riducendone la Velocità." },
+          { name: "LEER", type: "NORMAL", power: "---", acc: "100%", desc: "Sguardo intimidatorio che riduce la Difesa nemica." }
+        ]
+      },
+      {
+        id: 959, name: "Tinkaton", types: ["FAIRY", "STEEL"], bst: 506,
+        stats: { HP: 85, ATK: 75, DEF: 77, "SP.ATK": 70, "SP.DEF": 105, VEL: 94 },
+        ability: "Own Tempo", abilityDesc: "Impedisce al Pokémon di venire confuso.",
+        moves: [
+          { name: "KNOCK OFF", type: "DARK", power: "65", acc: "100%", desc: "Rimuove lo strumento tenuto dal nemico." },
+          { name: "STEEL BEAM", type: "STEEL", power: "140", acc: "95%", desc: "Raggio d'acciaio potentissimo che danneggia anche chi la usa." },
+          { name: "METAL SOUND", type: "STEEL", power: "---", acc: "85%", desc: "Stridio metallico che riduce di molto la Difesa Speciale." },
+          { name: "COVET", type: "NORMAL", power: "60", acc: "100%", desc: "Attacca sorridendo e ruba lo strumento." }
+        ]
+      },
+      {
+        id: 979, name: "Annihilape", types: ["FIGHTING", "GHOST"], bst: 535,
+        stats: { HP: 110, ATK: 115, DEF: 80, "SP.ATK": 50, "SP.DEF": 90, VEL: 90 },
+        ability: "Vital Spirit", abilityDesc: "Impedisce al Pokémon di addormentarsi.",
+        moves: [
+          { name: "FLING", type: "DARK", power: "---", acc: "100%", desc: "Lancia lo strumento indossato sul nemico." },
+          { name: "FIRE PUNCH", type: "FIRE", power: "75", acc: "100%", desc: "Pugno ardente con probabilità di scottare." },
+          { name: "NIGHT SHADE", type: "GHOST", power: "---", acc: "100%", desc: "Danni fissi pari al livello di chi usa la mossa." },
+          { name: "DIG", type: "GROUND", power: "80", acc: "100%", desc: "Scava sottoterra e colpisce al turno successivo." }
+        ]
+      },
+      {
+        id: 982, name: "Dudunsparce-two-segment", types: ["NORMAL"], bst: 520,
+        stats: { HP: 125, ATK: 100, DEF: 80, "SP.ATK": 85, "SP.DEF": 75, VEL: 55 },
+        ability: "Serene Grace", abilityDesc: "Gli effetti secondari delle mosse sono più probabili.",
+        moves: [
+          { name: "THROAT CHOP", type: "DARK", power: "80", acc: "100%", desc: "Impedisce al nemico di usare mosse basate sul suono." },
+          { name: "BODY SLAM", type: "NORMAL", power: "85", acc: "100%", desc: "Schiacciata che può causare la paralisi." },
+          { name: "BATON PASS", type: "NORMAL", power: "---", acc: "---", desc: "Passa il testimone ad un alleato trasferendo le modifiche." },
+          { name: "BODY PRESS", type: "FIGHTING", power: "80", acc: "100%", desc: "Danni basati sulla Difesa dell'utilizzatore." }
+        ]
+      },
+      {
+        id: 1011, name: "Dipplin", types: ["GRASS", "DRAGON"], bst: 485,
+        stats: { HP: 80, ATK: 80, DEF: 110, "SP.ATK": 95, "SP.DEF": 80, VEL: 40 },
+        ability: "Supersweet Syrup", abilityDesc: "Riduce l'Elusione dei nemici all'ingresso in campo.",
+        moves: [
+          { name: "DRAGON TAIL", type: "DRAGON", power: "60", acc: "90%", desc: "Fa volar via il bersaglio forzandone il cambio." },
+          { name: "DRAGON PULSE", type: "DRAGON", power: "85", acc: "100%", desc: "Genera un'onda d'urto che colpisce il bersaglio." },
+          { name: "SOLAR BEAM", type: "GRASS", power: "120", acc: "100%", desc: "Assorbe luce al primo turno, spara un raggio al secondo." },
+          { name: "PROTECT", type: "NORMAL", power: "---", acc: "---", desc: "Permette di eludere tutti gli attacchi del turno." }
+        ]
+      },
+      {
+        id: 1017, name: "Ogerpon", types: ["GRASS"], bst: 550,
+        stats: { HP: 80, ATK: 120, DEF: 84, "SP.ATK": 60, "SP.DEF": 96, VEL: 110 },
+        ability: "Defiant", abilityDesc: "L’Attacco aumenta quando un nemico fa calare le statistiche.",
+        moves: [
+          { name: "BRICK BREAK", type: "FIGHTING", power: "75", acc: "100%", desc: "Rompe barriere come Riflesso e Schermoluce." },
+          { name: "GIGA DRAIN", type: "GRASS", power: "75", acc: "100%", desc: "Assorbe PS ripristinandone metà del danno inferto." },
+          { name: "LEAF STORM", type: "GRASS", power: "130", acc: "90%", desc: "Tempesta di foglie affilate, riduce l'Attacco Speciale." },
+          { name: "GROWTH", type: "NORMAL", power: "---", acc: "---", desc: "Aumenta la crescita corporale e le statistiche offensive." }
+        ]
+      }
+    ];
+
+    let currentIndex = 0;
+
+    // Popola il menu a tendina
+    const selectEl = document.getElementById('pokeSelect');
+    pokemons.forEach((p, index) => {
+      const opt = document.createElement('option');
+      opt.value = index;
+      opt.innerText = `#${p.id} - ${p.name}`;
+      selectEl.appendChild(opt);
+    });
+
+    // Funzione per ruotare la carta
+    function flipCard(event) {
+      document.getElementById('pokemonCard').classList.toggle('flipped');
+    }
+
+    // Carica un pokemon specifico
+    function renderPokemon(index) {
+      const p = pokemons[index];
+      
+      // Front Data
+      document.getElementById('pokeName').innerText = p.name;
+      document.getElementById('pokeId').innerText = `#${p.id}`;
+      document.getElementById('pokeBST').innerText = p.bst;
+      
+      // Types Badges
+      const typesContainer = document.getElementById('pokeTypes');
+      typesContainer.innerHTML = p.types.map(t => `<span class="type-badge type-${t}">${t}</span>`).join('');
+
+      // Stats Bars (il max di riferimento per l'ampiezza % è 255 PS)
+      const statsContainer = document.getElementById('pokeStats');
+      statsContainer.innerHTML = Object.entries(p.stats).map(([k, v]) => {
+        let pct = Math.min(100, Math.round((v / 180) * 100)); 
+        let color = v >= 100 ? '#22c55e' : (v >= 70 ? '#eab308' : '#ef4444');
+        return `
+          <div class="stat-row">
+            <span class="stat-label">${k}</span>
+            <span class="stat-val">${v}</span>
+            <div class="stat-bar-bg">
+              <div class="stat-bar-fill" style="width: ${pct}%; background-color: ${color}"></div>
             </div>
-            <div class="modal-body">
-                <div class="modal-tabs">
-                    <button class="tab-btn active" onclick="switchTab('tab-gens', this)">Generazioni</button>
-                    <button class="tab-btn" onclick="switchTab('tab-moves', this)">Mosse Bannate</button>
-                    <button class="tab-btn" onclick="switchTab('tab-pokes', this)">Pokémon Bannati</button>
-                    <button class="tab-btn" onclick="switchTab('tab-io', this)">Import/Export</button>
-                </div>
+          </div>
+        `;
+      }).join('');
 
-                <div id="tab-gens" class="tab-content active">
-                    <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Seleziona le Generazioni da ESCLUDERE (Bannare):</p>
-                    <div id="gen-checkboxes" class="checkbox-group"></div>
-                </div>
+      // Ability
+      document.getElementById('pokeAbility').innerText = p.ability;
+      document.getElementById('pokeAbilityDesc').innerText = p.abilityDesc;
 
-                <div id="tab-moves" class="tab-content">
-                    <p style="font-size:0.8rem; color:var(--text-muted);">Aggiungi o rimuovi mosse vietate nel draft:</p>
-                    <div id="moves-banned-list" class="banned-list"></div>
-                    <div class="input-row">
-                        <input type="text" id="add-move-input" placeholder="es. fissure">
-                        <button class="btn btn-blue" onclick="addBannedMove()">Aggiungi</button>
-                    </div>
-                </div>
-
-                <div id="tab-pokes" class="tab-content">
-                    <p style="font-size:0.8rem; color:var(--text-muted);">Aggiungi o rimuovi Pokémon vietati nel draft:</p>
-                    <div id="poke-banned-list" class="banned-list"></div>
-                    <div class="input-row">
-                        <input type="text" id="add-poke-input" placeholder="es. mewtwo">
-                        <button class="btn btn-blue" onclick="addBannedPoke()">Aggiungi</button>
-                    </div>
-                </div>
-
-                <div id="tab-io" class="tab-content">
-                    <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Esporta o Importa la configurazione delle regole in formato JSON:</p>
-                    <div style="display:flex; gap:10px;">
-                        <button class="btn btn-blue" onclick="exportRulesJSON()">💾 Esporta Regole JSON</button>
-                        <button class="btn" onclick="importRulesJSON()">📂 Importa Regole JSON</button>
-                        <input type="file" id="import-rules-file" style="display:none" onchange="handleRulesFileSelect(event)">
-                    </div>
-                </div>
-            </div>
-            <div style="padding:10px; border-top:1px solid var(--border-color); text-align:right;">
-                <button class="btn btn-green" onclick="saveRulesAndClose()">Salva e Applica</button>
-            </div>
+      // Moves - ORDINATE PER TIPO (A-Z)
+      const sortedMoves = [...p.moves].sort((a, b) => a.type.localeCompare(b.type));
+      const movesContainer = document.getElementById('pokeMoves');
+      movesContainer.innerHTML = sortedMoves.map(m => `
+        <div class="move-card">
+          <div class="move-header">
+            <span>${m.name}</span>
+            <span class="type-badge type-${m.type}">${m.type}</span>
+          </div>
+          <div class="move-stats">Potenza: ${m.power} | Precisione: ${m.acc}</div>
+          <div>${m.desc}</div>
         </div>
-    </div>
-
-    <script>
-        const BASE_URL = "https://pokeapi.co/api/v2";
-
-        const GEN_RANGES = {
-            1: [1, 151], 2: [152, 251], 3: [252, 386],
-            4: [387, 493], 5: [494, 649], 6: [650, 721],
-            7: [722, 809], 8: [810, 905], 9: [906, 1025]
-        };
-
-        const DEFAULT_BANNED_MOVES = ["fissure", "sheer-cold", "guillotine", "double-team"];
-        const DEFAULT_BANNED_POKEMON = [];
-        const COMMON_ITEMS = [
-            "leftovers", "life-orb", "choice-band", "choice-specs", "choice-scarf",
-            "focus-sash", "heavy-duty-boots", "assault-vest", "rocky-helmet", "eviolite",
-            "expert-belt", "black-sludge", "sitrus-berry", "lum-berry", "weakness-policy",
-            "air-balloon", "light-clay", "damp-rock", "heat-rock"
-        ];
-
-        const TYPE_CHART = {
-            normal: {rock: 0.5, ghost: 0, steel: 0.5},
-            fire: {fire: 0.5, water: 0.5, grass: 2.0, ice: 2.0, bug: 2.0, rock: 0.5, dragon: 0.5, steel: 2.0},
-            water: {fire: 2.0, water: 0.5, grass: 0.5, ground: 2.0, rock: 2.0, dragon: 0.5},
-            grass: {fire: 0.5, water: 2.0, grass: 0.5, poison: 0.5, ground: 2.0, flying: 0.5, bug: 0.5, rock: 2.0, dragon: 0.5, steel: 0.5},
-            electric: {water: 2.0, grass: 0.5, electric: 0.5, ground: 0, flying: 2.0, dragon: 0.5},
-            ice: {fire: 0.5, water: 0.5, grass: 2.0, ice: 0.5, ground: 2.0, flying: 2.0, dragon: 2.0, steel: 0.5},
-            fighting: {normal: 2.0, ice: 2.0, poison: 0.5, flying: 0.5, psychic: 0.5, bug: 0.5, rock: 2.0, ghost: 0, dark: 2.0, steel: 2.0, fairy: 0.5},
-            poison: {grass: 2.0, poison: 0.5, ground: 0.5, rock: 0.5, ghost: 0.5, steel: 0, fairy: 2.0},
-            ground: {fire: 2.0, grass: 0.5, electric: 2.0, poison: 2.0, flying: 0, bug: 0.5, rock: 2.0, steel: 2.0},
-            flying: {grass: 2.0, electric: 0.5, fighting: 2.0, bug: 2.0, rock: 0.5, steel: 0.5},
-            psychic: {fighting: 2.0, poison: 2.0, psychic: 0.5, dark: 0, steel: 0.5},
-            bug: {fire: 0.5, grass: 2.0, fighting: 0.5, poison: 0.5, flying: 0.5, psychic: 2.0, ghost: 0.5, dark: 2.0, steel: 0.5, fairy: 0.5},
-            rock: {fire: 2.0, ice: 2.0, fighting: 0.5, ground: 0.5, flying: 2.0, bug: 2.0, steel: 0.5},
-            ghost: {normal: 0, psychic: 2.0, ghost: 2.0, dark: 0.5},
-            dragon: {dragon: 2.0, steel: 0.5, fairy: 0},
-            dark: {fighting: 0.5, psychic: 2.0, ghost: 2.0, dark: 0.5, fairy: 0.5},
-            steel: {fire: 0.5, water: 0.5, electric: 0.5, ice: 2.0, rock: 2.0, steel: 0.5, fairy: 2.0},
-            fairy: {fire: 0.5, fighting: 2.0, poison: 0.5, dragon: 2.0, dark: 2.0, steel: 0.5}
-        };
-
-        const NATURES = {
-            "Adamant": ["+Atk", "-SpA"], "Jolly": ["+Spe", "-SpA"], "Modest": ["+SpA", "-Atk"],
-            "Timid": ["+Spe", "-Atk"], "Bold": ["+Def", "-Atk"], "Impish": ["+Def", "-SpA"],
-            "Calm": ["+SpD", "-Atk"], "Careful": ["+SpD", "-SpA"], "Naive": ["+Spe", "-SpD"],
-            "Hasty": ["+Spe", "-Def"], "Brave": ["+Atk", "-Spe"], "Quiet": ["+SpA", "-Spe"],
-            "Hardy": ["Neutro", ""], "Docile": ["Neutro", ""], "Bashful": ["Neutro", ""],
-            "Quirky": ["Neutro", ""], "Serious": ["Neutro", ""]
-        };
-
-        const STAT_KEYS = ["hp", "attack", "defense", "special-attack", "special-defense", "speed"];
-        const STAT_SHORT = { "hp":"hp", "attack":"atk", "defense":"def", "special-attack":"spa", "special-defense":"spd", "speed":"spe" };
-
-        let rules = {
-            banned_gens: [],
-            banned_moves: [...DEFAULT_BANNED_MOVES],
-            banned_pokemon: [...DEFAULT_BANNED_POKEMON]
-        };
-
-        let moveCache = {}, abilityCache = {}, itemCache = {};
-        let draftRound = 0, team = [], currentOptions = [], currentPokemon = null;
-        let movePickRound = 0, validPokeIds = [];
-
-        // Funzione helper con Timeout per Fetch sicuri
-        async function fetchWithTimeout(url, options = {}, timeout = 4000) {
-            const controller = new AbortController();
-            const id = setTimeout(() => controller.abort(), timeout);
-            try {
-                const response = await fetch(url, { ...options, signal: controller.signal });
-                clearTimeout(id);
-                if (!response.ok) throw new Error("HTTP error " + response.status);
-                return await response.json();
-            } catch (err) {
-                clearTimeout(id);
-                throw err;
-            }
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            initGenCheckboxes();
-            renderTeamGrid();
-            renderStatBars();
-            startDraft();
-        });
-
-        function openConfigModal() {
-            document.getElementById('config-modal').style.display = 'flex';
-            renderBannedMoves();
-            renderBannedPoke();
-        }
-
-        function initGenCheckboxes() {
-            const container = document.getElementById('gen-checkboxes');
-            container.innerHTML = '';
-            for (let g = 1; g <= 9; g++) {
-                const label = document.createElement('label');
-                label.className = 'checkbox-label';
-                label.innerHTML = `
-                    <input type="checkbox" id="gen-chk-${g}" ${rules.banned_gens.includes(g) ? 'checked' : ''}>
-                    Gen ${g} (${GEN_RANGES[g][0]}-${GEN_RANGES[g][1]})
-                `;
-                container.appendChild(label);
-            }
-        }
-
-        function switchTab(tabId, btn) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            btn.classList.add('active');
-        }
-
-        function addBannedMove() {
-            const inp = document.getElementById('add-move-input');
-            const val = inp.value.trim().toLowerCase().replace(/\s+/g, '-');
-            if (val && !rules.banned_moves.includes(val)) {
-                rules.banned_moves.push(val);
-                inp.value = '';
-                renderBannedMoves();
-            }
-        }
-
-        function renderBannedMoves() {
-            const list = document.getElementById('moves-banned-list');
-            list.innerHTML = rules.banned_moves.map(m => `
-                <div class="banned-item-row">
-                    <span>${m.replace(/-/g, ' ')}</span>
-                    <button class="btn btn-red" style="padding:2px 6px; font-size:0.7rem;" onclick="removeBannedMove('${m}')">❌</button>
-                </div>
-            `).join('');
-        }
-
-        function removeBannedMove(m) {
-            rules.banned_moves = rules.banned_moves.filter(x => x !== m);
-            renderBannedMoves();
-        }
-
-        function addBannedPoke() {
-            const inp = document.getElementById('add-poke-input');
-            const val = inp.value.trim().toLowerCase().replace(/\s+/g, '-');
-            if (val && !rules.banned_pokemon.includes(val)) {
-                rules.banned_pokemon.push(val);
-                inp.value = '';
-                renderBannedPoke();
-            }
-        }
-
-        function renderBannedPoke() {
-            const list = document.getElementById('poke-banned-list');
-            list.innerHTML = rules.banned_pokemon.map(p => `
-                <div class="banned-item-row">
-                    <span>${p.replace(/-/g, ' ')}</span>
-                    <button class="btn btn-red" style="padding:2px 6px; font-size:0.7rem;" onclick="removeBannedPoke('${p}')">❌</button>
-                </div>
-            `).join('');
-        }
-
-        function removeBannedPoke(p) {
-            rules.banned_pokemon = rules.banned_pokemon.filter(x => x !== p);
-            renderBannedPoke();
-        }
-
-        function saveRulesAndClose() {
-            const bannedGens = [];
-            for (let g = 1; g <= 9; g++) {
-                if (document.getElementById(`gen-chk-${g}`).checked) bannedGens.push(g);
-            }
-            if (bannedGens.length === 9) {
-                alert("Non puoi bannare tutte e 9 le generazioni!");
-                return;
-            }
-            rules.banned_gens = bannedGens;
-            document.getElementById('config-modal').style.display = 'none';
-            startDraft();
-        }
-
-        function exportRulesJSON() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(rules, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", "draft_rules.json");
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-        }
-
-        function importRulesJSON() {
-            document.getElementById('import-rules-file').click();
-        }
-
-        function handleRulesFileSelect(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    rules.banned_gens = data.banned_gens || data.banned_generations || [];
-                    rules.banned_moves = data.banned_moves || DEFAULT_BANNED_MOVES;
-                    rules.banned_pokemon = data.banned_pokemon || [];
-                    initGenCheckboxes();
-                    renderBannedMoves();
-                    renderBannedPoke();
-                    alert("Regole importate con successo!");
-                } catch (err) {
-                    alert("Errore nella lettura del file di regole.");
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        async function fetchAbilityDesc(abilityName) {
-            if (!abilityName || abilityName === "Nessuna") return "Nessun effetto.";
-            if (abilityCache[abilityName]) return abilityCache[abilityName];
-            try {
-                const res = await fetchWithTimeout(`${BASE_URL}/ability/${abilityName.toLowerCase().replace(/\s+/g, '-')}`);
-                const entry = res.effect_entries.find(e => e.language.name === 'en');
-                const desc = entry ? entry.short_effect : "Descrizione non trovata.";
-                abilityCache[abilityName] = desc;
-                return desc;
-            } catch {
-                return "Effetto non disponibile.";
-            }
-        }
-
-        async function fetchMoveData(moveName) {
-            if (moveCache[moveName]) return moveCache[moveName];
-            try {
-                const res = await fetchWithTimeout(`${BASE_URL}/move/${moveName.toLowerCase().replace(/\s+/g, '-')}`);
-                const entry = res.effect_entries.find(e => e.language.name === 'en');
-                const desc = entry ? entry.short_effect : "Descrizione non trovata.";
-                const data = {
-                    desc,
-                    power: res.power || '-',
-                    accuracy: res.accuracy || '-',
-                    type: capitalize(res.type.name),
-                    damage_class: capitalize(res.damage_class.name)
-                };
-                moveCache[moveName] = data;
-                return data;
-            } catch {
-                return { desc: "Info non disponibile.", power: '-', accuracy: '-', type: '-', damage_class: '-' };
-            }
-        }
-
-        async function fetchItemDesc(itemName) {
-            if (!itemName) return "Nessun oggetto.";
-            if (itemCache[itemName]) return itemCache[itemName];
-            try {
-                const res = await fetchWithTimeout(`${BASE_URL}/item/${itemName.toLowerCase().replace(/\s+/g, '-')}`);
-                const entry = res.effect_entries.find(e => e.language.name === 'en');
-                const desc = entry ? entry.short_effect : "Descrizione non disponibile.";
-                itemCache[itemName] = desc;
-                return desc;
-            } catch {
-                return "Descrizione non disponibile.";
-            }
-        }
-
-        async function fetchPokemonData(pokeId) {
-            try {
-                const res = await fetchWithTimeout(`${BASE_URL}/pokemon/${pokeId}`);
-                const types = res.types.map(t => t.type.name);
-                const abilities = res.abilities.map(a => a.ability.name);
-                const stats = {};
-                res.stats.forEach(s => stats[s.stat.name] = s.base_stat);
-                const moves = res.moves
-                    .map(m => m.move.name)
-                    .filter(m => !rules.banned_moves.includes(m));
-                
-                const gender = Math.random() < 0.5 ? "M" : "F";
-                const selectedAbility = abilities.length > 0 ? abilities[Math.floor(Math.random() * abilities.length)] : "Nessuna";
-                
-                return {
-                    id: res.id,
-                    name: res.name,
-                    types: types,
-                    abilities: abilities,
-                    stats: stats,
-                    moves: moves,
-                    sprite_url: res.sprites.front_default || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${res.id}.png`,
-                    gender: gender,
-                    selected_ability: selectedAbility,
-                    ability_desc: "Caricamento descrizione...",
-                    selected_item: "",
-                    selected_moves: [],
-                    selected_evs: null,
-                    selected_nature: ""
-                };
-            } catch (err) {
-                console.error("Errore recupero Pokémon ID:", pokeId, err);
-                return null;
-            }
-        }
-
-        function startDraft() {
-            validPokeIds = [];
-            for (let g = 1; g <= 9; g++) {
-                if (!rules.banned_gens.includes(g)) {
-                    const [start, end] = GEN_RANGES[g];
-                    for (let id = start; id <= end; id++) validPokeIds.push(id);
-                }
-            }
-            draftRound = 0;
-            team = [];
-            updateTeamView();
-            nextPokemonRound();
-        }
-
-        function showLoading(msg) {
-            document.getElementById('action-title').innerText = msg;
-            document.getElementById('action-content').innerHTML = `
-                <div class="loading-spinner">
-                    <div class="spinner"></div>
-                    <div>Caricamento dati in corso...</div>
-                    <button class="btn btn-red" style="margin-top:10px;" onclick="nextPokemonRound()">⏳ Salta / Riprova</button>
-                </div>
-            `;
-        }
-
-        async function nextPokemonRound() {
-            if (draftRound >= 6) {
-                draftRound = 0;
-                startMovesPhase();
-                return;
-            }
-            draftRound++;
-            showLoading(`Scegli Pokémon (${draftRound}/6)`);
-
-            const fetched = [];
-            let attempts = 0;
-            while (fetched.length < 3 && attempts < 30) {
-                attempts++;
-                const randId = validPokeIds[Math.floor(Math.random() * validPokeIds.length)];
-                if (!fetched.some(p => p.id === randId)) {
-                    const pdata = await fetchPokemonData(randId);
-                    if (pdata && !rules.banned_pokemon.includes(pdata.name.toLowerCase())) {
-                        fetched.push(pdata);
-                    }
-                }
-            }
-
-            if (fetched.length === 0) {
-                alert("Errore di connessione a PokéAPI. Riprova più tardi.");
-                return;
-            }
-
-            currentOptions = fetched;
-            displayPokemonChoice();
-        }
-
-        function displayPokemonChoice() {
-            document.getElementById('action-title').innerText = `Scegli un Pokémon (${draftRound}/6)`;
-            const container = document.getElementById('action-content');
-            
-            let html = `<div class="cards-grid">`;
-            currentOptions.forEach((p, idx) => {
-                const bst = Object.values(p.stats).reduce((a, b) => a + b, 0);
-                const s = p.stats;
-                html += `
-                    <div class="poke-card" onclick="selectPokemon(${idx})" onmouseenter="previewPokemon(${idx})">
-                        <img src="${p.sprite_url}" alt="${p.name}">
-                        <div class="poke-card-name">${capitalize(p.name)} (${p.gender})</div>
-                        <div class="poke-card-ability">⚡ ${capitalize(p.selected_ability.replace(/-/g, ' '))}</div>
-                        <div class="poke-card-bst">BST: ${bst}</div>
-                        <div class="stats-mini-table">
-                            HP:${s.hp || 0} ATK:${s.attack || 0}<br>
-                            DEF:${s.defense || 0} SPA:${s['special-attack'] || 0}<br>
-                            SPD:${s['special-defense'] || 0} SPE:${s.speed || 0}
-                        </div>
-                        <button class="btn btn-block" style="padding:4px; font-size:0.75rem;">Scegli</button>
-                    </div>
-                `;
-            });
-            html += `</div>`;
-            container.innerHTML = html;
-        }
-
-        function previewPokemon(idx) {
-            const p = currentOptions[idx];
-            if (p) refreshSidebar(p);
-        }
-
-        async function selectPokemon(idx) {
-            const p = currentOptions[idx];
-            p.ability_desc = await fetchAbilityDesc(p.selected_ability);
-            team.push(p);
-            updateTeamView();
-            refreshSidebar(p);
-            refreshPokemonDetails(p);
-            nextPokemonRound();
-        }
-
-        async function startMovesPhase() {
-            if (draftRound >= team.length) {
-                draftRound = 0;
-                startNaturePhase();
-                return;
-            }
-            currentPokemon = team[draftRound];
-            refreshSidebar(currentPokemon);
-            refreshPokemonDetails(currentPokemon);
-
-            if (!currentPokemon.moves || currentPokemon.moves.length === 0) {
-                draftRound++;
-                startMovesPhase();
-                return;
-            }
-
-            movePickRound = currentPokemon.selected_moves.length;
-            nextMoveRound();
-        }
-
-        function nextMoveRound() {
-            const available = currentPokemon.moves.filter(m => !currentPokemon.selected_moves.includes(m) && !rules.banned_moves.includes(m));
-            if (movePickRound >= 4 || available.length === 0) {
-                draftRound++;
-                startMovesPhase();
-                return;
-            }
-
-            movePickRound++;
-            const count = Math.min(3, available.length);
-            const moveOptions = sampleArray(available, count);
-
-            document.getElementById('action-title').innerText = `Mosse per ${capitalize(currentPokemon.name)} (${draftRound + 1}/6)\nScegli mossa ${movePickRound}/4`;
-            
-            const container = document.getElementById('action-content');
-            let html = `<div class="options-list">`;
-            moveOptions.forEach(m => {
-                html += `
-                    <button class="btn btn-block btn-blue" 
-                            onmouseenter="previewMoveHover('${m}')" 
-                            onclick="selectMove('${m}')">
-                        ${capitalize(m.replace(/-/g, ' '))}
-                    </button>
-                `;
-            });
-            html += `</div>`;
-            container.innerHTML = html;
-        }
-
-        async function previewMoveHover(moveName) {
-            const info = await fetchMoveData(moveName);
-            const text = `=== ANTEPRIMA MOSSA ===\n• ${capitalize(moveName.replace(/-/g, ' '))} [${info.type} | ${info.damage_class}]\n  - Potenza: ${info.power} | Precisione: ${info.accuracy}%\n  -> Effetto: ${info.desc}`;
-            setDetailsText(text);
-        }
-
-        function selectMove(m) {
-            currentPokemon.selected_moves.push(m);
-            updateTeamView();
-            refreshPokemonDetails(currentPokemon);
-            nextMoveRound();
-        }
-
-        function startNaturePhase() {
-            if (draftRound >= team.length) {
-                draftRound = 0;
-                startEVPhase();
-                return;
-            }
-            currentPokemon = team[draftRound];
-            refreshSidebar(currentPokemon);
-            refreshPokemonDetails(currentPokemon);
-
-            const natKeys = Object.keys(NATURES);
-            const chosenNatures = sampleArray(natKeys, 3);
-
-            document.getElementById('action-title').innerText = `Natura per ${capitalize(currentPokemon.name)} (${draftRound + 1}/6)`;
-            
-            const container = document.getElementById('action-content');
-            let html = `<div class="options-list">`;
-            chosenNatures.forEach(nat => {
-                const eff = NATURES[nat];
-                const effStr = eff[1] ? `(${eff[0]}, ${eff[1]})` : `(${eff[0]})`;
-                html += `
-                    <button class="btn btn-block btn-yellow" onclick="selectNature('${nat}')">
-                        ${nat} ${effStr}
-                    </button>
-                `;
-            });
-            html += `</div>`;
-            container.innerHTML = html;
-        }
-
-        function selectNature(nat) {
-            currentPokemon.selected_nature = nat;
-            updateTeamView();
-            refreshSidebar(currentPokemon);
-            refreshPokemonDetails(currentPokemon);
-            draftRound++;
-            startNaturePhase();
-        }
-
-        function startEVPhase() {
-            if (draftRound >= team.length) {
-                draftRound = 0;
-                startItemPhase();
-                return;
-            }
-            currentPokemon = team[draftRound];
-            refreshSidebar(currentPokemon);
-            refreshPokemonDetails(currentPokemon);
-
-            const evOptions = [generateRandomEVs(), generateRandomEVs(), generateRandomEVs()];
-
-            document.getElementById('action-title').innerText = `EV Spread per ${capitalize(currentPokemon.name)} (${draftRound + 1}/6)`;
-            
-            const container = document.getElementById('action-content');
-            let html = `<div class="options-list">`;
-            evOptions.forEach((evs, idx) => {
-                const evStr = Object.entries(evs).filter(([k,v]) => v > 0).map(([k,v]) => `${v} ${k.toUpperCase()}`).join(' / ');
-                const total = Object.values(evs).reduce((a,b)=>a+b, 0);
-                html += `
-                    <button class="btn btn-block btn-orange" onclick="selectEV(${JSON.stringify(evs).replace(/"/g, '&quot;')})">
-                        Opz. ${idx+1} (${total} EV): ${evStr}
-                    </button>
-                `;
-            });
-            html += `</div>`;
-            container.innerHTML = html;
-        }
-
-        function generateRandomEVs() {
-            const stats = ["hp", "atk", "def", "spa", "spd", "spe"];
-            const evs = { hp: 0, atk: 0, def: 0, spa: 0, spd: 0, spe: 0 };
-            if (Math.random() < 0.5) {
-                const sample = sampleArray(stats, 2);
-                evs[sample[0]] = 252;
-                evs[sample[1]] = 252;
-                const rem = stats.filter(s => !sample.includes(s));
-                evs[rem[Math.floor(Math.random() * rem.length)]] = 6;
-            } else {
-                const sample = sampleArray(stats, 4);
-                evs[sample[0]] = 252;
-                evs[sample[1]] = 128;
-                evs[sample[2]] = 124;
-                evs[sample[3]] = 6;
-            }
-            return evs;
-        }
-
-        function selectEV(evs) {
-            currentPokemon.selected_evs = evs;
-            updateTeamView();
-            refreshSidebar(currentPokemon);
-            refreshPokemonDetails(currentPokemon);
-            draftRound++;
-            startEVPhase();
-        }
-
-        function startItemPhase() {
-            if (draftRound >= team.length) {
-                finishDraft();
-                return;
-            }
-            currentPokemon = team[draftRound];
-            refreshSidebar(currentPokemon);
-            refreshPokemonDetails(currentPokemon);
-
-            const itemOptions = sampleArray(COMMON_ITEMS, 3);
-
-            document.getElementById('action-title').innerText = `Oggetto per ${capitalize(currentPokemon.name)} (${draftRound + 1}/6)`;
-            
-            const container = document.getElementById('action-content');
-            let html = `<div class="options-list">`;
-            itemOptions.forEach(it => {
-                html += `
-                    <button class="btn btn-block btn-blue" 
-                            onmouseenter="previewItemHover('${it}')" 
-                            onclick="selectItem('${it}')">
-                        ${capitalize(it.replace(/-/g, ' '))}
-                    </button>
-                `;
-            });
-            html += `</div>`;
-            container.innerHTML = html;
-        }
-
-        async function previewItemHover(itemName) {
-            const desc = await fetchItemDesc(itemName);
-            const text = `=== ANTEPRIMA OGGETTO ===\n• ${capitalize(itemName.replace(/-/g, ' '))} \n  -> Effetto: ${desc}`;
-            setDetailsText(text);
-        }
-
-        function selectItem(it) {
-            currentPokemon.selected_item = it;
-            updateTeamView();
-            refreshSidebar(currentPokemon);
-            refreshPokemonDetails(currentPokemon);
-            draftRound++;
-            startItemPhase();
-        }
-
-        function finishDraft() {
-            document.getElementById('action-title').innerText = `🎉 Draft Completato!`;
-            const showdownText = exportToShowdown();
-
-            const container = document.getElementById('action-content');
-            container.innerHTML = `
-                <div style="width:100%; text-align:center;">
-                    <textarea class="showdown-output" readonly>${showdownText}</textarea>
-                    <button class="btn btn-block btn-blue" onclick="downloadTeamTXT()">💾 Salva Team (.txt)</button>
-                </div>
-            `;
-        }
-
-        function exportToShowdown() {
-            const statMap = { hp: "HP", atk: "Atk", def: "Def", spa: "SpA", spd: "SpD", spe: "Spe" };
-            return team.map(p => {
-                const lines = [];
-                const genderPart = p.gender ? ` (${p.gender})` : '';
-                const itemPart = p.selected_item ? ` @ ${capitalize(p.selected_item.replace(/-/g, ' '))}` : '';
-                lines.push(`${capitalize(p.name)}${genderPart}${itemPart}`);
-                lines.push(`Ability: ${capitalize(p.selected_ability.replace(/-/g, ' '))}`);
-                lines.push(`Level: 50`);
-                if (p.selected_nature) lines.push(`${p.selected_nature} Nature`);
-                if (p.selected_evs) {
-                    const evList = Object.entries(p.selected_evs).filter(([k,v])=>v>0).map(([k,v])=>`${v} ${statMap[k]}`);
-                    if (evList.length > 0) lines.push(`EVs: ${evList.join(' / ')}`);
-                }
-                p.selected_moves.forEach(m => lines.push(`- ${capitalize(m.replace(/-/g, ' '))}`));
-                return lines.join('\n');
-            }).join('\n\n');
-        }
-
-        function downloadTeamTXT() {
-            const text = exportToShowdown();
-            const blob = new Blob([text], { type: 'text/plain' });
-            const anchor = document.createElement('a');
-            anchor.download = 'my_draft_team.txt';
-            anchor.href = window.URL.createObjectURL(blob);
-            anchor.click();
-            anchor.remove();
-        }
-
-        function renderTeamGrid() {
-            const grid = document.getElementById('team-grid');
-            grid.innerHTML = '';
-            for (let i = 0; i < 6; i++) {
-                grid.innerHTML += `
-                    <div class="team-slot" id="slot-${i}" onclick="onSlotClick(${i})">
-                        <div class="slot-header">
-                            <img id="slot-img-${i}" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'%3E%3C/svg%3E">
-                            <div class="slot-title" id="slot-title-${i}">Slot ${i+1}: Vuoto</div>
-                        </div>
-                        <div class="slot-info" id="slot-info-${i}"></div>
-                    </div>
-                `;
-            }
-        }
-
-        function updateTeamView() {
-            for (let i = 0; i < 6; i++) {
-                const titleEl = document.getElementById(`slot-title-${i}`);
-                const imgEl = document.getElementById(`slot-img-${i}`);
-                const infoEl = document.getElementById(`slot-info-${i}`);
-
-                if (i < team.length) {
-                    const p = team[i];
-                    titleEl.innerText = `${i+1}. ${capitalize(p.name)} (${p.gender})`;
-                    titleEl.style.color = "var(--accent-blue)";
-                    imgEl.src = p.sprite_url;
-
-                    const itemStr = p.selected_item ? `Item: ${capitalize(p.selected_item.replace(/-/g, ' '))}` : 'Item: -';
-                    const natStr = p.selected_nature ? `Nat: ${p.selected_nature}` : 'Nat: -';
-                    const evStr = p.selected_evs ? `EV: ${Object.values(p.selected_evs).reduce((a,b)=>a+b,0)}` : 'EV: -';
-                    const movesStr = p.selected_moves.length > 0 ? p.selected_moves.map(m=>capitalize(m.replace(/-/g, ' '))).join(', ') : 'Mosse: -';
-
-                    infoEl.innerText = `${itemStr}\n${natStr} | ${evStr}\nMosse: ${movesStr}`;
-                } else {
-                    titleEl.innerText = `Slot ${i+1}: Vuoto`;
-                    titleEl.style.color = "var(--text-main)";
-                    imgEl.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'%3E%3C/svg%3E";
-                    infoEl.innerText = '';
-                }
-            }
-        }
-
-        function onSlotClick(idx) {
-            if (idx < team.length) {
-                const p = team[idx];
-                refreshSidebar(p);
-                refreshPokemonDetails(p);
-            }
-        }
-
-        function renderStatBars() {
-            const container = document.getElementById('stats-bars');
-            container.innerHTML = '';
-            STAT_KEYS.forEach(key => {
-                const label = STAT_SHORT[key].toUpperCase();
-                container.innerHTML += `
-                    <div class="stat-bar-container">
-                        <span class="stat-label">${label}</span>
-                        <span class="stat-val" id="stat-val-${key}">0</span>
-                        <div class="stat-bar-bg">
-                            <div class="stat-bar-fill" id="stat-bar-${key}"></div>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        function refreshSidebar(p) {
-            if (!p) return;
-            const hasCustom = !!(p.selected_nature || p.selected_evs);
-
-            document.getElementById('side-title').innerText = capitalize(p.name) + (hasCustom ? " (L.50)" : "");
-            document.getElementById('side-types').innerText = "Tipi: " + p.types.map(capitalize).join(', ');
-            document.getElementById('side-img').src = p.sprite_url;
-            document.getElementById('side-ability').innerText = "Abilità: " + capitalize(p.selected_ability.replace(/-/g, ' '));
-
-            let total = 0;
-            STAT_KEYS.forEach(k => {
-                const baseVal = p.stats[k] || 0;
-                let finalVal = baseVal;
-                let maxRef = 200;
-
-                if (hasCustom) {
-                    const shortKey = STAT_SHORT[k];
-                    const evVal = p.selected_evs ? (p.selected_evs[shortKey] || 0) : 0;
-                    finalVal = calcStatLvl50(k, baseVal, evVal, p.selected_nature);
-                    maxRef = 250;
-                }
-
-                total += finalVal;
-                document.getElementById(`stat-val-${k}`).innerText = finalVal;
-                
-                const pct = Math.min(100, (finalVal / maxRef) * 100);
-                const bar = document.getElementById(`stat-bar-${k}`);
-                bar.style.width = pct + "%";
-
-                let color = "var(--accent-red)";
-                if (finalVal >= (hasCustom ? 80 : 60)) color = "var(--accent-orange)";
-                if (finalVal >= (hasCustom ? 110 : 90)) color = "var(--accent-green)";
-                if (finalVal >= (hasCustom ? 150 : 120)) color = "var(--accent-blue)";
-                bar.style.backgroundColor = color;
-            });
-
-            document.getElementById('side-bst').innerText = hasCustom ? `STAT TOT (L.50): ${total}` : `BST: ${total}`;
-
-            const matchups = calcMatchups(p.types);
-            document.getElementById('matchups-box').innerHTML = `
-                <div style="color:var(--accent-red)">Debolezze x4: ${matchups['x4'].join(', ') || 'Nessuna'}</div>
-                <div style="color:var(--accent-orange)">Debolezze x2: ${matchups['x2'].join(', ') || 'Nessuna'}</div>
-                <div style="color:var(--text-main)">Immunità (x0): ${matchups['x0'].join(', ') || 'Nessuna'}</div>
-                <div style="color:var(--accent-green)">Resistenze x0.5: ${matchups['x0.5'].join(', ') || 'Nessuna'}</div>
-                <div style="color:var(--accent-cyan)">Super Res. x0.25: ${matchups['x0.25'].join(', ') || 'Nessuna'}</div>
-            `;
-        }
-
-        async function refreshPokemonDetails(p) {
-            if (!p) return;
-            const abName = capitalize(p.selected_ability.replace(/-/g, ' '));
-            const abDesc = p.ability_desc || await fetchAbilityDesc(p.selected_ability);
-
-            const lines = [
-                `=== ${p.name.toUpperCase()} ===`,
-                `• ABILITÀ: ${abName}`,
-                `  -> Effetto: ${abDesc}`
-            ];
-
-            if (p.selected_moves && p.selected_moves.length > 0) {
-                lines.push("\n• MOSSE SELEZIONATE:");
-                for (const m of p.selected_moves) {
-                    const mInfo = await fetchMoveData(m);
-                    lines.push(`  - ${capitalize(m.replace(/-/g, ' '))} [${mInfo.type} | ${mInfo.damage_class}] - Pot: ${mInfo.power} | Prec: ${mInfo.accuracy}%`);
-                    lines.push(`    Effetto: ${mInfo.desc}`);
-                }
-            }
-
-            if (p.selected_item) {
-                const itemDesc = await fetchItemDesc(p.selected_item);
-                lines.push(`\n• OGGETTO: ${capitalize(p.selected_item.replace(/-/g, ' '))}`);
-                lines.push(`  -> Effetto: ${itemDesc}`);
-            }
-
-            setDetailsText(lines.join('\n'));
-        }
-
-        function setDetailsText(txt) {
-            document.getElementById('details-textbox').innerText = txt;
-        }
-
-        function calcStatLvl50(statName, baseVal, evVal, natureName) {
-            const short = STAT_SHORT[statName];
-            if (statName === "hp") {
-                return Math.floor((2 * baseVal + Math.floor(evVal / 4)) * 50 / 100) + 50 + 10;
-            }
-            const raw = Math.floor((2 * baseVal + Math.floor(evVal / 4)) * 50 / 100) + 5;
-            let mod = 1.0;
-            if (NATURES[natureName]) {
-                const [plus, minus] = NATURES[natureName];
-                const natMap = { "+Atk":"atk", "-Atk":"atk", "+Def":"def", "-Def":"def", "+SpA":"spa", "-SpA":"spa", "+SpD":"spd", "-SpD":"spd", "+Spe":"spe", "-Spe":"spe" };
-                if (natMap[plus] === short) mod = 1.1;
-                else if (natMap[minus] === short) mod = 0.9;
-            }
-            return Math.floor(raw * mod);
-        }
-
-        function calcMatchups(types) {
-            const mults = {};
-            Object.keys(TYPE_CHART).forEach(t => mults[t] = 1.0);
-
-            types.forEach(ptype => {
-                const pt = ptype.toLowerCase();
-                Object.entries(TYPE_CHART).forEach(([atkType, targets]) => {
-                    if (targets[pt] !== undefined) {
-                        mults[atkType] *= targets[pt];
-                    }
-                });
-            });
-
-            const res = { x4: [], x2: [], x0: [], "x0.5": [], "x0.25": [] };
-            Object.entries(mults).forEach(([t, m]) => {
-                const name = capitalize(t);
-                if (m === 4.0) res.x4.push(name);
-                else if (m === 2.0) res.x2.push(name);
-                else if (m === 0.0) res.x0.push(name);
-                else if (m === 0.5) res['x0.5'].push(name);
-                else if (m === 0.25) res['x0.25'].push(name);
-            });
-            return res;
-        }
-
-        function capitalize(s) {
-            if (!s) return '';
-            return s.charAt(0).toUpperCase() + s.slice(1);
-        }
-
-        function sampleArray(arr, n) {
-            const shuffled = [...arr].sort(() => 0.5 - Math.random());
-            return shuffled.slice(0, n);
-        }
-    </script>
+      `).join('');
+
+      // Update Controls State
+      selectEl.value = index;
+      document.getElementById('prevBtn').disabled = index === 0;
+      document.getElementById('nextBtn').disabled = index === pokemons.length - 1;
+    }
+
+    function changePokemon(direction) {
+      // Rimuove l'effetto ruotato se presente prima di cambiare carta
+      document.getElementById('pokemonCard').classList.remove('flipped');
+      currentIndex += direction;
+      renderPokemon(currentIndex);
+    }
+
+    function selectPokemon(index) {
+      document.getElementById('pokemonCard').classList.remove('flipped');
+      currentIndex = parseInt(index);
+      renderPokemon(currentIndex);
+    }
+
+    // Inizializzazione Primo Caricamento
+    renderPokemon(0);
+  </script>
 </body>
 </html>
