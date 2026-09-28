@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PokéDex - Statistiche e Mega Evoluzioni</title>
+  <title>PokéDex - Statistiche, BST e Mega Evoluzioni</title>
   <style>
     :root {
       --bg-color: #0f172a;
@@ -68,18 +68,25 @@
     .type-badge { padding: 4px 8px; border-radius: 8px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; display: inline-block; }
 
     .img-container {
-      width: 100%; height: 160px; background: rgba(15, 23, 42, 0.6);
+      width: 100%; height: 150px; background: rgba(15, 23, 42, 0.6);
       border-radius: 12px; display: flex; justify-content: center; align-items: center;
       margin-bottom: 12px; border: 1px solid #334155;
     }
-    .img-container img { max-height: 140px; max-width: 100%; object-fit: contain; }
+    .img-container img { max-height: 130px; max-width: 100%; object-fit: contain; }
 
-    /* Sezione Statistiche */
-    .stats-section { background: #0f172a; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 0.8rem; }
-    .stats-title { font-weight: bold; margin-bottom: 6px; color: var(--text-dim); text-transform: uppercase; border-bottom: 1px solid #1e293b; padding-bottom: 3px; }
-    .stat-row { display: flex; justify-content: space-between; margin-bottom: 3px; }
-    .stat-name { color: var(--text-dim); font-weight: bold; }
-    .stat-val { font-weight: bold; }
+    /* Sezione Statistiche e BST */
+    .stats-section { background: #0f172a; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 0.75rem; }
+    .stats-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; border-bottom: 1px solid #1e293b; padding-bottom: 4px; }
+    .stats-title { font-weight: bold; color: var(--text-dim); text-transform: uppercase; }
+    .bst-badge { background: #334155; color: #38bdf8; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+
+    .stat-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; gap: 8px; }
+    .stat-name { color: var(--text-dim); font-weight: bold; width: 60px; }
+    .stat-val { font-weight: bold; width: 25px; text-align: right; }
+    
+    /* Barre Statistiche */
+    .stat-bar-container { flex-grow: 1; background: #1e293b; height: 6px; border-radius: 3px; overflow: hidden; }
+    .stat-bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
 
     .eff-section { background: #0f172a; padding: 10px; border-radius: 8px; font-size: 0.8rem; }
     .eff-title { font-weight: bold; margin-bottom: 6px; color: var(--text-dim); text-transform: uppercase; border-bottom: 1px solid #1e293b; padding-bottom: 3px; }
@@ -91,7 +98,7 @@
     .eff-label.resist { color: #86efac; }
     .eff-label.super-resist { color: #4ade80; }
 
-    .mega-badge { background: #8b5cf6; color: #fff; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; display: inline-block; margin-bottom: 8px; }
+    .mega-badge { background: #8b5cf6; color: #fff; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; display: inline-block; margin-bottom: 6px; }
   </style>
 </head>
 <body>
@@ -122,7 +129,10 @@
         </div>
 
         <div class="stats-section">
-          <div class="stats-title">Statistiche Base</div>
+          <div class="stats-header-row">
+            <span class="stats-title">Statistiche Base</span>
+            <span class="bst-badge" id="pokeBst">BST: 0</span>
+          </div>
           <div id="pokeStats"></div>
         </div>
 
@@ -145,7 +155,10 @@
 
         <div class="stats-section">
           <div class="mega-badge" id="megaAbilityBadge">Abilità: ---</div>
-          <div class="stats-title">Statistiche Mega Evoluzione</div>
+          <div class="stats-header-row">
+            <span class="stats-title">Statistiche Mega</span>
+            <span class="bst-badge" id="megaBst">BST: 0</span>
+          </div>
           <div id="megaStats"></div>
         </div>
       </div>
@@ -177,7 +190,6 @@
 
     const allTypes = ["NORMAL", "FIRE", "WATER", "GRASS", "ELECTRIC", "ICE", "FIGHTING", "POISON", "GROUND", "FLYING", "PSYCHIC", "BUG", "ROCK", "GHOST", "DRAGON", "DARK", "STEEL", "FAIRY"];
 
-    // Dataset completo con ID, tipi, statistiche base e mega evoluzione (se presente)
     const pokemons = [
       { name: "Raichu", id: 26, types: ["ELECTRIC"], stats: { HP: 60, ATK: 90, DEF: 55, "SP.ATK": 90, "SP.DEF": 80, VEL: 110 } },
       { name: "Nidoqueen", id: 31, types: ["POISON", "GROUND"], stats: { HP: 90, ATK: 92, DEF: 87, "SP.ATK": 75, "SP.DEF": 85, VEL: 76 } },
@@ -300,27 +312,52 @@
       return html || "<small style='color:var(--text-dim)'>Nessuna debolezza/resistenza particolare</small>";
     }
 
+    // Funzione per determinare il colore della barra in base al valore della statistica
+    function getStatColor(val) {
+      if (val < 60) return '#ef4444'; // Rosso (Scarsa)
+      if (val < 90) return '#f59e0b'; // Arancione (Media)
+      if (val < 120) return '#38bdf8'; // Azzurro (Buona)
+      if (val < 150) return '#4ade80'; // Verde (Ottima)
+      return '#a855f7'; // Viola (Eccellente/Leggendaria)
+    }
+
     function renderStats(statsObj) {
       let html = "";
+      let totalBst = 0;
       for (let [key, val] of Object.entries(statsObj)) {
-        html += `<div class="stat-row"><span class="stat-name">${key}</span><span class="stat-val">${val}</span></div>`;
+        totalBst += val;
+        // Calcola la percentuale per la barra (massimo stimato intorno a 230 per scale visive ottimali)
+        let percentage = Math.min(Math.round((val / 230) * 100), 100);
+        let color = getStatColor(val);
+
+        html += `
+          <div class="stat-row">
+            <span class="stat-name">${key}</span>
+            <span class="stat-val">${val}</span>
+            <div class="stat-bar-container">
+              <div class="stat-bar-fill" style="width: ${percentage}%; background-color: ${color};"></div>
+            </div>
+          </div>
+        `;
       }
-      return html;
+      return { html, totalBst };
     }
 
     function renderPokemon(index) {
       const p = pokemons[index];
       
-      // Reset flip to front when changing pokemon
       if (isFlipped) flipCard();
 
       document.getElementById('pokeName').innerText = p.name;
       document.getElementById('pokeImg').src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${p.id}.png`;
       document.getElementById('pokeTypes').innerHTML = p.types.map(t => `<span class="type-badge type-${t}">${t}</span>`).join('');
-      document.getElementById('pokeStats').innerHTML = renderStats(p.stats);
+      
+      let baseStatsResult = renderStats(p.stats);
+      document.getElementById('pokeStats').innerHTML = baseStatsResult.html;
+      document.getElementById('pokeBst').innerText = `BST: ${baseStatsResult.totalBst}`;
+      
       document.getElementById('typeEffectiveness').innerHTML = calculateTypeEffectiveness(p.types);
 
-      // Gestione Mega Evoluzione sul retro
       const flipBtn = document.getElementById('flipBtn');
       if (p.mega) {
         flipBtn.disabled = false;
@@ -328,7 +365,10 @@
         document.getElementById('megaImg').src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${p.mega.id}.png`;
         document.getElementById('megaTypes').innerHTML = p.mega.types.map(t => `<span class="type-badge type-${t}">${t}</span>`).join('');
         document.getElementById('megaAbilityBadge').innerText = `Abilità: ${p.mega.ability}`;
-        document.getElementById('megaStats').innerHTML = renderStats(p.mega.stats);
+        
+        let megaStatsResult = renderStats(p.mega.stats);
+        document.getElementById('megaStats').innerHTML = megaStatsResult.html;
+        document.getElementById('megaBst').innerText = `BST: ${megaStatsResult.totalBst}`;
       } else {
         flipBtn.disabled = true;
         document.getElementById('megaName').innerText = "---";
@@ -336,6 +376,7 @@
         document.getElementById('megaTypes').innerHTML = "";
         document.getElementById('megaAbilityBadge').innerText = "Abilità: ---";
         document.getElementById('megaStats').innerHTML = "";
+        document.getElementById('megaBst').innerText = "BST: 0";
       }
 
       selectEl.value = index;
