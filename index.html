@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PokéDex Interattivo Complete</title>
+  <title>PokéDex - Debolezze e Resistenze</title>
   <style>
     :root {
       --bg-color: #0f172a;
@@ -39,83 +39,39 @@
     header { text-align: center; margin-bottom: 20px; }
     h1 { color: #ef4444; font-size: 2rem; letter-spacing: 2px; }
 
-    /* Controlli e Navigazione */
     .controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
-    select, input, button {
+    select, button {
       padding: 10px 15px; border-radius: 8px; border: none; background: #334155; color: white; font-weight: bold; cursor: pointer; outline: none;
     }
     button:hover, select:hover { background: #475569; }
     button:disabled { opacity: 0.3; cursor: not-allowed; }
 
-    /* Area Card con Prospettiva 3D per Flip */
-    .card-container { perspective: 1000px; width: 420px; height: 680px; position: relative; }
+    .card-container { width: 100%; max-width: 450px; position: relative; }
     .card {
-      width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.6s ease-in-out;
-    }
-    .card.flipped { transform: rotateY(180deg); }
-
-    .card-face {
-      position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
       border-radius: 20px; background: var(--card-bg); border: 2px solid #334155;
-      padding: 20px; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.5); overflow-y: auto;
+      padding: 20px; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     }
-    .card-back { transform: rotateY(180deg); }
 
-    /* Header & Immagine Pokémon */
-    .header-card { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 5px; }
-    .id { font-weight: bold; color: var(--text-dim); }
-    .name { font-size: 1.4rem; font-weight: bold; }
-    .types { display: flex; gap: 5px; margin: 8px 0; }
-    .type-badge { padding: 3px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; display: inline-block; }
+    .header-card { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 15px; }
+    .name { font-size: 1.5rem; font-weight: bold; }
+    .types { display: flex; gap: 5px; }
+    .type-badge { padding: 4px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; display: inline-block; }
 
-    .poke-img-box { text-align: center; position: relative; background: radial-gradient(circle, #334155 0%, transparent 70%); margin: 5px 0; }
-    .poke-img-box img { width: 110px; height: 110px; transition: transform 0.2s ease; cursor: pointer; }
-    .poke-img-box img:hover { transform: scale(1.15); }
-    .shiny-hint { font-size: 0.65rem; color: #f59e0b; margin-top: -5px; }
-
-    /* Sezione Efficacia Tipi */
-    .eff-section { background: #0f172a; padding: 8px 10px; border-radius: 8px; margin: 8px 0; font-size: 0.75rem; }
-    .eff-title { font-weight: bold; margin-bottom: 4px; color: var(--text-dim); text-transform: uppercase; border-bottom: 1px solid #1e293b; padding-bottom: 2px; }
-    .eff-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; flex-wrap: wrap; }
-    .eff-label { font-weight: bold; width: 110px; font-size: 0.7rem; }
+    .eff-section { background: #0f172a; padding: 12px; border-radius: 8px; margin-top: 10px; font-size: 0.85rem; }
+    .eff-title { font-weight: bold; margin-bottom: 8px; color: var(--text-dim); text-transform: uppercase; border-bottom: 1px solid #1e293b; padding-bottom: 4px; }
+    .eff-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+    .eff-label { font-weight: bold; width: 120px; font-size: 0.75rem; }
     .eff-label.super-weak { color: #f87171; }
     .eff-label.weak { color: #fca5a5; }
     .eff-label.immune { color: #9ca3af; }
     .eff-label.resist { color: #86efac; }
     .eff-label.super-resist { color: #4ade80; }
-
-    /* Visualizzazione Barre Statistiche */
-    .stats { display: flex; flex-direction: column; gap: 4px; margin-top: 5px; }
-    .stat-row { display: flex; align-items: center; font-size: 0.75rem; }
-    .stat-label { width: 60px; font-weight: bold; color: var(--text-dim); }
-    .stat-val { width: 30px; text-align: right; padding-right: 8px; font-weight: bold; }
-    .stat-bar-bg { flex: 1; height: 8px; background: #334155; border-radius: 4px; overflow: hidden; }
-    .stat-bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
-
-    /* Sezione Info & Mosse */
-    .ability-box { background: #0f172a; padding: 8px; border-radius: 8px; margin: 8px 0; font-size: 0.8rem; }
-    .ability-title { color: #f59e0b; font-weight: bold; margin-bottom: 2px; }
-    
-    .moves-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
-    .move-card { background: #0f172a; border-left: 4px solid #ef4444; padding: 8px; border-radius: 4px; font-size: 0.8rem; }
-    .move-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 4px; }
-    .move-stats { color: var(--text-dim); font-size: 0.7rem; margin-bottom: 4px; }
-
-    .flip-btn {
-      background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 6px;
-      font-weight: bold; cursor: pointer; margin-top: auto; align-self: center; font-size: 0.8rem;
-    }
-    .flip-btn:hover { background: #dc2626; }
-
-    /* Scrollbar personalizzata per la carta */
-    .card-face::-webkit-scrollbar { width: 6px; }
-    .card-face::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>POKÉDEX INTERATTIVO</h1>
+    <h1>POKÉDEX - RESISTENZE & DEBOLEZZE</h1>
   </header>
 
   <div class="controls">
@@ -125,61 +81,20 @@
   </div>
 
   <div class="card-container">
-    <div class="card" id="pokemonCard">
-      
-      <!-- FRONT CARTA -->
-      <div class="card-face card-front">
-        <div class="header-card">
-          <span class="name" id="pokeName">---</span>
-          <span class="id" id="pokeId">#000</span>
-        </div>
-        
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <div class="types" id="pokeTypes"></div>
-          <small>BST: <strong id="pokeBST" style="color: #f59e0b;">---</strong></small>
-        </div>
-
-        <!-- Immagine Pokémon -->
-        <div class="poke-img-box">
-          <img id="pokeSprite" src="" alt="Pokemon" onclick="toggleShiny()" title="Clicca/Passa sopra per versione Shiny!">
-          <div class="shiny-hint">★ Clicca l'immagine per la versione Shiny ★</div>
-        </div>
-
-        <!-- Debolezze e Resistenze -->
-        <div class="eff-section">
-          <div class="eff-title">Efficacia Tipi Subita</div>
-          <div id="typeEffectiveness"></div>
-        </div>
-
-        <!-- Statistiche -->
-        <div class="stats" id="pokeStats"></div>
-
-        <!-- Abilità -->
-        <div class="ability-box">
-          <div class="ability-title">Abilità Estratta: <span id="pokeAbility">---</span></div>
-          <div id="pokeAbilityDesc" style="color: var(--text-dim);">---</div>
-        </div>
-
-        <button class="flip-btn" onclick="flipCard()">Mostra Mosse &rarr;</button>
+    <div class="card">
+      <div class="header-card">
+        <span class="name" id="pokeName">---</span>
+        <div class="types" id="pokeTypes"></div>
       </div>
 
-      <!-- BACK CARTA -->
-      <div class="card-face card-back">
-        <div class="header-card">
-          <span class="name">MOSSE APPRESE</span>
-          <small style="color: var(--text-dim);">Ordinate per Tipo</small>
-        </div>
-        
-        <div class="moves-list" id="pokeMoves"></div>
-
-        <button class="flip-btn" style="margin-top: 15px;" onclick="flipCard()">&larr; Torna alle Info</button>
+      <div class="eff-section">
+        <div class="eff-title">Efficacia Tipi Subita</div>
+        <div id="typeEffectiveness"></div>
       </div>
-
     </div>
   </div>
 
   <script>
-    // Tabella delle relazioni tra tipi Pokémon [Atk][Def]
     const typeChart = {
       NORMAL:   { ROCK: 0.5, GHOST: 0, STEEL: 0.5 },
       FIRE:     { FIRE: 0.5, WATER: 0.5, GRASS: 2, ICE: 2, BUG: 2, ROCK: 0.5, DRAGON: 0.5, STEEL: 2 },
@@ -203,687 +118,80 @@
 
     const allTypes = ["NORMAL", "FIRE", "WATER", "GRASS", "ELECTRIC", "ICE", "FIGHTING", "POISON", "GROUND", "FLYING", "PSYCHIC", "BUG", "ROCK", "GHOST", "DRAGON", "DARK", "STEEL", "FAIRY"];
 
-    // Dati Pokédex
+    // Lista generata dai dati forniti nel file di testo
     const pokemons = [
-      {
-        id: 36, name: "Clefable", types: ["FAIRY"], bst: 483,
-        stats: { HP: 95, ATK: 70, DEF: 73, "SP.ATK": 95, "SP.DEF": 90, VEL: 60 },
-        ability: "Magic Guard", abilityDesc: "Il Pokémon subisce danni solo da attacchi diretti.",
-        moves: [
-          { name: "BLIZZARD", type: "ICE", power: "110", acc: "70%", desc: "Colpisce i nemici intorno con una tremenda tempesta di ghiaccio che può anche congelarli." },
-          { name: "CHARGE BEAM", type: "ELECTRIC", power: "50", acc: "90%", desc: "Chi la usa lancia un fascio di elettricità molto intensa. Può anche aumentare il suo Attacco Speciale." },
-          { name: "SHADOW BALL", type: "GHOST", power: "80", acc: "100%", desc: "Lancia sul bersaglio una sfera nera. Può anche ridurne la Difesa Speciale." },
-          { name: "SAFEGUARD", type: "NORMAL", power: "---", acc: "---", desc: "Chi la usa crea un campo protettivo che evita problemi di stato per sé e gli alleati per cinque turni." }
-        ]
-      },
-      {
-        id: 38, name: "Ninetales", types: ["FIRE"], bst: 505,
-        stats: { HP: 73, ATK: 76, DEF: 75, "SP.ATK": 81, "SP.DEF": 100, VEL: 100 },
-        ability: "Drought (Nascosta)", abilityDesc: "Il sole brilla intensamente quando il Pokémon entra in campo.",
-        moves: [
-          { name: "DARK PULSE", type: "DARK", power: "80", acc: "100%", desc: "Chi la usa emana un’aura impregnata di oscuri pensieri. Può anche far tentennare il Pokémon colpito." },
-          { name: "OMINOUS WIND", type: "GHOST", power: "60", acc: "100%", desc: "Chi la usa attacca con una forte raffica di vento che può aumentare tutte le sue statistiche." },
-          { name: "LASER FOCUS", type: "NORMAL", power: "---", acc: "---", desc: "Chi la usa si concentra e nel turno successivo metterà sicuramente a segno un brutto colpo." },
-          { name: "TAKE DOWN", type: "NORMAL", power: "90", acc: "85%", desc: "Carica spericolata con tutto il corpo contro il bersaglio. Danneggia un po’ anche chi la usa." }
-        ]
-      },
-      {
-        id: 49, name: "Venomoth", types: ["BUG", "POISON"], bst: 450,
-        stats: { HP: 70, ATK: 65, DEF: 60, "SP.ATK": 90, "SP.DEF": 75, VEL: 90 },
-        ability: "Shield Dust", abilityDesc: "Annulla gli effetti secondari delle mosse subite.",
-        moves: [
-          { name: "STRUGGLE BUG", type: "BUG", power: "50", acc: "100%", desc: "Colpisce i nemici intorno opponendo resistenza e riducendo il loro Attacco Speciale." },
-          { name: "TWISTER", type: "DRAGON", power: "40", acc: "100%", desc: "Un potente tornado si abbatte sui nemici nei paraggi. Può anche farli tentennare." },
-          { name: "NIGHT SHADE", type: "GHOST", power: "---", acc: "100%", desc: "Fa apparire un orribile miraggio al bersaglio e infligge un danno pari al livello di chi la usa." },
-          { name: "POISON FANG", type: "POISON", power: "50", acc: "100%", desc: "Chi la usa morde il bersaglio con denti avvelenati che possono anche iperavvelenarlo." }
-        ]
-      },
-      {
-        id: 55, name: "Golduck", types: ["WATER"], bst: 500,
-        stats: { HP: 80, ATK: 82, DEF: 78, "SP.ATK": 95, "SP.DEF": 80, VEL: 85 },
-        ability: "Cloud Nine", abilityDesc: "Neutralizza gli effetti delle condizioni atmosferiche.",
-        moves: [
-          { name: "DIG", type: "GROUND", power: "80", acc: "100%", desc: "Chi la usa scava al primo turno e attacca al successivo. Fuori dalla lotta fa uscire da alcuni luoghi." },
-          { name: "FRUSTRATION", type: "NORMAL", power: "---", acc: "100%", desc: "Mossa che diventa tanto più potente quanto minore è il grado di affezione del Pokémon per il proprio Allenatore." },
-          { name: "ENCORE", type: "NORMAL", power: "---", acc: "100%", desc: "Chi la usa obbliga il bersaglio a ripetere per tre turni l’ultima mossa eseguita." },
-          { name: "PAY DAY", type: "NORMAL", power: "40", acc: "100%", desc: "Colpisce il bersaglio con una gran quantità di monete recuperabili dopo la lotta." }
-        ]
-      },
-      {
-        id: 62, name: "Poliwrath", types: ["WATER", "FIGHTING"], bst: 510,
-        stats: { HP: 90, ATK: 95, DEF: 95, "SP.ATK": 70, "SP.DEF": 90, VEL: 70 },
-        ability: "Damp", abilityDesc: "Impedisce le mosse autodistruttive.",
-        moves: [
-          { name: "HYPNOSIS", type: "PSYCHIC", power: "---", acc: "60%", desc: "Chi la usa si avvale della suggestione ipnotica per far addormentare il bersaglio." },
-          { name: "RETURN", type: "NORMAL", power: "---", acc: "100%", desc: "Mossa che diventa tanto più potente quanto maggiore è il grado di affezione del Pokémon per il proprio Allenatore." },
-          { name: "HELPING HAND", type: "NORMAL", power: "---", acc: "---", desc: "Mossa che aumenta la potenza dell’attacco di un alleato." },
-          { name: "HYDRO PUMP", type: "WATER", power: "110", acc: "80%", desc: "Il bersaglio è travolto da un potente getto d’acqua spruzzato ad altissima pressione." }
-        ]
-      },
-      {
-        id: 121, name: "Starmie", types: ["WATER", "PSYCHIC"], bst: 520,
-        stats: { HP: 60, ATK: 75, DEF: 85, "SP.ATK": 100, "SP.DEF": 85, VEL: 115 },
-        ability: "Natural Cure", abilityDesc: "Cura i problemi di stato quando il Pokémon viene sostituito.",
-        moves: [
-          { name: "CHARGE BEAM", type: "ELECTRIC", power: "50", acc: "90%", desc: "Chi la usa lancia un fascio di elettricità molto intensa. Può anche aumentare il suo Attacco Speciale." },
-          { name: "SUBSTITUTE", type: "NORMAL", power: "---", acc: "---", desc: "Chi la usa crea una copia di se stesso usando alcuni PS. La copia serve come esca per il nemico." },
-          { name: "EXPANDING FORCE", type: "PSYCHIC", power: "80", acc: "100%", desc: "Chi la usa attacca il bersaglio con energia psichica. Se utilizzata quando è attivo un Campo Psichico, la mossa aumenta di potenza e danneggia tutti i nemici." },
-          { name: "HYDRO PUMP", type: "WATER", power: "110", acc: "80%", desc: "Il bersaglio è travolto da un potente getto d’acqua spruzzato ad altissima pressione." }
-        ]
-      },
-      {
-        id: 127, name: "Pinsir", types: ["BUG"], bst: 500,
-        stats: { HP: 65, ATK: 125, DEF: 100, "SP.ATK": 55, "SP.DEF": 70, VEL: 85 },
-        ability: "Mold Breaker", abilityDesc: "Neutralizza le abilità che bloccano le mosse.",
-        moves: [
-          { name: "ROCK CLIMB", type: "NORMAL", power: "90", acc: "85%", desc: "Chi la usa carica con impeto incredibile. Il colpo può confondere il bersaglio." },
-          { name: "REST", type: "PSYCHIC", power: "---", acc: "---", desc: "Chi la usa recupera tutti i PS e guarisce da tutti i suoi problemi di stato, ma dorme per due turni." },
-          { name: "TAKE DOWN", type: "NORMAL", power: "90", acc: "85%", desc: "Carica spericolata con tutto il corpo contro il bersaglio. Danneggia un po’ anche chi la usa." },
-          { name: "HELPING HAND", type: "NORMAL", power: "---", acc: "---", desc: "Mossa che aumenta la potenza dell’attacco di un alleato." }
-        ]
-      },
-      {
-        id: 141, name: "Kabutops", types: ["ROCK", "WATER"], bst: 495,
-        stats: { HP: 60, ATK: 115, DEF: 105, "SP.ATK": 65, "SP.DEF": 70, VEL: 80 },
-        ability: "Battle Armor", abilityDesc: "Evita che il Pokémon subisca brutti colpi.",
-        moves: [
-          { name: "NIGHT SLASH", type: "DARK", power: "70", acc: "100%", desc: "Chi la usa colpisce il bersaglio appena si presenta l’occasione. Probabile brutto colpo." },
-          { name: "GIGA DRAIN", type: "GRASS", power: "75", acc: "100%", desc: "Mossa che assorbe PS. Chi la usa recupera una quantità di PS pari alla metà del danno inferto." },
-          { name: "SWORDS DANCE", type: "NORMAL", power: "---", acc: "---", desc: "Danza frenetica che incrementa lo spirito combattivo. Chi la usa aumenta di molto il suo Attacco." },
-          { name: "DIVE", type: "WATER", power: "80", acc: "100%", desc: "Chi la usa si tuffa in acqua per emergere e attaccare al turno seguente." }
-        ]
-      },
-      {
-        id: 154, name: "Meganium", types: ["GRASS"], bst: 525,
-        stats: { HP: 80, ATK: 82, DEF: 100, "SP.ATK": 83, "SP.DEF": 100, VEL: 80 },
-        ability: "Overgrow", abilityDesc: "Quando si è in difficoltà, potenzia le mosse di tipo Erba.",
-        moves: [
-          { name: "BULLET SEED", type: "GRASS", power: "25", acc: "100%", desc: "Chi la usa spara da due a cinque raffiche di semi contro il bersaglio in successione." },
-          { name: "SOLAR BEAM", type: "GRASS", power: "120", acc: "100%", desc: "Chi la usa assorbe luce al primo turno per proiettare un raggio intenso al turno successivo." },
-          { name: "DOUBLE EDGE", type: "NORMAL", power: "120", acc: "100%", desc: "Carica spietata e pericolosa che danneggia molto anche chi la usa." },
-          { name: "ROCK CLIMB", type: "NORMAL", power: "90", acc: "85%", desc: "Chi la usa carica con impeto incredibile. Il colpo può confondere il bersaglio." }
-        ]
-      },
-      {
-        id: 189, name: "Jumpluff", types: ["GRASS", "FLYING"], bst: 460,
-        stats: { HP: 75, ATK: 55, DEF: 70, "SP.ATK": 55, "SP.DEF": 95, VEL: 110 },
-        ability: "Leaf Guard", abilityDesc: "Evita problemi di stato quando c’è il sole.",
-        moves: [
-          { name: "BOUNCE", type: "FLYING", power: "85", acc: "85%", desc: "Chi la usa balza in alto e ricade sul bersaglio dopo un turno. Può anche paralizzarlo." },
-          { name: "LIGHT SCREEN", type: "PSYCHIC", power: "---", acc: "---", desc: "Innalza una barriera di luce fantastica che riduce i danni degli attacchi speciali per sé e gli alleati per cinque turni." },
-          { name: "SUNNY DAY", type: "FIRE", power: "---", acc: "---", desc: "Chi la usa intensifica i raggi solari per cinque turni, potenziando le mosse di tipo Fuoco." },
-          { name: "FLASH", type: "NORMAL", power: "---", acc: "100%", desc: "Investe il bersaglio con una luce abbagliante che ne riduce la precisione." }
-        ]
-      },
-      {
-        id: 203, name: "Girafarig", types: ["NORMAL", "PSYCHIC"], bst: 455,
-        stats: { HP: 70, ATK: 80, DEF: 65, "SP.ATK": 90, "SP.DEF": 65, VEL: 85 },
-        ability: "Sap Sipper (Nascosta)", abilityDesc: "Neutralizza le mosse di tipo Erba subite per aumentare l’Attacco.",
-        moves: [
-          { name: "TRAILBLAZE", type: "GRASS", power: "50", acc: "100%", desc: "L'utilizzatore attacca all'improvviso balzando dall'erba alta, aumentando la propria Velocità." },
-          { name: "GRASS KNOT", type: "GRASS", power: "---", acc: "100%", desc: "Chi la usa intrappola il bersaglio con l’erba e lo fa cadere. Danneggia maggiormente i Pokémon più pesanti." },
-          { name: "BULLDOZE", type: "GROUND", power: "60", acc: "100%", desc: "Chi la usa calpesta il terreno e scatena un terremoto che danneggia i Pokémon nei paraggi, riducendone la Velocità." },
-          { name: "CALM MIND", type: "PSYCHIC", power: "---", acc: "---", desc: "Chi la usa, meditando, placa il proprio spirito per aumentare l’Attacco Speciale e la Difesa Speciale." }
-        ]
-      },
-      {
-        id: 212, name: "Scizor", types: ["BUG", "STEEL"], bst: 500,
-        stats: { HP: 70, ATK: 130, DEF: 100, "SP.ATK": 55, "SP.DEF": 80, VEL: 65 },
-        ability: "Swarm", abilityDesc: "Quando si è in difficoltà, potenzia le mosse di tipo Coleottero.",
-        moves: [
-          { name: "SUPERPOWER", type: "FIGHTING", power: "120", acc: "100%", desc: "Chi la usa attacca il bersaglio con grande forza, ma il suo Attacco e la sua Difesa diminuiscono." },
-          { name: "BRICK BREAK", type: "FIGHTING", power: "75", acc: "100%", desc: "Colpisce il bersaglio con una mano e rompe barriere come Riflesso e Schermoluce." },
-          { name: "OMINOUS WIND", type: "GHOST", power: "60", acc: "100%", desc: "Chi la usa attacca con una forte raffica di vento che può aumentare tutte le sue statistiche." },
-          { name: "SWAGGER", type: "NORMAL", power: "---", acc: "85%", desc: "Chi la usa provoca il bersaglio e lo confonde, facendo aumentare però di molto il suo Attacco." }
-        ]
-      },
-      {
-        id: 242, name: "Blissey", types: ["NORMAL"], bst: 540,
-        stats: { HP: 255, ATK: 10, DEF: 10, "SP.ATK": 75, "SP.DEF": 135, VEL: 55 },
-        ability: "Healer (Nascosta)", abilityDesc: "A volte cura i problemi di stato degli alleati.",
-        moves: [
-          { name: "FOCUS BLAST", type: "FIGHTING", power: "120", acc: "70%", desc: "Chi la usa si concentra e rilascia la sua forza. Può ridurre la Difesa Speciale del Pokémon colpito." },
-          { name: "BULLDOZE", type: "GROUND", power: "60", acc: "100%", desc: "Chi la usa calpesta il terreno e scatena un terremoto che danneggia i Pokémon nei paraggi, riducendone la Velocità." },
-          { name: "PROTECT", type: "NORMAL", power: "---", acc: "---", desc: "Permette di eludere tutti gli attacchi. Se usata in successione può fallire." },
-          { name: "SWAGGER", type: "NORMAL", power: "---", acc: "85%", desc: "Chi la usa provoca il bersaglio e lo confonde, facendo aumentare però di molto il suo Attacco." }
-        ]
-      },
-      {
-        id: 275, name: "Shiftry", types: ["GRASS", "DARK"], bst: 480,
-        stats: { HP: 90, ATK: 100, DEF: 60, "SP.ATK": 90, "SP.DEF": 60, VEL: 80 },
-        ability: "Pickpocket (Nascosta)", abilityDesc: "Al contatto subito, ruba lo strumento di chi lo ha attaccato.",
-        moves: [
-          { name: "THIEF", type: "DARK", power: "60", acc: "100%", desc: "Chi la usa attacca il bersaglio e può rubargli lo strumento, se non ne ha già uno." },
-          { name: "LEAF STORM", type: "GRASS", power: "130", acc: "90%", desc: "Si forma una tempesta di foglie affilate. Il contraccolpo riduce di molto l’Attacco Speciale di chi la usa." },
-          { name: "SCREECH", type: "NORMAL", power: "---", acc: "85%", desc: "Stridio assordante che riduce di molto la Difesa del bersaglio." },
-          { name: "PSYCH UP", type: "NORMAL", power: "---", acc: "---", desc: "Chi la usa s’ipnotizza per copiare ogni modifica alle statistiche del bersaglio." }
-        ]
-      },
-      {
-        id: 323, name: "Camerupt", types: ["FIRE", "GROUND"], bst: 460,
-        stats: { HP: 70, ATK: 100, DEF: 70, "SP.ATK": 105, "SP.DEF": 75, VEL: 40 },
-        ability: "Solid Rock", abilityDesc: "Riduce la potenza delle mosse superefficaci.",
-        moves: [
-          { name: "LASH OUT", type: "DARK", power: "75", acc: "100%", desc: "Attacca con rabbia. Se ha subito cali di statistiche nel turno, la potenza raddoppia." },
-          { name: "HEAT WAVE", type: "FIRE", power: "95", acc: "90%", desc: "Chi la usa investe i nemici che ha intorno con una folata di vento caldo. Può anche scottarli." },
-          { name: "HOWL", type: "NORMAL", power: "---", acc: "---", desc: "Chi la usa emette un forte verso per darsi coraggio e aumentare l’Attacco." },
-          { name: "ROUND", type: "NORMAL", power: "60", acc: "100%", desc: "Attacca il bersaglio con una melodia. Se usata durante lo stesso turno da più Pokémon, i danni inflitti aumentano." }
-        ]
-      },
-      {
-        id: 330, name: "Flygon", types: ["GROUND", "DRAGON"], bst: 520,
-        stats: { HP: 80, ATK: 100, DEF: 80, "SP.ATK": 80, "SP.DEF": 80, VEL: 100 },
-        ability: "Levitate", abilityDesc: "Conferisce immunità dagli attacchi di tipo Terra.",
-        moves: [
-          { name: "DRAGON TAIL", type: "DRAGON", power: "60", acc: "90%", desc: "Chi la usa fa volar via il bersaglio in modo che venga sostituito." },
-          { name: "FLY", type: "FLYING", power: "90", acc: "95%", desc: "Chi la usa si alza in volo per attaccare al turno seguente." },
-          { name: "DOUBLE EDGE", type: "NORMAL", power: "120", acc: "100%", desc: "Carica spietata e pericolosa che danneggia molto anche chi la usa." },
-          { name: "MEGA PUNCH", type: "NORMAL", power: "80", acc: "85%", desc: "Colpisce il bersaglio con un pugno poderoso." }
-        ]
-      },
-      {
-        id: 398, name: "Staraptor", types: ["NORMAL", "FLYING"], bst: 485,
-        stats: { HP: 85, ATK: 120, DEF: 70, "SP.ATK": 50, "SP.DEF": 60, VEL: 100 },
-        ability: "Reckless (Nascosta)", abilityDesc: "Potenzia le mosse che provocano contraccolpi.",
-        moves: [
-          { name: "U TURN", type: "BUG", power: "70", acc: "100%", desc: "Chi usa questa mossa fa marcia indietro per farsi sostituire dopo aver sferrato l’attacco." },
-          { name: "AIR SLASH", type: "FLYING", power: "75", acc: "95%", desc: "Chi la usa attacca con un vento tagliente che squarcia il cielo. Può anche far tentennare il Pokémon colpito." },
-          { name: "REST", type: "PSYCHIC", power: "---", acc: "---", desc: "Chi la usa recupera tutti i PS e guarisce da tutti i suoi problemi di stato, ma dorme per due turni." },
-          { name: "HIDDEN POWER", type: "NORMAL", power: "60", acc: "100%", desc: "Mossa singolare che cambia tipo a seconda del Pokémon che la usa." }
-        ]
-      },
-      {
-        id: 407, name: "Roserade", types: ["GRASS", "POISON"], bst: 515,
-        stats: { HP: 60, ATK: 70, DEF: 65, "SP.ATK": 125, "SP.DEF": 105, VEL: 90 },
-        ability: "Natural Cure", abilityDesc: "Cura i problemi di stato quando il Pokémon viene sostituito.",
-        moves: [
-          { name: "SUNNY DAY", type: "FIRE", power: "---", acc: "---", desc: "Chi la usa intensifica i raggi solari per cinque turni, potenziando le mosse di tipo Fuoco." },
-          { name: "BULLET SEED", type: "GRASS", power: "25", acc: "100%", desc: "Chi la usa spara da due a cinque raffiche di semi contro il bersaglio in successione." },
-          { name: "SWAGGER", type: "NORMAL", power: "---", acc: "85%", desc: "Chi la usa provoca il bersaglio e lo confonde, facendo aumentare però di molto il suo Attacco." },
-          { name: "CAPTIVATE", type: "NORMAL", power: "---", acc: "100%", desc: "Se i nemici nei paraggi sono del sesso opposto, ne riduce di molto l'Attacco Speciale." }
-        ]
-      },
-      {
-        id: 421, name: "Cherrim", types: ["GRASS"], bst: 450,
-        stats: { HP: 70, ATK: 60, DEF: 70, "SP.ATK": 87, "SP.DEF": 78, VEL: 85 },
-        ability: "Flower Gift", abilityDesc: "Se c’è il sole, potenzia i Pokémon alleati.",
-        moves: [
-          { name: "SOLAR BLADE", type: "GRASS", power: "125", acc: "100%", desc: "Assorbe luce al primo turno per attaccare con una lama solare al successivo." },
-          { name: "LUCKY CHANT", type: "NORMAL", power: "---", acc: "---", desc: "Impedisce al nemico di sferrare brutti colpi alla squadra." },
-          { name: "HYPER BEAM", type: "NORMAL", power: "150", acc: "90%", desc: "Colpisce il bersaglio con un potente raggio. Chi la usa salta il turno successivo." },
-          { name: "HELPING HAND", type: "NORMAL", power: "---", acc: "---", desc: "Mossa che aumenta la potenza dell’attacco di un alleato." }
-        ]
-      },
-      {
-        id: 424, name: "Ambipom", types: ["NORMAL"], bst: 482,
-        stats: { HP: 75, ATK: 100, DEF: 66, "SP.ATK": 60, "SP.DEF": 66, VEL: 115 },
-        ability: "Pickup", abilityDesc: "Aumenta la probabilità di trovare strumenti.",
-        moves: [
-          { name: "GUNK SHOT", type: "POISON", power: "120", acc: "80%", desc: "Chi la usa attacca il bersaglio con rifiuti sudici che possono anche avvelenarlo." },
-          { name: "SUNNY DAY", type: "FIRE", power: "---", acc: "---", desc: "Chi la usa intensifica i raggi solari per cinque turni, potenziando le mosse di tipo Fuoco." },
-          { name: "METRONOME", type: "NORMAL", power: "---", acc: "---", desc: "Usa a caso una tra le tante mosse esistenti." },
-          { name: "GIGA IMPACT", type: "NORMAL", power: "150", acc: "90%", desc: "Carica il bersaglio con tutta la forza, ma deve riposare il turno successivo." }
-        ]
-      },
-      {
-        id: 426, name: "Drifblim", types: ["GHOST", "FLYING"], bst: 498,
-        stats: { HP: 150, ATK: 80, DEF: 44, "SP.ATK": 90, "SP.DEF": 54, VEL: 80 },
-        ability: "Flare Boost (Nascosta)", abilityDesc: "Aumenta l’Attacco Speciale se il Pokémon è scottato.",
-        moves: [
-          { name: "SHADOW BALL", type: "GHOST", power: "80", acc: "100%", desc: "Lancia sul bersaglio una sfera nera. Può anche ridurne la Difesa Speciale." },
-          { name: "HAZE", type: "ICE", power: "---", acc: "---", desc: "Annulla ogni modifica alle statistiche di tutti i Pokémon in campo." },
-          { name: "BIND", type: "NORMAL", power: "15", acc: "85%", desc: "Lega e stritola il bersaglio per quattro o cinque turni." },
-          { name: "ALLY SWITCH", type: "PSYCHIC", power: "---", acc: "---", desc: "Si teletrasporta al posto di un alleato in campo." }
-        ]
-      },
-      {
-        id: 429, name: "Mismagius", types: ["GHOST"], bst: 495,
-        stats: { HP: 60, ATK: 60, DEF: 60, "SP.ATK": 105, "SP.DEF": 105, VEL: 105 },
-        ability: "Levitate", abilityDesc: "Conferisce immunità dagli attacchi di tipo Terra.",
-        moves: [
-          { name: "HEAL BELL", type: "NORMAL", power: "---", acc: "---", desc: "Cura i problemi di stato suoi e dei Pokémon alleati." },
-          { name: "PROTECT", type: "NORMAL", power: "---", acc: "---", desc: "Permette di eludere tutti gli attacchi." },
-          { name: "RETURN", type: "NORMAL", power: "---", acc: "100%", desc: "Diventa più potente quanto maggiore è la felicità." },
-          { name: "PSYWAVE", type: "PSYCHIC", power: "---", acc: "100%", desc: "Colpisce con una strana onda psichica a intensità variabile." }
-        ]
-      },
-      {
-        id: 463, name: "Lickilicky", types: ["NORMAL"], bst: 515,
-        stats: { HP: 110, ATK: 85, DEF: 95, "SP.ATK": 80, "SP.DEF": 95, VEL: 50 },
-        ability: "Cloud Nine (Nascosta)", abilityDesc: "Neutralizza gli effetti delle condizioni atmosferiche.",
-        moves: [
-          { name: "PSYCH UP", type: "NORMAL", power: "---", acc: "---", desc: "Copia ogni modifica alle statistiche del bersaglio." },
-          { name: "DEFENSE CURL", type: "NORMAL", power: "---", acc: "---", desc: "Si raggomitola per aumentare la propria Difesa." },
-          { name: "HIDDEN POWER", type: "NORMAL", power: "60", acc: "100%", desc: "Mossa singolare che cambia tipo a seconda di chi la usa." },
-          { name: "NATURAL GIFT", type: "NORMAL", power: "---", acc: "100%", desc: "Trae forza dalla bacca posseduta, definendone tipo e potenza." }
-        ]
-      },
-      {
-        id: 467, name: "Magmortar", types: ["FIRE"], bst: 540,
-        stats: { HP: 75, ATK: 95, DEF: 67, "SP.ATK": 125, "SP.DEF": 95, VEL: 83 },
-        ability: "Vital Spirit (Nascosta)", abilityDesc: "Impedisce al Pokémon di addormentarsi.",
-        moves: [
-          { name: "LOW SWEEP", type: "FIGHTING", power: "65", acc: "100%", desc: "Colpisce con un attacco fulmineo riducendo la Velocità del bersaglio." },
-          { name: "FLING", type: "DARK", power: "---", acc: "100%", desc: "Lancia il proprio strumento contro il bersaglio." },
-          { name: "GIGA IMPACT", type: "NORMAL", power: "150", acc: "90%", desc: "Carica il bersaglio usando tutta la forza, ma salta il turno dopo." },
-          { name: "SCARY FACE", type: "NORMAL", power: "---", acc: "100%", desc: "Spaventa il bersaglio e ne riduce di molto la Velocità." }
-        ]
-      },
-      {
-        id: 478, name: "Froslass", types: ["ICE", "GHOST"], bst: 480,
-        stats: { HP: 70, ATK: 80, DEF: 70, "SP.ATK": 80, "SP.DEF": 70, VEL: 110 },
-        ability: "Snow Cloak", abilityDesc: "Aumenta l’elusione quando grandina.",
-        moves: [
-          { name: "ICE SHARD", type: "ICE", power: "40", acc: "100%", desc: "Lancia pezzi di ghiaccio. Questa mossa colpisce per prima." },
-          { name: "FAKE TEARS", type: "DARK", power: "---", acc: "100%", desc: "Pianto teatrale per ridurre di molto la Difesa Speciale del bersaglio." },
-          { name: "SNATCH", type: "DARK", power: "---", acc: "---", desc: "Ruba e usa la mossa curativa o di stato del nemico." },
-          { name: "FRUSTRATION", type: "NORMAL", power: "---", acc: "100%", desc: "Mossa più potente quanto minore è l'affezione." }
-        ]
-      },
-      {
-        id: 497, name: "Serperior", types: ["GRASS"], bst: 528,
-        stats: { HP: 75, ATK: 75, DEF: 95, "SP.ATK": 75, "SP.DEF": 95, VEL: 113 },
-        ability: "Contrary (Nascosta)", abilityDesc: "Le modifiche alle statistiche hanno effetto inverso.",
-        moves: [
-          { name: "KNOCK OFF", type: "DARK", power: "65", acc: "100%", desc: "Rimuove lo strumento del bersaglio. Più forte se lo strumento è presente." },
-          { name: "LEAF STORM", type: "GRASS", power: "130", acc: "90%", desc: "Tempesta di foglie affilate. Riduce l'Attacco Speciale (aumenta con Contrary!)." },
-          { name: "PROTECT", type: "NORMAL", power: "---", acc: "---", desc: "Elude tutti gli attacchi nel turno." },
-          { name: "SECRET POWER", type: "NORMAL", power: "70", acc: "100%", desc: "Attacco con effetto variabile secondo l'ambiente." }
-        ]
-      },
-      {
-        id: 500, name: "Emboar", types: ["FIRE", "FIGHTING"], bst: 528,
-        stats: { HP: 110, ATK: 123, DEF: 65, "SP.ATK": 100, "SP.DEF": 65, VEL: 65 },
-        ability: "Reckless (Nascosta)", abilityDesc: "Potenzia le mosse che provocano contraccolpi.",
-        moves: [
-          { name: "LOW KICK", type: "FIGHTING", power: "---", acc: "100%", desc: "Calcio basso che infligge più danni ai Pokémon più pesanti." },
-          { name: "INCINERATE", type: "FIRE", power: "60", acc: "100%", desc: "Attacca con fiamme distruggendo le bacche del bersaglio." },
-          { name: "IRON TAIL", type: "STEEL", power: "100", acc: "75%", desc: "Colpisce con una coda d'acciaio. Può ridurre la Difesa." },
-          { name: "SNORE", type: "NORMAL", power: "50", acc: "100%", desc: "Mossa da usare solo mentre si dorme. Può far tentennare." }
-        ]
-      },
-      {
-        id: 534, name: "Conkeldurr", types: ["FIGHTING"], bst: 505,
-        stats: { HP: 105, ATK: 140, DEF: 95, "SP.ATK": 55, "SP.DEF": 65, VEL: 45 },
-        ability: "Sheer Force", abilityDesc: "Aumenta i danni annullando altri effetti delle mosse.",
-        moves: [
-          { name: "ROCK SLIDE", type: "ROCK", power: "75", acc: "90%", desc: "Lancia grandi massi che possono far tentennare i nemici." },
-          { name: "HARD PRESS", type: "STEEL", power: "0", acc: "100%", desc: "Schiaccia il bersaglio. Più PS ha il nemico, più la mossa è forte." },
-          { name: "MEGA PUNCH", type: "NORMAL", power: "80", acc: "85%", desc: "Colpisce il bersaglio con un pugno poderoso." },
-          { name: "BODY SLAM", type: "NORMAL", power: "85", acc: "100%", desc: "Carica il bersaglio con tutto il corpo. Può paralizzare." }
-        ]
-      },
-      {
-        id: 545, name: "Scolipede", types: ["BUG", "POISON"], bst: 485,
-        stats: { HP: 60, ATK: 100, DEF: 89, "SP.ATK": 55, "SP.DEF": 69, VEL: 112 },
-        ability: "Poison Point", abilityDesc: "Può avvelenare chi manda a segno una mossa fisica.",
-        moves: [
-          { name: "STEEL ROLLER", type: "STEEL", power: "130", acc: "100%", desc: "Attacca distruggendo il Campo attivo. Fallisce senza Campo." },
-          { name: "SWAGGER", type: "NORMAL", power: "---", acc: "85%", desc: "Provoca il bersaglio, lo confonde ma ne aumenta l'Attacco." },
-          { name: "GIGA IMPACT", type: "NORMAL", power: "150", acc: "90%", desc: "Carica usando tutta la forza, salta il turno successivo." },
-          { name: "SUBSTITUTE", type: "NORMAL", power: "---", acc: "---", desc: "Crea un sostituto esca usando dei PS." }
-        ]
-      },
-      {
-        id: 547, name: "Whimsicott", types: ["GRASS", "FAIRY"], bst: 480,
-        stats: { HP: 60, ATK: 67, DEF: 85, "SP.ATK": 77, "SP.DEF": 75, VEL: 116 },
-        ability: "Chlorophyll (Nascosta)", abilityDesc: "Se c’è il sole, la statistica Velocità aumenta.",
-        moves: [
-          { name: "WORRY SEED", type: "GRASS", power: "---", acc: "100%", desc: "Muta l'abilità del bersaglio in Insonnia." },
-          { name: "PSYCHIC", type: "PSYCHIC", power: "90", acc: "100%", desc: "Attacco telecinetico che può ridurne la Difesa Speciale." },
-          { name: "GROWTH", type: "NORMAL", power: "---", acc: "---", desc: "Aumenta l'Attacco e l'Attacco Speciale dell'utilizzatore." },
-          { name: "COVET", type: "NORMAL", power: "60", acc: "100%", desc: "Attacca sorridendo e ruba lo strumento al nemico." }
-        ]
-      },
-      {
-        id: 565, name: "Carracosta", types: ["WATER", "ROCK"], bst: 495,
-        stats: { HP: 74, ATK: 108, DEF: 133, "SP.ATK": 83, "SP.DEF": 65, VEL: 32 },
-        ability: "Swift Swim (Nascosta)", abilityDesc: "Se piove, la statistica Velocità aumenta.",
-        moves: [
-          { name: "RAIN DANCE", type: "WATER", power: "---", acc: "---", desc: "Provoca una forte pioggia per cinque turni." },
-          { name: "WATER PULSE", type: "WATER", power: "60", acc: "100%", desc: "Getto d'acqua che può confondere il bersaglio." },
-          { name: "AQUA JET", type: "WATER", power: "40", acc: "100%", desc: "Attacco fulmineo ad alta priorità." },
-          { name: "WITHDRAW", type: "WATER", power: "---", acc: "---", desc: "Si ritira nel guscio aumentandone la Difesa." }
-        ]
-      },
-      {
-        id: 596, name: "Galvantula", types: ["BUG", "ELECTRIC"], bst: 472,
-        stats: { HP: 70, ATK: 77, DEF: 60, "SP.ATK": 97, "SP.DEF": 60, VEL: 108 },
-        ability: "Unnerve", abilityDesc: "Il nemico viene intimidito e non può mangiare bacche.",
-        moves: [
-          { name: "POUNCE", type: "BUG", power: "50", acc: "100%", desc: "Balza sul bersaglio riducendone la Velocità." },
-          { name: "TOXIC", type: "POISON", power: "---", acc: "90%", desc: "Iperavvelena il bersaglio con una potente tossina." },
-          { name: "ATTRACT", type: "NORMAL", power: "---", acc: "100%", desc: "Innamora il sesso opposto facendolo tentennare nell'attaccare." },
-          { name: "FRUSTRATION", type: "NORMAL", power: "---", acc: "100%", desc: "Danni crescenti con la minora affezione." }
-        ]
-      },
-      {
-        id: 614, name: "Beartic", types: ["ICE"], bst: 505,
-        stats: { HP: 95, ATK: 130, DEF: 80, "SP.ATK": 70, "SP.DEF": 80, VEL: 50 },
-        ability: "Swift Swim (Nascosta)", abilityDesc: "Se piove, la statistica Velocità aumenta.",
-        moves: [
-          { name: "AVALANCHE", type: "ICE", power: "60", acc: "100%", desc: "Infligge doppi danni se si è subiti danni nello stesso turno." },
-          { name: "ICE PUNCH", type: "ICE", power: "75", acc: "100%", desc: "Pugno di ghiaccio che può congelare il bersaglio." },
-          { name: "REST", type: "PSYCHIC", power: "---", acc: "---", desc: "Recupera tutti i PS e dorme per due turni." },
-          { name: "SLASH", type: "NORMAL", power: "70", acc: "100%", desc: "Attacca con artigli. Probabile brutto colpo." }
-        ]
-      },
-      {
-        id: 623, name: "Golurk", types: ["GROUND", "GHOST"], bst: 483,
-        stats: { HP: 89, ATK: 124, DEF: 80, "SP.ATK": 55, "SP.DEF": 80, VEL: 55 },
-        ability: "Iron Fist", abilityDesc: "Potenzia le mosse che utilizzano pugni.",
-        moves: [
-          { name: "SHOCK WAVE", type: "ELECTRIC", power: "60", acc: "---", desc: "Scossa elettrica che non fallisce mai." },
-          { name: "LOW SWEEP", type: "FIGHTING", power: "65", acc: "100%", desc: "Colpisce le gambe riducendo la Velocità del bersaglio." },
-          { name: "STEALTH ROCK", type: "ROCK", power: "---", acc: "---", desc: "Piazza trappole rocciose sul campo nemico." },
-          { name: "IRON HEAD", type: "STEEL", power: "80", acc: "100%", desc: "Colpisce di testa con forza. Può far tentennare." }
-        ]
-      },
-      {
-        id: 632, name: "Durant", types: ["BUG", "STEEL"], bst: 484,
-        stats: { HP: 58, ATK: 109, DEF: 112, "SP.ATK": 48, "SP.DEF": 48, VEL: 109 },
-        ability: "Hustle", abilityDesc: "Aumenta l’Attacco, ma riduce la precisione.",
-        moves: [
-          { name: "X SCISSOR", type: "BUG", power: "80", acc: "100%", desc: "Colpisce il bersaglio usando le sue falci come forbici." },
-          { name: "ROCK POLISH", type: "ROCK", power: "---", acc: "---", desc: "Leviga il corpo per aumentare di molto la Velocità." },
-          { name: "SAND ATTACK", type: "GROUND", power: "---", acc: "100%", desc: "Lancia sabbia in faccia riducendo la precisione." },
-          { name: "IRON DEFENSE", type: "STEEL", power: "---", acc: "---", desc: "Indurisce il corpo aumentando di molto la Difesa." }
-        ]
-      },
-      {
-        id: 658, name: "Greninja", types: ["WATER", "DARK"], bst: 530,
-        stats: { HP: 72, ATK: 95, DEF: 67, "SP.ATK": 103, "SP.DEF": 71, VEL: 122 },
-        ability: "Protean (Nascosta)", abilityDesc: "Cambia il tipo del Pokémon in quello della mossa usata.",
-        moves: [
-          { name: "ACROBATICS", type: "FLYING", power: "55", acc: "100%", desc: "Infligge danni doppi se l'utilizzatore non possiede strumenti." },
-          { name: "WATER SHURIKEN", type: "WATER", power: "15", acc: "100%", desc: "Attacca per primo colpendo da due a cinque volte di fila." },
-          { name: "POUND", type: "NORMAL", power: "40", acc: "100%", desc: "Colpisce il bersaglio con le zampe o la coda." },
-          { name: "GIGA IMPACT", type: "NORMAL", power: "150", acc: "90%", desc: "Carica a tutta forza, richiede riposo il turno dopo." }
-        ]
-      },
-      {
-        id: 663, name: "Talonflame", types: ["FIRE", "FLYING"], bst: 499,
-        stats: { HP: 78, ATK: 81, DEF: 71, "SP.ATK": 74, "SP.DEF": 69, VEL: 126 },
-        ability: "Flame Body", abilityDesc: "Al contatto subito, chi sferra l’attacco può venire scottato.",
-        moves: [
-          { name: "FIRE BLAST", type: "FIRE", power: "110", acc: "85%", desc: "Intensa fiammata che fa terra bruciata. Può scottare." },
-          { name: "RAIN DANCE", type: "WATER", power: "---", acc: "---", desc: "Provoca una forte pioggia per cinque turni." },
-          { name: "QUICK ATTACK", type: "NORMAL", power: "40", acc: "100%", desc: "Attacco ultra-veloce ad alta priorità." },
-          { name: "FEINT", type: "NORMAL", power: "30", acc: "100%", desc: "Colpisce anche chi usa Protezione o Individua." }
-        ]
-      },
-      {
-        id: 685, name: "Slurpuff", types: ["FAIRY"], bst: 480,
-        stats: { HP: 82, ATK: 80, DEF: 86, "SP.ATK": 85, "SP.DEF": 75, VEL: 72 },
-        ability: "Sweet Veil", abilityDesc: "Impedisce a sé e agli alleati di addormentarsi.",
-        moves: [
-          { name: "DRAINING KISS", type: "FAIRY", power: "50", acc: "100%", desc: "Assorbe PS dal bersaglio recuperando oltre la metà dei danni inflitti." },
-          { name: "ENDEAVOR", type: "NORMAL", power: "---", acc: "100%", desc: "Riduce i PS del bersaglio pari a quelli rimasti all'utilizzatore." },
-          { name: "GIGA IMPACT", type: "NORMAL", power: "150", acc: "90%", desc: "Carica a piena forza, riposa il turno dopo." },
-          { name: "TACKLE", type: "NORMAL", power: "40", acc: "100%", desc: "Carica l'avversario investendolo col corpo." }
-        ]
-      },
-      {
-        id: 724, name: "Decidueye", types: ["GRASS", "GHOST"], bst: 530,
-        stats: { HP: 78, ATK: 107, DEF: 75, "SP.ATK": 100, "SP.DEF": 100, VEL: 70 },
-        ability: "Overgrow", abilityDesc: "Quando si è in difficoltà, potenzia le mosse di tipo Erba.",
-        moves: [
-          { name: "HEX", type: "GHOST", power: "65", acc: "100%", desc: "Danni raddoppiati se il bersaglio soffre di problemi di stato." },
-          { name: "SCARY FACE", type: "NORMAL", power: "---", acc: "100%", desc: "Riduce di molto la Velocità del bersaglio." },
-          { name: "SWIFT", type: "NORMAL", power: "60", acc: "---", desc: "Raggi a forma di stella infallibili." },
-          { name: "COACHING", type: "FIGHTING", power: "---", acc: "---", desc: "Aumenta Attacco e Difesa degli alleati." }
-        ]
-      },
-      {
-        id: 738, name: "Vikavolt", types: ["BUG", "ELECTRIC"], bst: 500,
-        stats: { HP: 77, ATK: 70, DEF: 90, "SP.ATK": 145, "SP.DEF": 75, VEL: 43 },
-        ability: "Levitate", abilityDesc: "Conferisce immunità dagli attacchi di tipo Terra.",
-        moves: [
-          { name: "X SCISSOR", type: "BUG", power: "80", acc: "100%", desc: "Colpisce tagliando a forbice con gli artigli." },
-          { name: "BITE", type: "DARK", power: "60", acc: "100%", desc: "Morde con denti affilati e può far tentennare." },
-          { name: "VOLT SWITCH", type: "ELECTRIC", power: "70", acc: "100%", desc: "Attacca ed effettua subito un cambio con un alleato." },
-          { name: "ACROBATICS", type: "FLYING", power: "55", acc: "100%", desc: "Attacco rapido più potente se non si hanno strumenti." }
-        ]
-      },
-      {
-        id: 743, name: "Ribombee", types: ["BUG", "FAIRY"], bst: 464,
-        stats: { HP: 60, ATK: 55, DEF: 60, "SP.ATK": 95, "SP.DEF": 70, VEL: 124 },
-        ability: "Sweet Veil (Nascosta)", abilityDesc: "Impedisce a sé e agli alleati di addormentarsi.",
-        moves: [
-          { name: "DAZZLING GLEAM", type: "FAIRY", power: "80", acc: "100%", desc: "Emette una luce potente che colpisce i nemici vicini." },
-          { name: "TELEKINESIS", type: "PSYCHIC", power: "---", acc: "---", desc: "Fa fluttuare il nemico rendendolo facile da colpire." },
-          { name: "FRUSTRATION", type: "NORMAL", power: "---", acc: "100%", desc: "Danni potenziati dalla bassa affezione." },
-          { name: "PROTECT", type: "NORMAL", power: "---", acc: "---", desc: "Protegge interamente dagli attacchi per un turno." }
-        ]
-      },
-      {
-        id: 750, name: "Mudsdale", types: ["GROUND"], bst: 500,
-        stats: { HP: 100, ATK: 125, DEF: 100, "SP.ATK": 55, "SP.DEF": 85, VEL: 35 },
-        ability: "Inner Focus (Nascosta)", abilityDesc: "Evita che il Pokémon tentenni.",
-        moves: [
-          { name: "STONE EDGE", type: "ROCK", power: "100", acc: "80%", desc: "Colpisce dal basso con pietre affilate. Alto tasso di brutti colpi." },
-          { name: "SNORE", type: "NORMAL", power: "50", acc: "100%", desc: "Attacco sonoro da usare solo mentre si dorme." },
-          { name: "SUBSTITUTE", type: "NORMAL", power: "---", acc: "---", desc: "Crea una copia esca consumando PS." },
-          { name: "DOUBLE TEAM", type: "NORMAL", power: "---", acc: "---", desc: "Crea copie illusorie aumentando l'elusione." }
-        ]
-      },
-      {
-        id: 763, name: "Tsareena", types: ["GRASS"], bst: 510,
-        stats: { HP: 72, ATK: 120, DEF: 98, "SP.ATK": 50, "SP.DEF": 98, VEL: 72 },
-        ability: "Leaf Guard", abilityDesc: "Evita problemi di stato quando c’è il sole.",
-        moves: [
-          { name: "TRIPLE AXEL", type: "ICE", power: "20", acc: "90%", desc: "Sferra fino a 3 calci consecutivi con potenza crescente." },
-          { name: "LOW KICK", type: "FIGHTING", power: "---", acc: "100%", desc: "Calcio basso, infligge più danni ai bersagli pesanti." },
-          { name: "CHARM", type: "FAIRY", power: "---", acc: "100%", desc: "Ammalia il bersaglio riducendone molto l'Attacco." },
-          { name: "TEETER DANCE", type: "NORMAL", power: "---", acc: "100%", desc: "Danza goffa che confonde tutti i Pokémon attorno." }
-        ]
-      },
-      {
-        id: 832, name: "Dubwool", types: ["NORMAL"], bst: 490,
-        stats: { HP: 72, ATK: 80, DEF: 100, "SP.ATK": 60, "SP.DEF": 90, VEL: 88 },
-        ability: "Steadfast", abilityDesc: "Aumenta la Velocità se il Pokémon tentenna.",
-        moves: [
-          { name: "WILD CHARGE", type: "ELECTRIC", power: "90", acc: "100%", desc: "Carica elettrica sul bersaglio con contraccolpo per sé." },
-          { name: "DOUBLE KICK", type: "FIGHTING", power: "30", acc: "100%", desc: "Colpisce due volte consecutive con raffiche di calci." },
-          { name: "ZEN HEADBUTT", type: "PSYCHIC", power: "80", acc: "90%", desc: "Testata concentrata che può far tentennare il nemico." },
-          { name: "HYPER BEAM", type: "NORMAL", power: "150", acc: "90%", desc: "Raggio devastante, salta il turno successivo per ricaricare." }
-        ]
-      },
-      {
-        id: 841, name: "Flapple", types: ["GRASS", "DRAGON"], bst: 485,
-        stats: { HP: 70, ATK: 110, DEF: 80, "SP.ATK": 95, "SP.DEF": 60, VEL: 70 },
-        ability: "Ripen", abilityDesc: "Fa maturare le bacche raddoppiandone gli effetti.",
-        moves: [
-          { name: "AIR SLASH", type: "FLYING", power: "75", acc: "95%", desc: "Vento tagliente che può far tentennare il bersaglio." },
-          { name: "TERA BLAST", type: "NORMAL", power: "80", acc: "100%", desc: "Attacco Teracristal usando la statistica d'attacco più alta." },
-          { name: "RECYCLE", type: "NORMAL", power: "---", acc: "---", desc: "Ricicla uno strumento monouso già consumato." },
-          { name: "ATTRACT", type: "NORMAL", power: "---", acc: "100%", desc: "Infatua l'avversario di sesso opposto." }
-        ]
-      },
-      {
-        id: 844, name: "Sandaconda", types: ["GROUND"], bst: 510,
-        stats: { HP: 72, ATK: 107, DEF: 125, "SP.ATK": 65, "SP.DEF": 70, VEL: 71 },
-        ability: "Shed Skin", abilityDesc: "Può curare i problemi di stato del Pokémon.",
-        moves: [
-          { name: "WRAP", type: "NORMAL", power: "15", acc: "90%", desc: "Avvolge e stritola per 4 o 5 turni." },
-          { name: "COIL", type: "POISON", power: "---", acc: "---", desc: "Si concentra aumentando Attacco, Difesa e Precisione." },
-          { name: "HYPER BEAM", type: "NORMAL", power: "150", acc: "90%", desc: "Potente raggio. Richiede un turno di riposo." },
-          { name: "ATTRACT", type: "NORMAL", power: "---", acc: "100%", desc: "Ammalia il nemico del sesso opposto." }
-        ]
-      },
-      {
-        id: 845, name: "Cramorant", types: ["FLYING", "WATER"], bst: 475,
-        stats: { HP: 70, ATK: 85, DEF: 55, "SP.ATK": 85, "SP.DEF": 95, VEL: 85 },
-        ability: "Gulp Missile", abilityDesc: "Quando usa Surf o Sub, cattura una preda. Se ferito, la sputa.",
-        moves: [
-          { name: "AIR CUTTER", type: "FLYING", power: "60", acc: "95%", desc: "Provoca un vento tagliente. Probabile brutto colpo." },
-          { name: "SURF", type: "WATER", power: "90", acc: "100%", desc: "Un'onda enorme travolge il campo di battaglia." },
-          { name: "ICY WIND", type: "ICE", power: "55", acc: "95%", desc: "Aria gelida che riduce la Velocità dei nemici." },
-          { name: "AMNESIA", type: "PSYCHIC", power: "---", acc: "---", desc: "Aumenta di molto la Difesa Speciale." }
-        ]
-      },
-      {
-        id: 849, name: "Toxtricity-amped", types: ["ELECTRIC", "POISON"], bst: 502,
-        stats: { HP: 75, ATK: 98, DEF: 70, "SP.ATK": 114, "SP.DEF": 70, VEL: 75 },
-        ability: "Technician (Nascosta)", abilityDesc: "Potenzia le mosse più deboli del Pokémon.",
-        moves: [
-          { name: "PAYBACK", type: "DARK", power: "50", acc: "100%", desc: "Potenza raddoppiata se si attacca dopo il bersaglio." },
-          { name: "THUNDERBOLT", type: "ELECTRIC", power: "90", acc: "100%", desc: "Scarica elettrica che può paralizzare." },
-          { name: "SUBSTITUTE", type: "NORMAL", power: "---", acc: "---", desc: "Crea una copia esca consumando PS." },
-          { name: "SCREECH", type: "NORMAL", power: "---", acc: "85%", desc: "Stridio che riduce di molto la Difesa nemica." }
-        ]
-      },
-      {
-        id: 855, name: "Polteageist", types: ["GHOST"], bst: 508,
-        stats: { HP: 60, ATK: 65, DEF: 65, "SP.ATK": 134, "SP.DEF": 114, VEL: 70 },
-        ability: "Weak Armor", abilityDesc: "Riduce la Difesa e aumenta la Velocità se il Pokémon è colpito.",
-        moves: [
-          { name: "DARK PULSE", type: "DARK", power: "80", acc: "100%", desc: "Emana un'aura oscura che può far tentennare." },
-          { name: "SLEEP TALK", type: "NORMAL", power: "---", acc: "---", desc: "Sfodera una mossa a caso mentre dorme." },
-          { name: "SHELL SMASH", type: "NORMAL", power: "---", acc: "---", desc: "Riduce le difese per aumentare di molto Atk, SpAtk e Vel." },
-          { name: "REST", type: "PSYCHIC", power: "---", acc: "---", desc: "Recupera tutti i PS dormendo per due turni." }
-        ]
-      },
-      {
-        id: 875, name: "Eiscue-ice", types: ["ICE"], bst: 470,
-        stats: { HP: 75, ATK: 80, DEF: 110, "SP.ATK": 65, "SP.DEF": 90, VEL: 50 },
-        ability: "Ice Face", abilityDesc: "Incasse danni fisici grazie al blocco di ghiaccio in testa.",
-        moves: [
-          { name: "AVALANCHE", type: "ICE", power: "60", acc: "100%", desc: "Doppi danni se subisce ferite nello stesso turno." },
-          { name: "POWDER SNOW", type: "ICE", power: "40", acc: "100%", desc: "Raffica di neve che può congelare." },
-          { name: "ENDURE", type: "NORMAL", power: "---", acc: "---", desc: "Resiste a qualsiasi colpo lasciando almeno 1 PS." },
-          { name: "HYPER BEAM", type: "NORMAL", power: "150", acc: "90%", desc: "Raggio ad altissima potenza, salta il turno successivo." }
-        ]
-      },
-      {
-        id: 898, name: "Calyrex", types: ["PSYCHIC", "GRASS"], bst: 500,
-        stats: { HP: 100, ATK: 80, DEF: 80, "SP.ATK": 80, "SP.DEF": 80, VEL: 80 },
-        ability: "Unnerve", abilityDesc: "Il nemico viene intimidito e non può mangiare bacche.",
-        moves: [
-          { name: "SOLAR BLADE", type: "GRASS", power: "125", acc: "100%", desc: "Lama solare ad alta intensità caricata al primo turno." },
-          { name: "GRASSY TERRAIN", type: "GRASS", power: "---", acc: "---", desc: "Crea un campo erboso che rigenera PS ad ogni turno." },
-          { name: "POLLEN PUFF", type: "BUG", power: "90", acc: "100%", desc: "Danneggia i nemici o cura gli alleati colpiti." },
-          { name: "BATON PASS", type: "NORMAL", power: "---", acc: "---", desc: "Sostituisce il Pokémon ereditando i bonus di statistiche." }
-        ]
-      },
-      {
-        id: 927, name: "Dachsbun", types: ["FAIRY"], bst: 477,
-        stats: { HP: 57, ATK: 80, DEF: 115, "SP.ATK": 50, "SP.DEF": 80, VEL: 95 },
-        ability: "Aroma Veil (Nascosta)", abilityDesc: "Protegge da mosse che limitano la scelta di attacchi.",
-        moves: [
-          { name: "FIRE FANG", type: "FIRE", power: "65", acc: "95%", desc: "Morde con denti infuocati. Può scottare o far tentennare." },
-          { name: "CRUNCH", type: "DARK", power: "80", acc: "100%", desc: "Morde con forza e può ridurre la Difesa." },
-          { name: "STOMPING TANTRUM", type: "GROUND", power: "75", acc: "100%", desc: "Potenza raddoppiata se la mossa precedente ha fallito." },
-          { name: "TERA BLAST", type: "NORMAL", power: "80", acc: "100%", desc: "Energia Teracristal adattata al tipo del Pokémon." }
-        ]
-      },
-      {
-        id: 937, name: "Ceruledge", types: ["FIRE", "GHOST"], bst: 525,
-        stats: { HP: 75, ATK: 125, DEF: 80, "SP.ATK": 60, "SP.DEF": 100, VEL: 85 },
-        ability: "Flash Fire", abilityDesc: "Potenzia le proprie mosse Fuoco se se ne subisce una.",
-        moves: [
-          { name: "EMBER", type: "FIRE", power: "40", acc: "100%", desc: "Fiammelle d'attacco che possono scottare." },
-          { name: "CLEAR SMOG", type: "POISON", power: "50", acc: "---", desc: "Fumo speciale che azzera le statistiche modificate del nemico." },
-          { name: "FALSE SWIPE", type: "NORMAL", power: "40", acc: "100%", desc: "Lascia il bersaglio sempre con almeno 1 PS." },
-          { name: "TERA BLAST", type: "NORMAL", power: "80", acc: "100%", desc: "Emana energia Teracristal basata sulla statistica più alta." }
-        ]
-      },
-      {
-        id: 941, name: "Kilowattrel", types: ["ELECTRIC", "FLYING"], bst: 490,
-        stats: { HP: 70, ATK: 70, DEF: 60, "SP.ATK": 105, "SP.DEF": 60, VEL: 125 },
-        ability: "Wind Power", abilityDesc: "Si carica quando è colpito da mosse di vento, potenziando l'Elettricità.",
-        moves: [
-          { name: "THUNDER", type: "ELECTRIC", power: "110", acc: "70%", desc: "Lampo violento che può paralizzare." },
-          { name: "THUNDER SHOCK", type: "ELECTRIC", power: "40", acc: "100%", desc: "Scarica elettrica base con probabilità di paralisi." },
-          { name: "ELECTRIC TERRAIN", type: "ELECTRIC", power: "---", acc: "---", desc: "Crea un campo elettrico che impedisce di addormentarsi." },
-          { name: "SLEEP TALK", type: "NORMAL", power: "---", acc: "---", desc: "Usa una mossa a caso mentre dorme." }
-        ]
-      },
-      {
-        id: 945, name: "Grafaiai", types: ["POISON", "NORMAL"], bst: 485,
-        stats: { HP: 63, ATK: 95, DEF: 65, "SP.ATK": 80, "SP.DEF": 72, VEL: 110 },
-        ability: "Prankster (Nascosta)", abilityDesc: "Dà priorità a mosse che alterano lo stato.",
-        moves: [
-          { name: "MUD SHOT", type: "GROUND", power: "55", acc: "95%", desc: "Lancia fango riducendo la Velocità del bersaglio." },
-          { name: "ENDURE", type: "NORMAL", power: "---", acc: "---", desc: "Sopravvive a qualsiasi colpo con 1 PS." },
-          { name: "SCARY FACE", type: "NORMAL", power: "---", acc: "100%", desc: "Spaventa il bersaglio riducendone la Velocità." },
-          { name: "LEER", type: "NORMAL", power: "---", acc: "100%", desc: "Sguardo intimidatorio che riduce la Difesa nemica." }
-        ]
-      },
-      {
-        id: 959, name: "Tinkaton", types: ["FAIRY", "STEEL"], bst: 506,
-        stats: { HP: 85, ATK: 75, DEF: 77, "SP.ATK": 70, "SP.DEF": 105, VEL: 94 },
-        ability: "Own Tempo", abilityDesc: "Impedisce al Pokémon di venire confuso.",
-        moves: [
-          { name: "KNOCK OFF", type: "DARK", power: "65", acc: "100%", desc: "Rimuove lo strumento tenuto dal nemico." },
-          { name: "STEEL BEAM", type: "STEEL", power: "140", acc: "95%", desc: "Raggio d'acciaio potentissimo che danneggia anche chi la usa." },
-          { name: "METAL SOUND", type: "STEEL", power: "---", acc: "85%", desc: "Stridio metallico che riduce di molto la Difesa Speciale." },
-          { name: "COVET", type: "NORMAL", power: "60", acc: "100%", desc: "Attacca sorridendo e ruba lo strumento." }
-        ]
-      },
-      {
-        id: 979, name: "Annihilape", types: ["FIGHTING", "GHOST"], bst: 535,
-        stats: { HP: 110, ATK: 115, DEF: 80, "SP.ATK": 50, "SP.DEF": 90, VEL: 90 },
-        ability: "Vital Spirit", abilityDesc: "Impedisce al Pokémon di addormentarsi.",
-        moves: [
-          { name: "FLING", type: "DARK", power: "---", acc: "100%", desc: "Lancia lo strumento indossato sul nemico." },
-          { name: "FIRE PUNCH", type: "FIRE", power: "75", acc: "100%", desc: "Pugno ardente con probabilità di scottare." },
-          { name: "NIGHT SHADE", type: "GHOST", power: "---", acc: "100%", desc: "Danni fissi pari al livello di chi usa la mossa." },
-          { name: "DIG", type: "GROUND", power: "80", acc: "100%", desc: "Scava sottoterra e colpisce al turno successivo." }
-        ]
-      },
-      {
-        id: 982, name: "Dudunsparce-two-segment", types: ["NORMAL"], bst: 520,
-        stats: { HP: 125, ATK: 100, DEF: 80, "SP.ATK": 85, "SP.DEF": 75, VEL: 55 },
-        ability: "Serene Grace", abilityDesc: "Gli effetti secondari delle mosse sono più probabili.",
-        moves: [
-          { name: "THROAT CHOP", type: "DARK", power: "80", acc: "100%", desc: "Impedisce al nemico di usare mosse basate sul suono." },
-          { name: "BODY SLAM", type: "NORMAL", power: "85", acc: "100%", desc: "Schiacciata che può causare la paralisi." },
-          { name: "BATON PASS", type: "NORMAL", power: "---", acc: "---", desc: "Passa il testimone ad un alleato trasferendo le modifiche." },
-          { name: "BODY PRESS", type: "FIGHTING", power: "80", acc: "100%", desc: "Danni basati sulla Difesa dell'utilizzatore." }
-        ]
-      },
-      {
-        id: 1011, name: "Dipplin", types: ["GRASS", "DRAGON"], bst: 485,
-        stats: { HP: 80, ATK: 80, DEF: 110, "SP.ATK": 95, "SP.DEF": 80, VEL: 40 },
-        ability: "Supersweet Syrup", abilityDesc: "Riduce l'Elusione dei nemici all'ingresso in campo.",
-        moves: [
-          { name: "DRAGON TAIL", type: "DRAGON", power: "60", acc: "90%", desc: "Fa volar via il bersaglio forzandone il cambio." },
-          { name: "DRAGON PULSE", type: "DRAGON", power: "85", acc: "100%", desc: "Genera un'onda d'urto che colpisce il bersaglio." },
-          { name: "SOLAR BEAM", type: "GRASS", power: "120", acc: "100%", desc: "Assorbe luce al primo turno, spara un raggio al secondo." },
-          { name: "PROTECT", type: "NORMAL", power: "---", acc: "---", desc: "Permette di eludere tutti gli attacchi del turno." }
-        ]
-      },
-      {
-        id: 1017, name: "Ogerpon", types: ["GRASS"], bst: 550,
-        stats: { HP: 80, ATK: 120, DEF: 84, "SP.ATK": 60, "SP.DEF": 96, VEL: 110 },
-        ability: "Defiant", abilityDesc: "L’Attacco aumenta quando un nemico fa calare le statistiche.",
-        moves: [
-          { name: "BRICK BREAK", type: "FIGHTING", power: "75", acc: "100%", desc: "Rompe barriere come Riflesso e Schermoluce." },
-          { name: "GIGA DRAIN", type: "GRASS", power: "75", acc: "100%", desc: "Assorbe PS ripristinandone metà del danno inferto." },
-          { name: "LEAF STORM", type: "GRASS", power: "130", acc: "90%", desc: "Tempesta di foglie affilate, riduce l'Attacco Speciale." },
-          { name: "GROWTH", type: "NORMAL", power: "---", acc: "---", desc: "Aumenta la crescita corporale e le statistiche offensive." }
-        ]
-      }
+      { name: "Raichu", types: ["ELECTRIC"] },
+      { name: "Nidoqueen", types: ["POISON", "GROUND"] },
+      { name: "Clefable", types: ["FAIRY"] },
+      { name: "Ninetales", types: ["FIRE"] },
+      { name: "Victreebel", types: ["GRASS", "POISON"] },
+      { name: "Gengar", types: ["GHOST", "POISON"] },
+      { name: "Typhlosion", types: ["FIRE"] },
+      { name: "Steelix", types: ["STEEL", "GROUND"] },
+      { name: "Raikou", types: ["ELECTRIC"] },
+      { name: "Blaziken", types: ["FIRE", "FIGHTING"] },
+      { name: "Swellow", types: ["NORMAL", "FLYING"] },
+      { name: "Torkoal", types: ["FIRE"] },
+      { name: "Flygon", types: ["GROUND", "DRAGON"] },
+      { name: "Armaldo", types: ["ROCK", "BUG"] },
+      { name: "Chimecho", types: ["PSYCHIC"] },
+      { name: "Gorebyss", types: ["WATER"] },
+      { name: "Garchomp", types: ["DRAGON", "GROUND"] },
+      { name: "Carnivine", types: ["GRASS"] },
+      { name: "Rhyperior", types: ["GROUND", "ROCK"] },
+      { name: "Mamoswine", types: ["ICE", "GROUND"] },
+      { name: "Uxie", types: ["PSYCHIC"] },
+      { name: "Mesprit", types: ["PSYCHIC"] },
+      { name: "Excadrill", types: ["GROUND", "STEEL"] },
+      { name: "Seismitoad", types: ["WATER", "GROUND"] },
+      { name: "Maractus", types: ["GRASS"] },
+      { name: "Archeops", types: ["ROCK", "FLYING"] },
+      { name: "Garbodor", types: ["POISON"] },
+      { name: "Alomomola", types: ["WATER"] },
+      { name: "Ferrothorn", types: ["GRASS", "STEEL"] },
+      { name: "Tornadus-incarnate", types: ["FLYING"] },
+      { name: "Thundurus-incarnate", types: ["ELECTRIC", "FLYING"] },
+      { name: "Pyroar-male", types: ["FIRE", "NORMAL"] },
+      { name: "Slurpuff", types: ["FAIRY"] },
+      { name: "Heliolisk", types: ["ELECTRIC", "NORMAL"] },
+      { name: "Goodra", types: ["DRAGON"] },
+      { name: "Avalugg", types: ["ICE"] },
+      { name: "Primarina", types: ["WATER", "FAIRY"] },
+      { name: "Toucannon", types: ["NORMAL", "FLYING"] },
+      { name: "Araquanid", types: ["WATER", "BUG"] },
+      { name: "Turtonator", types: ["FIRE", "DRAGON"] },
+      { name: "Mimikyu-disguised", types: ["GHOST", "FAIRY"] },
+      { name: "Tapu-lele", types: ["PSYCHIC", "FAIRY"] },
+      { name: "Nihilego", types: ["ROCK", "POISON"] },
+      { name: "Necrozma", types: ["PSYCHIC"] },
+      { name: "Blacephalon", types: ["FIRE", "GHOST"] },
+      { name: "Thievul", types: ["DARK"] },
+      { name: "Sandaconda", types: ["GROUND"] },
+      { name: "Centiskorch", types: ["FIRE", "BUG"] },
+      { name: "Grimmsnarl", types: ["DARK", "FAIRY"] },
+      { name: "Arctozolt", types: ["ELECTRIC", "ICE"] },
+      { name: "Regieleki", types: ["ELECTRIC"] },
+      { name: "Glastrier", types: ["ICE"] },
+      { name: "Dachsbun", types: ["FAIRY"] },
+      { name: "Houndstone", types: ["GHOST"] },
+      { name: "Veluza", types: ["WATER", "PSYCHIC"] },
+      { name: "Flutter-mane", types: ["GHOST", "FAIRY"] },
+      { name: "Iron-treads", types: ["GROUND", "STEEL"] },
+      { name: "Walking-wake", types: ["WATER", "DRAGON"] },
+      { name: "Munkidori", types: ["POISON", "PSYCHIC"] },
+      { name: "Hydrapple", types: ["GRASS", "DRAGON"] }
     ];
 
     let currentIndex = 0;
-    let isShiny = false;
 
-    // Popola il menu a tendina
     const selectEl = document.getElementById('pokeSelect');
     pokemons.forEach((p, index) => {
       const opt = document.createElement('option');
       opt.value = index;
-      opt.innerText = `#${p.id} - ${p.name}`;
+      opt.innerText = `${index + 1}. ${p.name}`;
       selectEl.appendChild(opt);
     });
 
-    function flipCard() {
-      document.getElementById('pokemonCard').classList.toggle('flipped');
-    }
-
-    // Calcolo delle Debolezze e Resistenze
     function calculateTypeEffectiveness(defenderTypes) {
       let multipliers = {};
       allTypes.forEach(t => multipliers[t] = 1);
@@ -909,117 +217,42 @@
       }
 
       let html = "";
-
       const createBadges = (types) => types.map(t => `<span class="type-badge type-${t}">${t}</span>`).join(' ');
 
-      if (superWeak.length > 0) {
-        html += `<div class="eff-row"><span class="eff-label super-weak">Super Debole (4x):</span><div>${createBadges(superWeak)}</div></div>`;
-      }
-      if (weak.length > 0) {
-        html += `<div class="eff-row"><span class="eff-label weak">Debole (2x):</span><div>${createBadges(weak)}</div></div>`;
-      }
-      if (immune.length > 0) {
-        html += `<div class="eff-row"><span class="eff-label immune">Immune (0x):</span><div>${createBadges(immune)}</div></div>`;
-      }
-      if (resist.length > 0) {
-        html += `<div class="eff-row"><span class="eff-label resist">Resistente (0.5x):</span><div>${createBadges(resist)}</div></div>`;
-      }
-      if (superResist.length > 0) {
-        html += `<div class="eff-row"><span class="eff-label super-resist">Iperresistente (0.25x):</span><div>${createBadges(superResist)}</div></div>`;
-      }
+      if (superWeak.length > 0) html += `<div class="eff-row"><span class="eff-label super-weak">Super Debole (4x):</span><div>${createBadges(superWeak)}</div></div>`;
+      if (weak.length > 0) html += `<div class="eff-row"><span class="eff-label weak">Debole (2x):</span><div>${createBadges(weak)}</div></div>`;
+      if (immune.length > 0) html += `<div class="eff-row"><span class="eff-label immune">Immune (0x):</span><div>${createBadges(immune)}</div></div>`;
+      if (resist.length > 0) html += `<div class="eff-row"><span class="eff-label resist">Resistente (0.5x):</span><div>${createBadges(resist)}</div></div>`;
+      if (superResist.length > 0) html += `<div class="eff-row"><span class="eff-label super-resist">Iperresistente (0.25x):</span><div>${createBadges(superResist)}</div></div>`;
 
       return html || "<small style='color:var(--text-dim)'>Nessuna debolezza/resistenza particolare</small>";
     }
 
-    function toggleShiny() {
-      isShiny = !isShiny;
-      updateSprite();
-    }
-
-    function updateSprite() {
-      const p = pokemons[currentIndex];
-      const imgEl = document.getElementById('pokeSprite');
-      
-      // PokéAPI Sprite URLs
-      const normalUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png`;
-      const shinyUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${p.id}.png`;
-      
-      imgEl.src = isShiny ? shinyUrl : normalUrl;
-    }
-
-    // Renderizza Pokémon
     function renderPokemon(index) {
       const p = pokemons[index];
-      isShiny = false; // reset ad ogni cambio pokemon
       
-      // Basic Data
       document.getElementById('pokeName').innerText = p.name;
-      document.getElementById('pokeId').innerText = `#${p.id}`;
-      document.getElementById('pokeBST').innerText = p.bst;
       
-      // Sprite
-      updateSprite();
-
-      // Types Badges
       const typesContainer = document.getElementById('pokeTypes');
       typesContainer.innerHTML = p.types.map(t => `<span class="type-badge type-${t}">${t}</span>`).join('');
 
-      // Calcolo Efficacia Tipi
       document.getElementById('typeEffectiveness').innerHTML = calculateTypeEffectiveness(p.types);
 
-      // Statistiche
-      const statsContainer = document.getElementById('pokeStats');
-      statsContainer.innerHTML = Object.entries(p.stats).map(([k, v]) => {
-        let pct = Math.min(100, Math.round((v / 180) * 100)); 
-        let color = v >= 100 ? '#22c55e' : (v >= 70 ? '#eab308' : '#ef4444');
-        return `
-          <div class="stat-row">
-            <span class="stat-label">${k}</span>
-            <span class="stat-val">${v}</span>
-            <div class="stat-bar-bg">
-              <div class="stat-bar-fill" style="width: ${pct}%; background-color: ${color}"></div>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      // Abilità
-      document.getElementById('pokeAbility').innerText = p.ability;
-      document.getElementById('pokeAbilityDesc').innerText = p.abilityDesc;
-
-      // Mosse
-      const sortedMoves = [...p.moves].sort((a, b) => a.type.localeCompare(b.type));
-      const movesContainer = document.getElementById('pokeMoves');
-      movesContainer.innerHTML = sortedMoves.map(m => `
-        <div class="move-card">
-          <div class="move-header">
-            <span>${m.name}</span>
-            <span class="type-badge type-${m.type}">${m.type}</span>
-          </div>
-          <div class="move-stats">Potenza: ${m.power} | Precisione: ${m.acc}</div>
-          <div>${m.desc}</div>
-        </div>
-      `).join('');
-
-      // Controlli
       selectEl.value = index;
       document.getElementById('prevBtn').disabled = index === 0;
       document.getElementById('nextBtn').disabled = index === pokemons.length - 1;
     }
 
     function changePokemon(direction) {
-      document.getElementById('pokemonCard').classList.remove('flipped');
       currentIndex += direction;
       renderPokemon(currentIndex);
     }
 
     function selectPokemon(index) {
-      document.getElementById('pokemonCard').classList.remove('flipped');
       currentIndex = parseInt(index);
       renderPokemon(currentIndex);
     }
 
-    // Inizializzazione
     renderPokemon(0);
   </script>
 </body>
