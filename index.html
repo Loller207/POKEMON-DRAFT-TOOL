@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PokéDex - Debolezze e Resistenze</title>
+  <title>PokéDex - Statistiche e Mega Evoluzioni</title>
   <style>
     :root {
       --bg-color: #0f172a;
@@ -39,79 +39,117 @@
     header { text-align: center; margin-bottom: 20px; }
     h1 { color: #ef4444; font-size: 2rem; letter-spacing: 2px; }
 
-    .controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
+    .controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; align-items: center; }
     select, button {
       padding: 10px 15px; border-radius: 8px; border: none; background: #334155; color: white; font-weight: bold; cursor: pointer; outline: none;
     }
     button:hover, select:hover { background: #475569; }
     button:disabled { opacity: 0.3; cursor: not-allowed; }
+    .flip-btn { background: #f59e0b; color: #0f172a; }
+    .flip-btn:hover { background: #d97706; }
+    .flip-btn:disabled { background: #334155; color: #fff; opacity: 0.3; }
 
-    .card-container { width: 100%; max-width: 450px; position: relative; }
+    .card-container { width: 100%; max-width: 450px; perspective: 1000px; }
     .card {
-      border-radius: 20px; background: var(--card-bg); border: 2px solid #334155;
+      width: 100%; border-radius: 20px; background: var(--card-bg); border: 2px solid #334155;
       padding: 20px; display: flex; flex-direction: column; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      transition: transform 0.6s; transform-style: preserve-style; position: relative;
     }
+    .card.is-flipped { transform: rotateY(180deg); }
 
-    .header-card { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 15px; }
-    .name { font-size: 1.5rem; font-weight: bold; }
+    .card-face { width: 100%; display: flex; flex-direction: column; backface-visibility: hidden; }
+    .card-back { position: absolute; top: 20px; left: 20px; width: calc(100% - 40px); transform: rotateY(180deg); display: none; }
+    .card.is-flipped .card-front { display: none; }
+    .card.is-flipped .card-back { display: flex; }
+
+    .header-card { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 12px; }
+    .name { font-size: 1.4rem; font-weight: bold; }
     .types { display: flex; gap: 5px; }
-    .type-badge { padding: 4px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; display: inline-block; }
+    .type-badge { padding: 4px 8px; border-radius: 8px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; display: inline-block; }
 
     .img-container {
-      width: 100%;
-      height: 200px;
-      background: rgba(15, 23, 42, 0.6);
-      border-radius: 12px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-bottom: 15px;
-      border: 1px solid #334155;
+      width: 100%; height: 160px; background: rgba(15, 23, 42, 0.6);
+      border-radius: 12px; display: flex; justify-content: center; align-items: center;
+      margin-bottom: 12px; border: 1px solid #334155;
     }
-    .img-container img {
-      max-height: 170px;
-      max-width: 100%;
-      object-fit: contain;
-    }
+    .img-container img { max-height: 140px; max-width: 100%; object-fit: contain; }
 
-    .eff-section { background: #0f172a; padding: 12px; border-radius: 8px; margin-top: 10px; font-size: 0.85rem; }
-    .eff-title { font-weight: bold; margin-bottom: 8px; color: var(--text-dim); text-transform: uppercase; border-bottom: 1px solid #1e293b; padding-bottom: 4px; }
-    .eff-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
-    .eff-label { font-weight: bold; width: 120px; font-size: 0.75rem; }
+    /* Sezione Statistiche */
+    .stats-section { background: #0f172a; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 0.8rem; }
+    .stats-title { font-weight: bold; margin-bottom: 6px; color: var(--text-dim); text-transform: uppercase; border-bottom: 1px solid #1e293b; padding-bottom: 3px; }
+    .stat-row { display: flex; justify-content: space-between; margin-bottom: 3px; }
+    .stat-name { color: var(--text-dim); font-weight: bold; }
+    .stat-val { font-weight: bold; }
+
+    .eff-section { background: #0f172a; padding: 10px; border-radius: 8px; font-size: 0.8rem; }
+    .eff-title { font-weight: bold; margin-bottom: 6px; color: var(--text-dim); text-transform: uppercase; border-bottom: 1px solid #1e293b; padding-bottom: 3px; }
+    .eff-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; flex-wrap: wrap; }
+    .eff-label { font-weight: bold; width: 110px; font-size: 0.7rem; }
     .eff-label.super-weak { color: #f87171; }
     .eff-label.weak { color: #fca5a5; }
     .eff-label.immune { color: #9ca3af; }
     .eff-label.resist { color: #86efac; }
     .eff-label.super-resist { color: #4ade80; }
+
+    .mega-badge { background: #8b5cf6; color: #fff; padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; display: inline-block; margin-bottom: 8px; }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>POKÉDEX - RESISTENZE & DEBOLEZZE</h1>
+    <h1>POKÉDEX - STATS & MEGA</h1>
   </header>
 
   <div class="controls">
-    <button id="prevBtn" onclick="changePokemon(-1)">&larr; Precedente</button>
+    <button id="prevBtn" onclick="changePokemon(-1)">&larr;</button>
     <select id="pokeSelect" onchange="selectPokemon(this.value)"></select>
-    <button id="nextBtn" onclick="changePokemon(1)">Successivo &rarr;</button>
+    <button id="nextBtn" onclick="changePokemon(1)">&rarr;</button>
+    <button id="flipBtn" class="flip-btn" onclick="flipCard()" disabled>Gira Carta (Mega)</button>
   </div>
 
   <div class="card-container">
-    <div class="card">
-      <div class="header-card">
-        <span class="name" id="pokeName">---</span>
-        <div class="types" id="pokeTypes"></div>
+    <div class="card" id="pokemonCard">
+      
+      <!-- FRONTE DELLA CARTA -->
+      <div class="card-face card-front">
+        <div class="header-card">
+          <span class="name" id="pokeName">---</span>
+          <div class="types" id="pokeTypes"></div>
+        </div>
+
+        <div class="img-container">
+          <img id="pokeImg" src="" alt="Artwork Pokémon">
+        </div>
+
+        <div class="stats-section">
+          <div class="stats-title">Statistiche Base</div>
+          <div id="pokeStats"></div>
+        </div>
+
+        <div class="eff-section">
+          <div class="eff-title">Efficacia Tipi Subita</div>
+          <div id="typeEffectiveness"></div>
+        </div>
       </div>
 
-      <div class="img-container">
-        <img id="pokeImg" src="" alt="Artwork Pokémon">
+      <!-- RETRO DELLA CARTA (MEGA EVOLUZIONE) -->
+      <div class="card-face card-back">
+        <div class="header-card">
+          <span class="name" id="megaName">---</span>
+          <div class="types" id="megaTypes"></div>
+        </div>
+
+        <div class="img-container">
+          <img id="megaImg" src="" alt="Mega Artwork">
+        </div>
+
+        <div class="stats-section">
+          <div class="mega-badge" id="megaAbilityBadge">Abilità: ---</div>
+          <div class="stats-title">Statistiche Mega Evoluzione</div>
+          <div id="megaStats"></div>
+        </div>
       </div>
 
-      <div class="eff-section">
-        <div class="eff-title">Efficacia Tipi Subita</div>
-        <div id="typeEffectiveness"></div>
-      </div>
     </div>
   </div>
 
@@ -139,71 +177,84 @@
 
     const allTypes = ["NORMAL", "FIRE", "WATER", "GRASS", "ELECTRIC", "ICE", "FIGHTING", "POISON", "GROUND", "FLYING", "PSYCHIC", "BUG", "ROCK", "GHOST", "DRAGON", "DARK", "STEEL", "FAIRY"];
 
-    // Lista dei 60 Pokémon con associato l'ID ufficiale del Pokédex per caricare l'immagine
+    // Dataset completo con ID, tipi, statistiche base e mega evoluzione (se presente)
     const pokemons = [
-      { name: "Raichu", id: 26, types: ["ELECTRIC"] },
-      { name: "Nidoqueen", id: 31, types: ["POISON", "GROUND"] },
-      { name: "Clefable", id: 36, types: ["FAIRY"] },
-      { name: "Ninetales", id: 38, types: ["FIRE"] },
-      { name: "Victreebel", id: 71, types: ["GRASS", "POISON"] },
-      { name: "Gengar", id: 94, types: ["GHOST", "POISON"] },
-      { name: "Typhlosion", id: 157, types: ["FIRE"] },
-      { name: "Steelix", id: 208, types: ["STEEL", "GROUND"] },
-      { name: "Raikou", id: 243, types: ["ELECTRIC"] },
-      { name: "Blaziken", id: 257, types: ["FIRE", "FIGHTING"] },
-      { name: "Swellow", id: 277, types: ["NORMAL", "FLYING"] },
-      { name: "Torkoal", id: 324, types: ["FIRE"] },
-      { name: "Flygon", id: 330, types: ["GROUND", "DRAGON"] },
-      { name: "Armaldo", id: 348, types: ["ROCK", "BUG"] },
-      { name: "Chimecho", id: 358, types: ["PSYCHIC"] },
-      { name: "Gorebyss", id: 368, types: ["WATER"] },
-      { name: "Garchomp", id: 445, types: ["DRAGON", "GROUND"] },
-      { name: "Carnivine", id: 455, types: ["GRASS"] },
-      { name: "Rhyperior", id: 464, types: ["GROUND", "ROCK"] },
-      { name: "Mamoswine", id: 473, types: ["ICE", "GROUND"] },
-      { name: "Uxie", id: 480, types: ["PSYCHIC"] },
-      { name: "Mesprit", id: 481, types: ["PSYCHIC"] },
-      { name: "Excadrill", id: 530, types: ["GROUND", "STEEL"] },
-      { name: "Seismitoad", id: 537, types: ["WATER", "GROUND"] },
-      { name: "Maractus", id: 556, types: ["GRASS"] },
-      { name: "Archeops", id: 567, types: ["ROCK", "FLYING"] },
-      { name: "Garbodor", id: 569, types: ["POISON"] },
-      { name: "Alomomola", id: 594, types: ["WATER"] },
-      { name: "Ferrothorn", id: 598, types: ["GRASS", "STEEL"] },
-      { name: "Tornadus-incarnate", id: 641, types: ["FLYING"] },
-      { name: "Thundurus-incarnate", id: 642, types: ["ELECTRIC", "FLYING"] },
-      { name: "Pyroar-male", id: 667, types: ["FIRE", "NORMAL"] },
-      { name: "Slurpuff", id: 685, types: ["FAIRY"] },
-      { name: "Heliolisk", id: 695, types: ["ELECTRIC", "NORMAL"] },
-      { name: "Goodra", id: 706, types: ["DRAGON"] },
-      { name: "Avalugg", id: 713, types: ["ICE"] },
-      { name: "Primarina", id: 730, types: ["WATER", "FAIRY"] },
-      { name: "Toucannon", id: 731, types: ["NORMAL", "FLYING"] },
-      { name: "Araquanid", id: 752, types: ["WATER", "BUG"] },
-      { name: "Turtonator", id: 776, types: ["FIRE", "DRAGON"] },
-      { name: "Mimikyu-disguised", id: 778, types: ["GHOST", "FAIRY"] },
-      { name: "Tapu-lele", id: 786, types: ["PSYCHIC", "FAIRY"] },
-      { name: "Nihilego", id: 793, types: ["ROCK", "POISON"] },
-      { name: "Necrozma", id: 800, types: ["PSYCHIC"] },
-      { name: "Blacephalon", id: 806, types: ["FIRE", "GHOST"] },
-      { name: "Thievul", id: 828, types: ["DARK"] },
-      { name: "Sandaconda", id: 843, types: ["GROUND"] },
-      { name: "Centiskorch", id: 851, types: ["FIRE", "BUG"] },
-      { name: "Grimmsnarl", id: 861, types: ["DARK", "FAIRY"] },
-      { name: "Arctozolt", id: 880, types: ["ELECTRIC", "ICE"] },
-      { name: "Regieleki", id: 894, types: ["ELECTRIC"] },
-      { name: "Glastrier", id: 896, types: ["ICE"] },
-      { name: "Dachsbun", id: 927, types: ["FAIRY"] },
-      { name: "Houndstone", id: 945, types: ["GHOST"] },
-      { name: "Veluza", id: 977, types: ["WATER", "PSYCHIC"] },
-      { name: "Flutter-mane", id: 987, types: ["GHOST", "FAIRY"] },
-      { name: "Iron-treads", id: 990, types: ["GROUND", "STEEL"] },
-      { name: "Walking-wake", id: 1009, types: ["WATER", "DRAGON"] },
-      { name: "Munkidori", id: 1014, types: ["POISON", "PSYCHIC"] },
-      { name: "Hydrapple", id: 1011, types: ["GRASS", "DRAGON"] }
+      { name: "Raichu", id: 26, types: ["ELECTRIC"], stats: { HP: 60, ATK: 90, DEF: 55, "SP.ATK": 90, "SP.DEF": 80, VEL: 110 } },
+      { name: "Nidoqueen", id: 31, types: ["POISON", "GROUND"], stats: { HP: 90, ATK: 92, DEF: 87, "SP.ATK": 75, "SP.DEF": 85, VEL: 76 } },
+      { name: "Clefable", id: 36, types: ["FAIRY"], stats: { HP: 95, ATK: 70, DEF: 73, "SP.ATK": 95, "SP.DEF": 90, VEL: 60 } },
+      { name: "Ninetales", id: 38, types: ["FIRE"], stats: { HP: 73, ATK: 76, DEF: 75, "SP.ATK": 81, "SP.DEF": 100, VEL: 100 } },
+      { name: "Victreebel", id: 71, types: ["GRASS", "POISON"], stats: { HP: 80, ATK: 105, DEF: 65, "SP.ATK": 100, "SP.DEF": 70, VEL: 70 } },
+      { 
+        name: "Gengar", id: 94, types: ["GHOST", "POISON"], stats: { HP: 60, ATK: 65, DEF: 60, "SP.ATK": 130, "SP.DEF": 75, VEL: 110 },
+        mega: { name: "Mega Gengar", id: 10038, types: ["GHOST", "POISON"], ability: "Shadow Tag", stats: { HP: 60, ATK: 65, DEF: 80, "SP.ATK": 170, "SP.DEF": 95, VEL: 130 } }
+      },
+      { name: "Typhlosion", id: 157, types: ["FIRE"], stats: { HP: 78, ATK: 84, DEF: 78, "SP.ATK": 109, "SP.DEF": 85, VEL: 100 } },
+      { 
+        name: "Steelix", id: 208, types: ["STEEL", "GROUND"], stats: { HP: 75, ATK: 85, DEF: 200, "SP.ATK": 55, "SP.DEF": 65, VEL: 30 },
+        mega: { name: "Mega Steelix", id: 10072, types: ["STEEL", "GROUND"], ability: "Sand Force", stats: { HP: 75, ATK: 125, DEF: 230, "SP.ATK": 55, "SP.DEF": 95, VEL: 30 } }
+      },
+      { name: "Raikou", id: 243, types: ["ELECTRIC"], stats: { HP: 90, ATK: 85, DEF: 75, "SP.ATK": 115, "SP.DEF": 115, VEL: 115 } },
+      { 
+        name: "Blaziken", id: 257, types: ["FIRE", "FIGHTING"], stats: { HP: 80, ATK: 120, DEF: 70, "SP.ATK": 110, "SP.DEF": 70, VEL: 80 },
+        mega: { name: "Mega Blaziken", id: 10050, types: ["FIRE", "FIGHTING"], ability: "Speed Boost", stats: { HP: 80, ATK: 160, DEF: 80, "SP.ATK": 130, "SP.DEF": 80, VEL: 100 } }
+      },
+      { name: "Swellow", id: 277, types: ["NORMAL", "FLYING"], stats: { HP: 60, ATK: 85, DEF: 60, "SP.ATK": 75, "SP.DEF": 50, VEL: 125 } },
+      { name: "Torkoal", id: 324, types: ["FIRE"], stats: { HP: 70, ATK: 85, DEF: 140, "SP.ATK": 85, "SP.DEF": 70, VEL: 20 } },
+      { name: "Flygon", id: 330, types: ["GROUND", "DRAGON"], stats: { HP: 80, ATK: 100, DEF: 80, "SP.ATK": 80, "SP.DEF": 80, VEL: 100 } },
+      { name: "Armaldo", id: 348, types: ["ROCK", "BUG"], stats: { HP: 75, ATK: 125, DEF: 100, "SP.ATK": 70, "SP.DEF": 80, VEL: 45 } },
+      { name: "Chimecho", id: 358, types: ["PSYCHIC"], stats: { HP: 75, ATK: 50, DEF: 80, "SP.ATK": 95, "SP.DEF": 90, VEL: 65 } },
+      { name: "Gorebyss", id: 368, types: ["WATER"], stats: { HP: 55, ATK: 84, DEF: 105, "SP.ATK": 114, "SP.DEF": 75, VEL: 52 } },
+      { 
+        name: "Garchomp", id: 445, types: ["DRAGON", "GROUND"], stats: { HP: 108, ATK: 130, DEF: 95, "SP.ATK": 80, "SP.DEF": 85, VEL: 102 },
+        mega: { name: "Mega Garchomp", id: 10058, types: ["DRAGON", "GROUND"], ability: "Sand Force", stats: { HP: 108, ATK: 170, DEF: 115, "SP.ATK": 120, "SP.DEF": 95, VEL: 92 } }
+      },
+      { name: "Carnivine", id: 455, types: ["GRASS"], stats: { HP: 74, ATK: 100, DEF: 72, "SP.ATK": 90, "SP.DEF": 72, VEL: 46 } },
+      { name: "Rhyperior", id: 464, types: ["GROUND", "ROCK"], stats: { HP: 115, ATK: 140, DEF: 130, "SP.ATK": 55, "SP.DEF": 55, VEL: 40 } },
+      { name: "Mamoswine", id: 473, types: ["ICE", "GROUND"], stats: { HP: 110, ATK: 130, DEF: 80, "SP.ATK": 70, "SP.DEF": 60, VEL: 80 } },
+      { name: "Uxie", id: 480, types: ["PSYCHIC"], stats: { HP: 75, ATK: 75, DEF: 130, "SP.ATK": 75, "SP.DEF": 130, VEL: 95 } },
+      { name: "Mesprit", id: 481, types: ["PSYCHIC"], stats: { HP: 80, ATK: 105, DEF: 105, "SP.ATK": 105, "SP.DEF": 105, VEL: 80 } },
+      { name: "Excadrill", id: 530, types: ["GROUND", "STEEL"], stats: { HP: 110, ATK: 135, DEF: 60, "SP.ATK": 50, "SP.DEF": 65, VEL: 88 } },
+      { name: "Seismitoad", id: 537, types: ["WATER", "GROUND"], stats: { HP: 105, ATK: 95, DEF: 75, "SP.ATK": 85, "SP.DEF": 75, VEL: 74 } },
+      { name: "Maractus", id: 556, types: ["GRASS"], stats: { HP: 75, ATK: 86, DEF: 67, "SP.ATK": 106, "SP.DEF": 67, VEL: 60 } },
+      { name: "Archeops", id: 567, types: ["ROCK", "FLYING"], stats: { HP: 75, ATK: 140, DEF: 65, "SP.ATK": 112, "SP.DEF": 65, VEL: 110 } },
+      { name: "Garbodor", id: 569, types: ["POISON"], stats: { HP: 80, ATK: 95, DEF: 82, "SP.ATK": 60, "SP.DEF": 82, VEL: 75 } },
+      { name: "Alomomola", id: 594, types: ["WATER"], stats: { HP: 165, ATK: 75, DEF: 80, "SP.ATK": 40, "SP.DEF": 45, VEL: 65 } },
+      { name: "Ferrothorn", id: 598, types: ["GRASS", "STEEL"], stats: { HP: 74, ATK: 94, DEF: 131, "SP.ATK": 54, "SP.DEF": 116, VEL: 20 } },
+      { name: "Tornadus-incarnate", id: 641, types: ["FLYING"], stats: { HP: 79, ATK: 115, DEF: 70, "SP.ATK": 125, "SP.DEF": 80, VEL: 111 } },
+      { name: "Thundurus-incarnate", id: 642, types: ["ELECTRIC", "FLYING"], stats: { HP: 79, ATK: 115, DEF: 70, "SP.ATK": 125, "SP.DEF": 80, VEL: 111 } },
+      { name: "Pyroar-male", id: 667, types: ["FIRE", "NORMAL"], stats: { HP: 86, ATK: 68, DEF: 72, "SP.ATK": 109, "SP.DEF": 66, VEL: 106 } },
+      { name: "Slurpuff", id: 685, types: ["FAIRY"], stats: { HP: 82, ATK: 80, DEF: 86, "SP.ATK": 85, "SP.DEF": 75, VEL: 72 } },
+      { name: "Heliolisk", id: 695, types: ["ELECTRIC", "NORMAL"], stats: { HP: 62, ATK: 55, DEF: 52, "SP.ATK": 109, "SP.DEF": 94, VEL: 109 } },
+      { name: "Goodra", id: 706, types: ["DRAGON"], stats: { HP: 90, ATK: 100, DEF: 70, "SP.ATK": 110, "SP.DEF": 150, VEL: 80 } },
+      { name: "Avalugg", id: 713, types: ["ICE"], stats: { HP: 95, ATK: 117, DEF: 184, "SP.ATK": 44, "SP.DEF": 46, VEL: 28 } },
+      { name: "Primarina", id: 730, types: ["WATER", "FAIRY"], stats: { HP: 80, ATK: 74, DEF: 74, "SP.ATK": 126, "SP.DEF": 116, VEL: 60 } },
+      { name: "Toucannon", id: 731, types: ["NORMAL", "FLYING"], stats: { HP: 80, ATK: 120, DEF: 75, "SP.ATK": 75, "SP.DEF": 75, VEL: 60 } },
+      { name: "Araquanid", id: 752, types: ["WATER", "BUG"], stats: { HP: 68, ATK: 70, DEF: 92, "SP.ATK": 50, "SP.DEF": 132, VEL: 42 } },
+      { name: "Turtonator", id: 776, types: ["FIRE", "DRAGON"], stats: { HP: 60, ATK: 78, DEF: 135, "SP.ATK": 91, "SP.DEF": 85, VEL: 36 } },
+      { name: "Mimikyu-disguised", id: 778, types: ["GHOST", "FAIRY"], stats: { HP: 55, ATK: 90, DEF: 80, "SP.ATK": 50, "SP.DEF": 105, VEL: 96 } },
+      { name: "Tapu-lele", id: 786, types: ["PSYCHIC", "FAIRY"], stats: { HP: 70, ATK: 85, DEF: 75, "SP.ATK": 130, "SP.DEF": 115, VEL: 95 } },
+      { name: "Nihilego", id: 793, types: ["ROCK", "POISON"], stats: { HP: 109, ATK: 53, DEF: 47, "SP.ATK": 127, "SP.DEF": 131, VEL: 103 } },
+      { name: "Necrozma", id: 800, types: ["PSYCHIC"], stats: { HP: 97, ATK: 107, DEF: 101, "SP.ATK": 127, "SP.DEF": 89, VEL: 79 } },
+      { name: "Blacephalon", id: 806, types: ["FIRE", "GHOST"], stats: { HP: 53, ATK: 127, DEF: 53, "SP.ATK": 151, "SP.DEF": 79, VEL: 107 } },
+      { name: "Thievul", id: 828, types: ["DARK"], stats: { HP: 70, ATK: 58, DEF: 58, "SP.ATK": 87, "SP.DEF": 92, VEL: 90 } },
+      { name: "Sandaconda", id: 843, types: ["GROUND"], stats: { HP: 72, ATK: 107, DEF: 125, "SP.ATK": 65, "SP.DEF": 70, VEL: 71 } },
+      { name: "Centiskorch", id: 851, types: ["FIRE", "BUG"], stats: { HP: 100, ATK: 115, DEF: 65, "SP.ATK": 90, "SP.DEF": 90, VEL: 65 } },
+      { name: "Grimmsnarl", id: 861, types: ["DARK", "FAIRY"], stats: { HP: 95, ATK: 120, DEF: 65, "SP.ATK": 95, "SP.DEF": 75, VEL: 60 } },
+      { name: "Arctozolt", id: 880, types: ["ELECTRIC", "ICE"], stats: { HP: 90, ATK: 100, DEF: 90, "SP.ATK": 90, "SP.DEF": 80, VEL: 55 } },
+      { name: "Regieleki", id: 894, types: ["ELECTRIC"], stats: { HP: 80, ATK: 100, DEF: 50, "SP.ATK": 100, "SP.DEF": 50, VEL: 200 } },
+      { name: "Glastrier", id: 896, types: ["ICE"], stats: { HP: 100, ATK: 145, DEF: 130, "SP.ATK": 65, "SP.DEF": 110, VEL: 30 } },
+      { name: "Dachsbun", id: 927, types: ["FAIRY"], stats: { HP: 57, ATK: 80, DEF: 115, "SP.ATK": 50, "SP.DEF": 80, VEL: 95 } },
+      { name: "Houndstone", id: 945, types: ["GHOST"], stats: { HP: 72, ATK: 101, DEF: 100, "SP.ATK": 50, "SP.DEF": 97, VEL: 68 } },
+      { name: "Veluza", id: 977, types: ["WATER", "PSYCHIC"], stats: { HP: 90, ATK: 102, DEF: 73, "SP.ATK": 78, "SP.DEF": 65, VEL: 70 } },
+      { name: "Flutter-mane", id: 987, types: ["GHOST", "FAIRY"], stats: { HP: 55, ATK: 55, DEF: 55, "SP.ATK": 135, "SP.DEF": 135, VEL: 135 } },
+      { name: "Iron-treads", id: 990, types: ["GROUND", "STEEL"], stats: { HP: 90, ATK: 112, DEF: 120, "SP.ATK": 72, "SP.DEF": 70, VEL: 106 } },
+      { name: "Walking-wake", id: 1009, types: ["WATER", "DRAGON"], stats: { HP: 99, ATK: 83, DEF: 91, "SP.ATK": 125, "SP.DEF": 83, VEL: 109 } },
+      { name: "Munkidori", id: 1014, types: ["POISON", "PSYCHIC"], stats: { HP: 88, ATK: 75, DEF: 66, "SP.ATK": 130, "SP.DEF": 90, VEL: 106 } },
+      { name: "Hydrapple", id: 1011, types: ["GRASS", "DRAGON"], stats: { HP: 106, ATK: 80, DEF: 110, "SP.ATK": 120, "SP.DEF": 80, VEL: 44 } }
     ];
 
     let currentIndex = 0;
+    let isFlipped = false;
 
     const selectEl = document.getElementById('pokeSelect');
     pokemons.forEach((p, index) => {
@@ -249,22 +300,59 @@
       return html || "<small style='color:var(--text-dim)'>Nessuna debolezza/resistenza particolare</small>";
     }
 
+    function renderStats(statsObj) {
+      let html = "";
+      for (let [key, val] of Object.entries(statsObj)) {
+        html += `<div class="stat-row"><span class="stat-name">${key}</span><span class="stat-val">${val}</span></div>`;
+      }
+      return html;
+    }
+
     function renderPokemon(index) {
       const p = pokemons[index];
       
+      // Reset flip to front when changing pokemon
+      if (isFlipped) flipCard();
+
       document.getElementById('pokeName').innerText = p.name;
-      
-      // Carica l'immagine ufficiale usando l'ID del Pokémon
       document.getElementById('pokeImg').src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${p.id}.png`;
-
-      const typesContainer = document.getElementById('pokeTypes');
-      typesContainer.innerHTML = p.types.map(t => `<span class="type-badge type-${t}">${t}</span>`).join('');
-
+      document.getElementById('pokeTypes').innerHTML = p.types.map(t => `<span class="type-badge type-${t}">${t}</span>`).join('');
+      document.getElementById('pokeStats').innerHTML = renderStats(p.stats);
       document.getElementById('typeEffectiveness').innerHTML = calculateTypeEffectiveness(p.types);
+
+      // Gestione Mega Evoluzione sul retro
+      const flipBtn = document.getElementById('flipBtn');
+      if (p.mega) {
+        flipBtn.disabled = false;
+        document.getElementById('megaName').innerText = p.mega.name;
+        document.getElementById('megaImg').src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${p.mega.id}.png`;
+        document.getElementById('megaTypes').innerHTML = p.mega.types.map(t => `<span class="type-badge type-${t}">${t}</span>`).join('');
+        document.getElementById('megaAbilityBadge').innerText = `Abilità: ${p.mega.ability}`;
+        document.getElementById('megaStats').innerHTML = renderStats(p.mega.stats);
+      } else {
+        flipBtn.disabled = true;
+        document.getElementById('megaName').innerText = "---";
+        document.getElementById('megaImg').src = "";
+        document.getElementById('megaTypes').innerHTML = "";
+        document.getElementById('megaAbilityBadge').innerText = "Abilità: ---";
+        document.getElementById('megaStats').innerHTML = "";
+      }
 
       selectEl.value = index;
       document.getElementById('prevBtn').disabled = index === 0;
       document.getElementById('nextBtn').disabled = index === pokemons.length - 1;
+    }
+
+    function flipCard() {
+      const card = document.getElementById('pokemonCard');
+      isFlipped = !isFlipped;
+      if (isFlipped) {
+        card.classList.add('is-flipped');
+        document.getElementById('flipBtn').innerText = "Gira Carta (Fronte)";
+      } else {
+        card.classList.remove('is-flipped');
+        document.getElementById('flipBtn').innerText = "Gira Carta (Mega)";
+      }
     }
 
     function changePokemon(direction) {
