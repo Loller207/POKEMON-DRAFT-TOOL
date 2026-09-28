@@ -57,6 +57,23 @@
     .types { display: flex; gap: 5px; }
     .type-badge { padding: 4px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; display: inline-block; }
 
+    .img-container {
+      width: 100%;
+      height: 200px;
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 15px;
+      border: 1px solid #334155;
+    }
+    .img-container img {
+      max-height: 170px;
+      max-width: 100%;
+      object-fit: contain;
+    }
+
     .eff-section { background: #0f172a; padding: 12px; border-radius: 8px; margin-top: 10px; font-size: 0.85rem; }
     .eff-title { font-weight: bold; margin-bottom: 8px; color: var(--text-dim); text-transform: uppercase; border-bottom: 1px solid #1e293b; padding-bottom: 4px; }
     .eff-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
@@ -85,6 +102,10 @@
       <div class="header-card">
         <span class="name" id="pokeName">---</span>
         <div class="types" id="pokeTypes"></div>
+      </div>
+
+      <div class="img-container">
+        <img id="pokeImg" src="" alt="Artwork Pokémon">
       </div>
 
       <div class="eff-section">
@@ -118,68 +139,68 @@
 
     const allTypes = ["NORMAL", "FIRE", "WATER", "GRASS", "ELECTRIC", "ICE", "FIGHTING", "POISON", "GROUND", "FLYING", "PSYCHIC", "BUG", "ROCK", "GHOST", "DRAGON", "DARK", "STEEL", "FAIRY"];
 
-    // Lista generata dai dati forniti nel file di testo
+    // Lista dei 60 Pokémon con associato l'ID ufficiale del Pokédex per caricare l'immagine
     const pokemons = [
-      { name: "Raichu", types: ["ELECTRIC"] },
-      { name: "Nidoqueen", types: ["POISON", "GROUND"] },
-      { name: "Clefable", types: ["FAIRY"] },
-      { name: "Ninetales", types: ["FIRE"] },
-      { name: "Victreebel", types: ["GRASS", "POISON"] },
-      { name: "Gengar", types: ["GHOST", "POISON"] },
-      { name: "Typhlosion", types: ["FIRE"] },
-      { name: "Steelix", types: ["STEEL", "GROUND"] },
-      { name: "Raikou", types: ["ELECTRIC"] },
-      { name: "Blaziken", types: ["FIRE", "FIGHTING"] },
-      { name: "Swellow", types: ["NORMAL", "FLYING"] },
-      { name: "Torkoal", types: ["FIRE"] },
-      { name: "Flygon", types: ["GROUND", "DRAGON"] },
-      { name: "Armaldo", types: ["ROCK", "BUG"] },
-      { name: "Chimecho", types: ["PSYCHIC"] },
-      { name: "Gorebyss", types: ["WATER"] },
-      { name: "Garchomp", types: ["DRAGON", "GROUND"] },
-      { name: "Carnivine", types: ["GRASS"] },
-      { name: "Rhyperior", types: ["GROUND", "ROCK"] },
-      { name: "Mamoswine", types: ["ICE", "GROUND"] },
-      { name: "Uxie", types: ["PSYCHIC"] },
-      { name: "Mesprit", types: ["PSYCHIC"] },
-      { name: "Excadrill", types: ["GROUND", "STEEL"] },
-      { name: "Seismitoad", types: ["WATER", "GROUND"] },
-      { name: "Maractus", types: ["GRASS"] },
-      { name: "Archeops", types: ["ROCK", "FLYING"] },
-      { name: "Garbodor", types: ["POISON"] },
-      { name: "Alomomola", types: ["WATER"] },
-      { name: "Ferrothorn", types: ["GRASS", "STEEL"] },
-      { name: "Tornadus-incarnate", types: ["FLYING"] },
-      { name: "Thundurus-incarnate", types: ["ELECTRIC", "FLYING"] },
-      { name: "Pyroar-male", types: ["FIRE", "NORMAL"] },
-      { name: "Slurpuff", types: ["FAIRY"] },
-      { name: "Heliolisk", types: ["ELECTRIC", "NORMAL"] },
-      { name: "Goodra", types: ["DRAGON"] },
-      { name: "Avalugg", types: ["ICE"] },
-      { name: "Primarina", types: ["WATER", "FAIRY"] },
-      { name: "Toucannon", types: ["NORMAL", "FLYING"] },
-      { name: "Araquanid", types: ["WATER", "BUG"] },
-      { name: "Turtonator", types: ["FIRE", "DRAGON"] },
-      { name: "Mimikyu-disguised", types: ["GHOST", "FAIRY"] },
-      { name: "Tapu-lele", types: ["PSYCHIC", "FAIRY"] },
-      { name: "Nihilego", types: ["ROCK", "POISON"] },
-      { name: "Necrozma", types: ["PSYCHIC"] },
-      { name: "Blacephalon", types: ["FIRE", "GHOST"] },
-      { name: "Thievul", types: ["DARK"] },
-      { name: "Sandaconda", types: ["GROUND"] },
-      { name: "Centiskorch", types: ["FIRE", "BUG"] },
-      { name: "Grimmsnarl", types: ["DARK", "FAIRY"] },
-      { name: "Arctozolt", types: ["ELECTRIC", "ICE"] },
-      { name: "Regieleki", types: ["ELECTRIC"] },
-      { name: "Glastrier", types: ["ICE"] },
-      { name: "Dachsbun", types: ["FAIRY"] },
-      { name: "Houndstone", types: ["GHOST"] },
-      { name: "Veluza", types: ["WATER", "PSYCHIC"] },
-      { name: "Flutter-mane", types: ["GHOST", "FAIRY"] },
-      { name: "Iron-treads", types: ["GROUND", "STEEL"] },
-      { name: "Walking-wake", types: ["WATER", "DRAGON"] },
-      { name: "Munkidori", types: ["POISON", "PSYCHIC"] },
-      { name: "Hydrapple", types: ["GRASS", "DRAGON"] }
+      { name: "Raichu", id: 26, types: ["ELECTRIC"] },
+      { name: "Nidoqueen", id: 31, types: ["POISON", "GROUND"] },
+      { name: "Clefable", id: 36, types: ["FAIRY"] },
+      { name: "Ninetales", id: 38, types: ["FIRE"] },
+      { name: "Victreebel", id: 71, types: ["GRASS", "POISON"] },
+      { name: "Gengar", id: 94, types: ["GHOST", "POISON"] },
+      { name: "Typhlosion", id: 157, types: ["FIRE"] },
+      { name: "Steelix", id: 208, types: ["STEEL", "GROUND"] },
+      { name: "Raikou", id: 243, types: ["ELECTRIC"] },
+      { name: "Blaziken", id: 257, types: ["FIRE", "FIGHTING"] },
+      { name: "Swellow", id: 277, types: ["NORMAL", "FLYING"] },
+      { name: "Torkoal", id: 324, types: ["FIRE"] },
+      { name: "Flygon", id: 330, types: ["GROUND", "DRAGON"] },
+      { name: "Armaldo", id: 348, types: ["ROCK", "BUG"] },
+      { name: "Chimecho", id: 358, types: ["PSYCHIC"] },
+      { name: "Gorebyss", id: 368, types: ["WATER"] },
+      { name: "Garchomp", id: 445, types: ["DRAGON", "GROUND"] },
+      { name: "Carnivine", id: 455, types: ["GRASS"] },
+      { name: "Rhyperior", id: 464, types: ["GROUND", "ROCK"] },
+      { name: "Mamoswine", id: 473, types: ["ICE", "GROUND"] },
+      { name: "Uxie", id: 480, types: ["PSYCHIC"] },
+      { name: "Mesprit", id: 481, types: ["PSYCHIC"] },
+      { name: "Excadrill", id: 530, types: ["GROUND", "STEEL"] },
+      { name: "Seismitoad", id: 537, types: ["WATER", "GROUND"] },
+      { name: "Maractus", id: 556, types: ["GRASS"] },
+      { name: "Archeops", id: 567, types: ["ROCK", "FLYING"] },
+      { name: "Garbodor", id: 569, types: ["POISON"] },
+      { name: "Alomomola", id: 594, types: ["WATER"] },
+      { name: "Ferrothorn", id: 598, types: ["GRASS", "STEEL"] },
+      { name: "Tornadus-incarnate", id: 641, types: ["FLYING"] },
+      { name: "Thundurus-incarnate", id: 642, types: ["ELECTRIC", "FLYING"] },
+      { name: "Pyroar-male", id: 667, types: ["FIRE", "NORMAL"] },
+      { name: "Slurpuff", id: 685, types: ["FAIRY"] },
+      { name: "Heliolisk", id: 695, types: ["ELECTRIC", "NORMAL"] },
+      { name: "Goodra", id: 706, types: ["DRAGON"] },
+      { name: "Avalugg", id: 713, types: ["ICE"] },
+      { name: "Primarina", id: 730, types: ["WATER", "FAIRY"] },
+      { name: "Toucannon", id: 731, types: ["NORMAL", "FLYING"] },
+      { name: "Araquanid", id: 752, types: ["WATER", "BUG"] },
+      { name: "Turtonator", id: 776, types: ["FIRE", "DRAGON"] },
+      { name: "Mimikyu-disguised", id: 778, types: ["GHOST", "FAIRY"] },
+      { name: "Tapu-lele", id: 786, types: ["PSYCHIC", "FAIRY"] },
+      { name: "Nihilego", id: 793, types: ["ROCK", "POISON"] },
+      { name: "Necrozma", id: 800, types: ["PSYCHIC"] },
+      { name: "Blacephalon", id: 806, types: ["FIRE", "GHOST"] },
+      { name: "Thievul", id: 828, types: ["DARK"] },
+      { name: "Sandaconda", id: 843, types: ["GROUND"] },
+      { name: "Centiskorch", id: 851, types: ["FIRE", "BUG"] },
+      { name: "Grimmsnarl", id: 861, types: ["DARK", "FAIRY"] },
+      { name: "Arctozolt", id: 880, types: ["ELECTRIC", "ICE"] },
+      { name: "Regieleki", id: 894, types: ["ELECTRIC"] },
+      { name: "Glastrier", id: 896, types: ["ICE"] },
+      { name: "Dachsbun", id: 927, types: ["FAIRY"] },
+      { name: "Houndstone", id: 945, types: ["GHOST"] },
+      { name: "Veluza", id: 977, types: ["WATER", "PSYCHIC"] },
+      { name: "Flutter-mane", id: 987, types: ["GHOST", "FAIRY"] },
+      { name: "Iron-treads", id: 990, types: ["GROUND", "STEEL"] },
+      { name: "Walking-wake", id: 1009, types: ["WATER", "DRAGON"] },
+      { name: "Munkidori", id: 1014, types: ["POISON", "PSYCHIC"] },
+      { name: "Hydrapple", id: 1011, types: ["GRASS", "DRAGON"] }
     ];
 
     let currentIndex = 0;
@@ -233,6 +254,9 @@
       
       document.getElementById('pokeName').innerText = p.name;
       
+      // Carica l'immagine ufficiale usando l'ID del Pokémon
+      document.getElementById('pokeImg').src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${p.id}.png`;
+
       const typesContainer = document.getElementById('pokeTypes');
       typesContainer.innerHTML = p.types.map(t => `<span class="type-badge type-${t}">${t}</span>`).join('');
 
